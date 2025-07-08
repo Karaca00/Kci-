@@ -1,0 +1,2815 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ห้องเรียน 3/1 - รายละเอียดและค่าห้องนักเรียน</title>
+    <style>
+        /* CSS สำหรับจัดรูปแบบทั่วไปของหน้าเว็บ */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            /* สีพื้นหลังอ่อนๆ */
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* สไตล์สำหรับส่วนหัวของเว็บไซต์ */
+        header {
+            background-image: url('https://scontent.fkkc4-2.fna.fbcdn.net/v/t1.15752-9/508131474_1025581716446927_9075685662320565972_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=0024fc&_nc_ohc=6FXIhjyjdh0Q7kNvwGOBoCw&_nc_oc=Adn6t6vcnN8GtoPiXpXB-xaSzew85BiHeRcw6iVvO7XsjBdop8vnkIWrZfYg7uF2LE7ZGM2f6SDMF77V2NY2tXtil&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fkkc4-2.fna&oh=03_Q7cD2wF5C-h6aqnDUvnfW0wBxNshDWZDarffKwY0nJtx-ykI_g&oe=68905528');
+            /* เปลี่ยนพื้นหลังเป็นรูปภาพ */
+            background-size: cover;
+            /* ให้รูปภาพคลุมพื้นที่ทั้งหมด */
+            background-position: center;
+            /* จัดตำแหน่งรูปภาพให้อยู่กึ่งกลาง */
+            background-repeat: no-repeat;
+            /* ไม่ให้รูปภาพซ้ำ */
+            color: #ecf0f1;
+            /* สีเทาอ่อน */
+            padding: 20px 0;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        /* สไตล์สำหรับแถบนำทาง (Navigation Bar) */
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            /* ให้เมนูขึ้นบรรทัดใหม่เมื่อหน้าจอเล็ก */
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            padding: 5px 0;
+            transition: color 0.3s ease, border-bottom 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #3498db;
+            /* สีฟ้าอ่อนเมื่อโฮเวอร์ */
+            border-bottom: 2px solid #3498db;
+        }
+
+        /* สไตล์สำหรับคอนเทนเนอร์ของปุ่มสลับตาราง */
+        .toggle-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            /* ระยะห่างระหว่างปุ่ม */
+            flex-wrap: wrap;
+            justify-content: center;
+            /* ซ่อนโดยค่าเริ่มต้น */
+            display: none;
+        }
+
+        .toggle-btn {
+            background-color: #607d8b;
+            /* สีเทาอมฟ้า */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: #455a64;
+            /* สีเข้มขึ้นเมื่อโฮเวอร์ */
+        }
+
+        .toggle-btn.active {
+            background-color: #007bff;
+            /* สีน้ำเงินสำหรับปุ่มที่เลือกอยู่ */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            /* ยกขึ้นเล็กน้อย */
+        }
+
+
+        /* สไตล์สำหรับคอนเทนเนอร์ของตาราง */
+        .table-container {
+            width: 90%;
+            max-width: 1000px;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+            /* ทำให้ตารางมีแถบเลื่อนแนวนอนถ้าข้อมูลเยอะเกินไป */
+            margin-bottom: 20px;
+            /* เพิ่มระยะห่างด้านล่าง */
+            /* ซ่อนโดยค่าเริ่มต้น */
+            display: none;
+        }
+
+        /* สไตล์สำหรับตาราง */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            /* รวมเส้นขอบของเซลล์เข้าด้วยกัน */
+            margin: 0 auto;
+            /* จัดกึ่งกลางตาราง */
+        }
+
+        /* สไตล์สำหรับส่วนหัวของตาราง (<thead>) */
+        th {
+            background-color: #34495e;
+            /* สีกรมท่า */
+            color: #ecf0f1;
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 2px solid #2c3e50;
+            font-weight: bold;
+        }
+
+        /* สไตล์สำหรับข้อมูลในตาราง (<td>) และแถว (<tr>) */
+        td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+            /* เส้นแบ่งแถว */
+            text-align: left;
+        }
+
+        /* สไตล์เมื่อนำเมาส์ไปชี้ที่แถว */
+        tr:hover {
+            background-color: #f0f8ff;
+            /* สีฟ้าอ่อนเมื่อโฮเวอร์ */
+        }
+
+        /* สไตล์สำหรับแถวคู่-คี่ (เพื่อให้แยกแยะง่ายขึ้น) */
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+            /* สีเทาอ่อนสำหรับแถวคู่ */
+        }
+
+        /* สไตล์สำหรับปุ่มดูรายละเอียด */
+        .details-btn {
+            background-color: #4CAF50;
+            /* สีเขียว */
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .details-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* New: Style for the "Edit Score" button */
+        .edit-score-btn {
+            background-color: #ffc107;
+            /* Yellow for edit */
+            color: #333;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-score-btn:hover {
+            background-color: #e0a800;
+        }
+
+
+        /* สไตล์สำหรับ Modal (Pop-up) */
+        .modal-overlay {
+            display: none;
+            /* ซ่อนไว้ตอนแรก */
+            position: fixed;
+            /* อยู่เหนือเนื้อหาทั้งหมด */
+            z-index: 1000;
+            /* ให้แสดงทับองค์ประกอบอื่น */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            /* พื้นหลังทึบแสง */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 600px;
+            /* เพิ่มความกว้าง modal เพื่อรองรับช่องคะแนน */
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            /* แอนิเมชันตอนเปิด */
+            transition: max-width 0.3s ease;
+            /* เพิ่ม transition สำหรับ max-width */
+        }
+
+        /* New: Expanded modal content for edit mode */
+        .modal-content.expanded-edit-mode {
+            max-width: 900px;
+            /* Increase width for edit mode */
+            width: 95%;
+            /* Adjust width for responsiveness */
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            margin-bottom: 10px;
+        }
+
+        .modal-content p strong {
+            color: #34495e;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+        }
+
+        /* แอนิเมชัน Fade In */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* สไตล์สำหรับส่วนแก้ไขคะแนนใน Modal */
+        .score-editing-section {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+            /* เส้นแบ่ง */
+        }
+
+        .score-editing-section h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            display: flex;
+            /* ใช้ flexbox เพื่อจัดวางวันที่/เวลา */
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            /* ระยะห่างระหว่างข้อความกับวันที่ */
+        }
+
+        .score-editing-section h4 span {
+            font-weight: normal;
+            /* ทำให้วันที่/เวลาไม่เป็นตัวหนาเท่าหัวข้อ */
+        }
+
+        .score-input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            /* ปรับคอลัมน์ให้ยืดหยุ่น */
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .score-input-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            /* ชิดซ้าย */
+        }
+
+        .score-input-item label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .score-input-item input[type="number"],
+        .score-input-item input[type="password"] {
+            /* เพิ่มสไตล์สำหรับ input password */
+            width: calc(100% - 16px);
+            /* หัก padding */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: center;
+            /* จัดตัวเลขอยู่ตรงกลาง */
+        }
+
+        /* New: Style for the "Show Weekly Scores" button */
+        .show-weekly-scores-btn {
+            background-color: #5bc0de;
+            /* Info blue */
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-top: 5px;
+            /* Space from the input field */
+            transition: background-color 0.3s ease;
+            width: 100%;
+            /* Make button take full width of its container */
+            box-sizing: border-box;
+            /* Include padding/border in width */
+        }
+
+        .show-weekly-scores-btn:hover {
+            background-color: #31b0d5;
+        }
+
+        .score-modal-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .score-modal-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .score-modal-actions .save-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .score-modal-actions .save-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .score-modal-actions .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .score-modal-actions .cancel-btn:hover {
+            background-color: #5a6268;
+        }
+
+        /* New styles for editable student details */
+        .student-detail-display,
+        .student-detail-edit {
+            margin-bottom: 10px;
+        }
+
+        /* New: Grid layout for student details edit section */
+        #studentDetailsEdit {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            /* Two columns, flexible width */
+            gap: 15px;
+            /* Spacing between grid items */
+            margin-top: 20px;
+            /* Add some top margin */
+        }
+
+        #studentDetailsEdit .edit-field-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #studentDetailsEdit .edit-field-item label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        #studentDetailsEdit .edit-field-item input[type="text"],
+        #studentDetailsEdit .edit-field-item input[type="number"],
+        /* Added for student number */
+        #studentDetailsEdit .edit-field-item select,
+        #studentDetailsEdit .edit-field-item input[type="tel"] {
+            width: 100%;
+            /* Make inputs take full width of their grid item */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+            /* Include padding/border in width calculation */
+        }
+
+        .edit-student-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .edit-student-buttons button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-student-buttons .edit-btn {
+            background-color: #ffc107;
+            /* Yellow for edit */
+            color: #333;
+        }
+
+        .edit-student-buttons .edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .edit-student-buttons .save-edit-btn {
+            background-color: #28a745;
+            /* Green for save */
+            color: white;
+        }
+
+        .edit-student-buttons .save-edit-btn:hover {
+            background-color: #218838;
+        }
+
+        .edit-student-buttons .cancel-edit-btn {
+            background-color: #dc3545;
+            /* Red for cancel */
+            color: white;
+        }
+
+        .edit-student-buttons .cancel-edit-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Hide specific sections based on editing mode */
+        .view-mode .student-detail-edit,
+        .edit-mode .student-detail-display,
+        .edit-mode .edit-btn {
+            display: none;
+        }
+
+        .view-mode .save-edit-btn,
+        .view-mode .cancel-edit-btn {
+            display: none;
+        }
+
+        /* New: Style for password verification section - hidden by default */
+        .password-verification {
+            display: none;
+            /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .password-verification input[type="password"] {
+            width: calc(100% - 30px);
+            /* Adjust width */
+            max-width: 300px;
+            /* Limit max width */
+            margin-top: 10px;
+        }
+
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            nav ul li {
+                margin: 0 10px;
+            }
+
+            nav ul li a {
+                font-size: 1em;
+            }
+
+            .table-container {
+                width: 95%;
+                /* ใช้ความกว้างมากขึ้นบนหน้าจอเล็ก */
+                padding: 15px;
+            }
+
+            th,
+            td {
+                padding: 8px 10px;
+                /* ลด padding ลง */
+                font-size: 0.9em;
+                /* ลดขนาดตัวอักษร */
+            }
+
+            .details-btn,
+            .toggle-btn {
+                padding: 5px 10px;
+                font-size: 0.8em;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .modal-content.expanded-edit-mode {
+                max-width: 95%;
+                /* Make it take more space on smaller screens */
+            }
+
+            .close-button {
+                font-size: 1.8em;
+                top: 10px;
+                right: 15px;
+            }
+
+            .score-input-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                /* ปรับคอลัมน์ใน modal เล็กน้อย */
+                gap: 10px;
+            }
+
+            #studentDetailsEdit {
+                grid-template-columns: 1fr;
+                /* Stack columns on very small screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            nav ul li {
+                margin: 0 5px;
+            }
+
+            nav ul li a {
+                font-size: 0.9em;
+            }
+
+            .table-container {
+                padding: 10px;
+            }
+        }
+
+        /* NEW CSS for month buttons */
+        .month-button-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .month-button {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .month-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .month-button:active {
+            transform: translateY(0);
+        }
+
+        /* Style for table footer (for total row) */
+        tfoot {
+            font-weight: bold;
+            background-color: #e0e0e0;
+            /* Light grey background for footer */
+        }
+
+        tfoot td {
+            padding: 12px 15px;
+            border-top: 2px solid #ccc;
+            /* Stronger border above total */
+        }
+
+        /* Styles for Settings Page */
+        .settings-container {
+            width: 90%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            /* ซ่อนโดยค่าเริ่มต้น */
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .settings-container h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .settings-button {
+            background-color: #dc3545;
+            /* Red for destructive action */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .settings-button:hover {
+            background-color: #c82333;
+        }
+
+        /* Styles for Admin Password Modal (for clearing history) */
+        #adminClearHistoryModal .modal-content {
+            max-width: 400px;
+            text-align: center;
+        }
+
+        #adminClearHistoryModal .modal-content label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        #adminClearHistoryModal .modal-content input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        #adminClearHistoryModal .modal-content .modal-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        #adminClearHistoryModal .modal-content .modal-actions .confirm-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #adminClearHistoryModal .modal-content .modal-actions .confirm-btn:hover {
+            background-color: #218838;
+        }
+
+        #adminClearHistoryModal .modal-content .modal-actions .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        #adminClearHistoryModal .modal-content .modal-actions .cancel-btn:hover {
+            background-color: #5a6268;
+        }
+
+        /* New CSS for toggle switch in settings */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 20px;
+            transition: background-color 0.3s;
+            -webkit-appearance: none;
+            /* Hide default checkbox */
+            -moz-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            /* Remove outline on focus */
+        }
+
+        .toggle-switch:checked {
+            background-color: #28a745;
+            /* Green when checked */
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            /* Add a subtle shadow */
+        }
+
+        .toggle-switch:checked::before {
+            transform: translateX(20px);
+        }
+
+        /* New: Admin Password Modal for Settings Entry */
+        #settingsAdminPasswordModal .modal-content {
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* New: Home placeholder styles */
+        #homePlaceholderContainer {
+            width: 90%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+        }
+
+        #homePlaceholderContainer h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>คำชะอีวิทยาคาร</h1>
+        <h2>M.3/1</h2>
+        <nav>
+            <ul>
+                <li><a href="#" id="navHomeBtn">หน้าหลัก</a></li>
+                <li><a href="#" id="navClassBtn">เก็บค่าห้อง</a></li>
+                <li><a href="#about">เกี่ยวกับห้องเรียน</a></li>
+                <li><a href="#contact">ติดต่อแอดมิน</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- New: Home Placeholder Container -->
+    <div id="homePlaceholderContainer" class="table-container">
+        <h2>ยินดีต้อนรับสู่ระบบจัดการข้อมูลนักเรียน</h2>
+        <p>คุณสามารถใช้เมนูด้านบนเพื่อเข้าถึงส่วนต่างๆ ของระบบ</p>
+    </div>
+
+    <div class="toggle-buttons">
+        <button id="showStudentListBtn" class="toggle-btn active">รายชื่อของนักเรียน</button>
+        <button id="showStudentScoresBtn" class="toggle-btn">ค่าห้องของนักเรียน</button>
+        <button id="showStudentScoresBtnAll" class="toggle-btn">ค่าห้องของนักเรียนทั้งหมด</button>
+        <button id="showStudentFeeSummaryBtn" class="toggle-btn">สรุปค่าห้องของนักเรียน</button>
+        <button id="ScoresHistoryBtn" class="toggle-btn">ประวัติการบันทึก</button>
+        <button id="SettingBtn" class="toggle-btn">ตั้งค่า</button>
+    </div>
+
+    <div id="studentListTableContainer" class="table-container">
+        <h2>รายชื่อนักเรียน ห้อง 3/1</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>เลขที่</th>
+                    <th>รหัสนักเรียน</th>
+                    <th>คำนำหน้า</th>
+                    <th>ชื่อ - นามสกุล</th>
+                    <th>สถานะ</th>
+                    <th>รายละเอียด</th>
+                </tr>
+            </thead>
+            <tbody id="studentListTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <div id="scoreTableContainer" class="table-container">
+        <h2>ค่าห้องของนักเรียน ห้อง 3/1</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>เลขที่</th>
+                    <th>รหัสนักเรียน</th>
+                    <th>ชื่อ - นามสกุล</th>
+                    <th>ดูค่าห้องรายเดือน</th>
+                </tr>
+            </thead>
+            <tbody id="scoreTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- New: Student Fee Summary Table Container -->
+    <div id="studentFeeSummaryTableContainer" class="table-container">
+        <h2 id="feeSummaryTitle">สรุปค่าห้องของนักเรียน ห้อง 3/1 (ต่อเดือน)</h2>
+        <table>
+            <thead>
+                <tr id="feeSummaryTableHeader">
+                    <th>เลขที่</th>
+                    <th>รหัสนักเรียน</th>
+                    <th>ชื่อ - นามสกุล</th>
+                    <!-- Monthly headers will be added by JS -->
+                </tr>
+            </thead>
+            <tbody id="studentFeeSummaryTableBody">
+                <!-- Summary rows will be added by JS -->
+            </tbody>
+            <tfoot id="feeSummaryTableFooter">
+                <!-- Total row will be added by JS -->
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- New: Save History Table Container -->
+    <div id="saveHistoryTableContainer" class="table-container">
+        <h2>ประวัติการบันทึก</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>เลขที่</th>
+                    <th>รหัสนักเรียน</th>
+                    <th>ชื่อ - นามสกุล</th>
+                    <th>รายละเอียด</th>
+                    <th>จำนวนค่าห้องที่เปลี่ยนแปลง</th>
+                    <th>เวลาที่บันทึก</th>
+                </tr>
+            </thead>
+            <tbody id="saveHistoryTableBody">
+                <!-- History rows will be added by JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- New: Settings Container -->
+    <div id="settingsContainer" class="settings-container">
+        <h2>ตั้งค่า</h2>
+        <div id="historyCountDisplay" style="margin-bottom: 15px; font-size: 1.1em; font-weight: bold; color: #34495e;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <label for="autoDeleteToggle" style="font-weight: bold;">เปิด/ปิด ลบประวัติอัตโนมัติ:</label>
+            <input type="checkbox" id="autoDeleteToggle" class="toggle-switch">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <label for="historyLimitInput" style="font-weight: bold;">ขีดจำกัดประวัติ:</label>
+            <input type="number" id="historyLimitInput" min="1" value="100" readonly
+                style="width: 80px; text-align: center;">
+            <button id="editHistoryLimitBtn" class="edit-btn" style="padding: 5px 10px;">แก้ไข</button>
+        </div>
+        <div id="historyLimitEditActions"
+            style="display: none; flex-direction: column; align-items: center; gap: 10px; margin-top: 10px;">
+            <p id="historyLimitErrorMessage" style="color: red; text-align: center;"></p>
+            <div style="display: flex; gap: 10px;">
+                <button id="saveHistoryLimitBtn" class="save-btn" style="padding: 8px 15px;">บันทึกขีดจำกัด</button>
+                <button id="cancelHistoryLimitBtn" class="cancel-btn" style="padding: 8px 15px;">ยกเลิก</button>
+            </div>
+        </div>
+
+        <button id="clearHistoryBtn" class="settings-button">ล้างประวัติการบันทึกทั้งหมด</button>
+    </div>
+
+    <!-- Student Detail Modal (for general student info) -->
+    <div id="studentDetailModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modalStudentName"></h3>
+
+            <div id="studentDetailsView" class="student-detail-display view-mode">
+                <p><strong>เลขที่:</strong> <span id="modalStudentNumber"></span></p>
+                <p><strong>รหัสนักเรียน:</strong> <span id="modalStudentId"></span></p>
+                <p><strong>ชั้นปี:</strong> <span id="modalStudentGrade"></span></p>
+                <p><strong>ห้องเรียน:</strong> <span id="modalStudentClass"></span></p>
+                <p><strong>สถานะ:</strong> <span id="modalStudentStatus"></span></p>
+                <p><strong>วันเกิด:</strong> <span id="modalStudentDob"></span></p>
+                <p><strong>เบอร์โทรศัพท์:</strong> <span id="modalStudentPhone"></span></p>
+            </div>
+
+            <div id="studentDetailsEdit" class="student-detail-edit edit-mode" style="display: none;">
+                <div class="edit-field-item">
+                    <label for="editStudentNumber">เลขที่:</label>
+                    <input type="number" id="editStudentNumber" placeholder="เลขที่นักเรียน" min="1">
+                </div>
+                <div class="edit-field-item">
+                    <label for="editStudentId">รหัสนักเรียน:</label>
+                    <input type="text" id="editStudentId" placeholder="รหัสนักเรียน">
+                </div>
+                <div class="edit-field-item">
+                    <label for="editPrefix">คำนำหน้า:</label>
+                    <select id="editPrefix">
+                        <option value="เด็กชาย">เด็กชาย</option>
+                        <option value="นาย">นาย</option>
+                        <option value="เด็กหญิง">เด็กหญิง</option>
+                        <option value="นางสาว">นางสาว</option>
+                    </select>
+                </div>
+                <div class="edit-field-item">
+                    <label for="editName">ชื่อ - นามสกุล:</label>
+                    <input type="text" id="editName" placeholder="ชื่อ - นามสกุล">
+                </div>
+                <div class="edit-field-item">
+                    <label for="editGrade">ชั้นปี:</label>
+                    <input type="text" id="editGrade" placeholder="ชั้นปี">
+                </div>
+                <div class="edit-field-item">
+                    <label for="editClass">ห้องเรียน:</label>
+                    <input type="text" id="editClass" placeholder="ห้องเรียน">
+                </div>
+                <div class="edit-field-item">
+                    <label for="editStatus">สถานะ:</label>
+                    <input type="text" id="editStatus" placeholder="สถานะ">
+                </div>
+                <div class="edit-field-item">
+                    <label for="editDob">วันเกิด:</label>
+                    <input type="text" id="editDob" placeholder="วันเกิด (เช่น 01 มกราคม 2545)">
+                </div>
+                <div class="edit-field-item">
+                    <label for="editPhone">เบอร์โทรศัพท์:</label>
+                    <input type="tel" id="editPhone" placeholder="เบอร์โทรศัพท์">
+                </div>
+            </div>
+
+            <div class="password-verification" id="adminPasswordSection">
+                <label for="adminPasswordInput" style="font-weight: bold; color: #333;">รหัสผ่านแอดมิน:</label>
+                <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก">
+                <p id="passwordErrorMessage" style="color: red; text-align: center; margin-top: 10px;"></p>
+            </div>
+
+            <div class="edit-student-buttons">
+                <button class="edit-btn" id="editStudentInfoBtn">แก้ไขข้อมูล</button>
+                <button class="save-edit-btn" id="saveStudentInfoBtn" style="display: none;">บันทึกข้อมูล</button>
+                <button class="cancel-edit-btn" id="cancelStudentInfoBtn" style="display: none;">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="monthlySelectionModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeMonthlySelectionModalBtn">&times;</span>
+            <h3 id="monthlySelectionModalStudentName"></h3>
+            <h4>เลือกเดือนเพื่อดูค่าห้องรายสัปดาห์</h4>
+            <div id="monthButtonsGrid" class="score-input-grid">
+            </div>
+            <div class="score-modal-actions">
+                <button class="cancel-btn" id="cancelMonthlySelectionBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="weeklyScoresModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeWeeklyScoresModalBtn">&times;</span>
+            <h3 id="weeklyModalStudentName"></h3>
+            <h4>ค่าห้องประจำสัปดาห์ของ <span id="weeklyModalMonthName"></span></h4>
+
+            <div id="weeklyScoresGrid" class="score-input-grid" style="margin-top: 20px;">
+            </div>
+
+            <div class="password-verification" id="weeklyAdminPasswordSection">
+                <label for="weeklyAdminPasswordInput" style="font-weight: bold; color: #333;">รหัสผ่านแอดมิน:</label>
+                <input type="password" id="weeklyAdminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก">
+                <p id="weeklyPasswordErrorMessage" style="color: red; text-align: center; margin-top: 10px;"></p>
+            </div>
+
+            <div class="score-modal-actions">
+                <button class="save-btn" id="saveWeeklyScoresBtn">บันทึกค่าห้องรายสัปดาห์</button>
+                <button class="cancel-btn" id="cancelWeeklyScoresBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="allStudentsMonthSelectionModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeAllStudentsMonthSelectionModalBtn">&times;</span>
+            <h3 id="allStudentsMonthSelectionModalTitle">เลือกเดือนเพื่อดูค่าห้องของนักเรียนทั้งหมด</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>เดือน</th>
+                            <th>การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allStudentsMonthTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="score-modal-actions">
+                <button class="cancel-btn" id="cancelAllStudentsMonthSelectionBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="allStudentsWeeklyScoresMainContainer" class="table-container">
+        <h4>ค่าห้องประจำสัปดาห์ของนักเรียนทุกคนประจำเดือน <span id="allStudentsWeeklyModalMonthName"></span></h4>
+        <div style="overflow-x: auto;">
+            <table id="allStudentsWeeklyScoresTable">
+                <thead>
+                    <tr>
+                        <th>เลขที่</th>
+                        <th>รหัสนักเรียน</th>
+                        <th>ชื่อ - นามสกุล</th>
+                        <th>สัปดาห์ที่ 1</th>
+                        <th>สัปดาห์ที่ 2</th>
+                        <th>สัปดาห์ที่ 3</th>
+                        <th>สัปดาห์ที่ 4</th>
+                        <th>สัปดาห์ที่ 5</th>
+                    </tr>
+                </thead>
+                <tbody id="allStudentsWeeklyScoresTableBody">
+                </tbody>
+            </table>
+        </div>
+        <div class="password-verification" id="allStudentsWeeklyAdminPasswordSectionAll">
+            <label for="allStudentsWeeklyAdminPasswordInput" style="font-weight: bold; color: #333;">รหัสผ่านแอดมิน:</label>
+            <input type="password" id="allStudentsWeeklyAdminPasswordInputAll" placeholder="กรอกรหัสผ่านเพื่อบันทึก">
+            <p id="allStudentsWeeklyPasswordErrorMessageAll" style="color: red; text-align: center; margin-top: 10px;">
+            </p>
+        </div>
+        <div class="score-modal-actions">
+            <button class="save-btn" id="saveAllStudentsWeeklyScoresBtn">บันทึกค่าห้อง</button>
+            <button class="cancel-btn" id="cancelAllStudentsWeeklyScoresBtn">ยกเลิก</button>
+        </div>
+    </div>
+
+    <!-- Admin Confirmation Modal for Clearing History (NO PASSWORD) -->
+    <div id="adminClearHistoryModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeAdminClearHistoryModalBtn">&times;</span>
+            <h3>ยืนยันการล้างประวัติ</h3>
+            <p>คุณแน่ใจใช่มั้ยที่จะลบประวัติทั้งหมด?</p>
+            <p style="color: red; font-weight: bold; margin-top: 10px;">เมื่อกดล้างประวัติแล้วจะไม่สามารถกู้คืนได้</p>
+            <div class="modal-actions">
+                <button class="confirm-btn" id="confirmClearHistoryBtn">ยืนยัน</button>
+                <button class="cancel-btn" id="cancelClearHistoryBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New: Admin Password Modal for Settings Entry -->
+    <div id="settingsAdminPasswordModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeSettingsAdminPasswordModalBtn">&times;</span>
+            <h3>กรุณาใส่รหัสผ่านแอดมิน</h3>
+            <label for="settingsAdminPasswordInput">รหัสผ่าน:</label>
+            <input type="password" id="settingsAdminPasswordInput" placeholder="กรอกรหัสผ่านแอดมิน">
+            <p id="settingsAdminPasswordErrorMessage" style="color: red; text-align: center; margin-top: 10px;"></p>
+            <div class="modal-actions">
+                <button class="confirm-btn" id="confirmSettingsAdminPasswordBtn">ยืนยัน</button>
+                <button class="cancel-btn" id="cancelSettingsAdminPasswordBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script type="module">
+        // Helper function to extract student number from ID
+        function getStudentNumberFromId(id) {
+            if (id.startsWith("ST")) {
+                return parseInt(id.substring(2));
+            }
+            return parseInt(id);
+        }
+
+        // Student data for Class 3/1 (initial - will be overwritten by Firebase data)
+        const initialStudents = [
+            { id: "ST001", prefix: "นาย", name: "กฤติพงศ์ นามบุตร", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "หัวหน้าห้อง", dob: "06 สิงหาคม 2553", phone: "063-071-0560" },
+            { id: "ST002", prefix: "นาย", name: "ธนาศักดิ์ คนหมั้น", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "26 มกราคม 2554", phone: "082-345-6789" },
+            { id: "ST003", prefix: "นาย", name: "ปิยวัฒน์ คนเพียร", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "16 มิถุนายน 2553", phone: "083-456-7890" },
+            { id: "ST004", prefix: "นาย", name: "นักเรียน 4", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST005", prefix: "นาย", name: "นักเรียน 5", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST006", prefix: "นาย", name: "นักเรียน 6", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST007", prefix: "นาย", name: "นักเรียน 7", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST008", prefix: "นาย", name: "นักเรียน 8", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST009", prefix: "นาย", name: "นักเรียน 9", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST010", prefix: "นาย", name: "นักเรียน 10", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST011", prefix: "นาย", name: "นักเรียน 11", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST012", prefix: "นาย", name: "นักเรียน 12", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST013", prefix: "นาย", name: "นักเรียน 13", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST014", prefix: "นาย", name: "นักเรียน 14", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST015", prefix: "นาย", name: "นักเรียน 15", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST016", prefix: "นาย", name: "นักเรียน 16", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST017", prefix: "นาย", name: "นักเรียน 17", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST018", prefix: "นาย", name: "นักเรียน 18", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST019", prefix: "นาย", name: "นักเรียน 19", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST020", prefix: "นาย", name: "นักเรียน 20", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST021", prefix: "นาย", name: "นักเรียน 21", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST022", prefix: "นาย", name: "นักเรียน 22", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST023", prefix: "นางสาว", name: "นักเรียน 23", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST024", prefix: "นางสาว", name: "นักเรียน 24", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST025", prefix: "นางสาว", name: "นักเรียน 25", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST026", prefix: "นางสาว", name: "นักเรียน 26", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST027", prefix: "นางสาว", name: "นักเรียน 27", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST028", prefix: "นางสาว", name: "นักเรียน 28", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST029", prefix: "นางสาว", name: "นักเรียน 29", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" },
+            { id: "ST030", prefix: "นางสาว", name: "นักเรียน 30", grade: "มัธยมศึกษาปีที่ 3", class: "3/1", status: "นักเรียน", dob: "-", phone: "-" }
+        ];
+
+        const studentsData = initialStudents.map(s => ({ ...s, studentNumber: s.studentNumber !== undefined ? s.studentNumber : (initialStudents.indexOf(s) + 1) })); // Initialize studentNumber from data or derive
+
+        // Student scores data for Class 3/1 (will be overwritten by Firebase data)
+        const studentScores = {}; // This will now store monthly totals (if needed) or can be removed
+        const months = ["พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม", "มกราคม", "กุมภาพันธ์", "มีนาคม"];
+        const numWeeksInMonth = 5; // Assuming max 5 weeks for any month's weekly scores
+
+        // *** Firebase Configuration ***
+        // Please replace the following values with your actual Firebase configuration!
+        // You can find this information in Firebase Console -> Project settings -> Your apps.
+        const firebaseConfig = {
+            apiKey: "AIzaSyBPLPEig2DuVmPBnp654vtLved2x373o64",
+            authDomain: "tester-5ead2.firebaseapp.com",
+            projectId: "tester-5ead2",
+            storageBucket: "tester-5ead2.firebasestorage.app",
+            messagingSenderId: "352436666156",
+            appId: "1:352436666156:web:13f7aa528c42bcbaf13689",
+            measurementId: "G-H32613VB65"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const studentsCollection = db.collection('students3_1'); // Collection for student general details
+        const monthlyScoresCollection = db.collection('studentMonthlyScores'); // This collection might be less used now
+        const weeklyScoresCollection = db.collection('studentWeeklyScores'); // Collection for weekly scores
+        const saveHistoryCollection = db.collection('saveHistory'); // New: Collection for save history
+        const appSettingsCollection = db.collection('settings'); // New: Collection for app settings
+        const appSettingsDocRef = appSettingsCollection.doc('appSettings'); // Single document for app settings
+        // const newsCollection = db.collection('news'); // Removed: Collection for news
+
+        // Admin password (for demonstration, use Firebase Security Rules in production)
+        const ADMIN_PASSWORD = "301";
+
+        let currentStudentId = null; // Store the ID of the student whose details or scores are currently open
+        let currentAllStudentsWeeklyScoresMonth = null; // Store the currently selected month for all students' scores
+        // let currentNewsId = null; // Removed: Store the ID of the news item being edited/deleted
+
+        // Global state for news management mode (Removed as news system is removed)
+        // let currentNewsMode = 'none'; // 'none', 'edit', 'delete'
+        // let pendingNewsAction = null; // 'add', 'edit', 'delete' - stores action requested before password check
+
+
+        // DOM Elements (Declared here, will be assigned inside DOMContentLoaded)
+        let studentListTableBody;
+        let scoreTableBody;
+        let studentDetailModal;
+        let closeButton;
+        let modalOverlay;
+
+        let modalStudentName;
+        let modalStudentNumber;
+        let modalStudentId;
+        let modalStudentGrade;
+        let modalStudentClass;
+        let modalStudentStatus;
+        let modalStudentDob;
+        let modalStudentPhone;
+
+        let studentDetailsView;
+        let studentDetailsEdit;
+        let editStudentInfoBtn;
+        let saveStudentInfoBtn;
+        let cancelStudentInfoBtn;
+
+        let editStudentNumber;
+        let editStudentId;
+        let editPrefix;
+        let editName;
+        let editGrade;
+        let editClass;
+        let editStatus;
+        let editDob;
+        let editPhone;
+
+        let adminPasswordInput; // Re-introduced for studentDetailModal
+        let passwordErrorMessage; // Re-introduced for studentDetailModal
+        let adminPasswordSection; // New: Reference to the password section div
+
+        let showStudentListBtn;
+        let showStudentScoresBtn;
+        let showStudentScoresBtnAll; // New button for all student scores
+        let showStudentFeeSummaryBtn; // New button for fee summary
+        let ScoresHistoryBtn; // New button for save history
+        let SettingBtn; // New button for settings
+        let studentListTableContainer;
+        let scoreTableContainer;
+        let studentFeeSummaryTableContainer; // New container for fee summary
+        let studentFeeSummaryTableBody; // New tbody for fee summary
+        let feeSummaryTableHeader; // New header for fee summary
+        let feeSummaryTableFooter; // New footer for fee summary
+        let feeSummaryTitle; // New: Reference to the title for summary table
+        let saveHistoryTableContainer; // New container for save history
+        let saveHistoryTableBody; // New tbody for save history
+        let settingsContainer; // New: Settings container
+        let clearHistoryBtn; // New: Clear history button
+
+        // New DOM elements for settings
+        let historyCountDisplay;
+        let autoDeleteToggle;
+        let historyLimitInput;
+        let editHistoryLimitBtn;
+        let saveHistoryLimitBtn;
+        let cancelHistoryLimitBtn;
+        let historyLimitEditActions;
+        let historyLimitErrorMessage;
+
+
+        let monthlySelectionModal;
+        let closeMonthlySelectionModalBtn;
+        let monthlySelectionModalStudentName;
+        let monthButtonsGrid;
+        let cancelMonthlySelectionBtn;
+
+        let weeklyScoresModal;
+        let closeWeeklyScoresModalBtn;
+        let weeklyModalStudentName;
+        let weeklyModalMonthName;
+        let weeklyScoresGrid;
+        let weeklyAdminPasswordInput;
+        let weeklyPasswordErrorMessage;
+        let saveWeeklyScoresBtn;
+        let cancelWeeklyScoresBtn;
+        let weeklyAdminPasswordSection; // New: Reference to the password section div for weekly scores modal
+
+        let allStudentsMonthSelectionModal; // New modal for all students' month selection
+        let closeAllStudentsMonthSelectionModalBtn;
+        let allStudentsMonthSelectionModalTitle;
+        let allStudentsMonthTableBody;
+        let cancelAllStudentsMonthSelectionBtn;
+
+        let allStudentsWeeklyScoresMainContainer; // New main table container for all students' weekly scores
+        let allStudentsWeeklyModalMonthName;
+        let allStudentsWeeklyScoresTableBody;
+        let allStudentsWeeklyAdminPasswordSectionAll;
+        let allStudentsWeeklyAdminPasswordInputAll;
+        let allStudentsWeeklyPasswordErrorMessageAll;
+        let saveAllStudentsWeeklyScoresBtn;
+        let cancelAllStudentsWeeklyScoresBtn;
+
+        let adminClearHistoryModal; // New: Admin password modal for clearing history
+        let closeAdminClearHistoryModalBtn;
+        let confirmClearHistoryBtn;
+        let cancelClearHistoryBtn;
+
+        // New: Admin password modal for Settings entry
+        let settingsAdminPasswordModal;
+        let closeSettingsAdminPasswordModalBtn;
+        let settingsAdminPasswordInput;
+        let settingsAdminPasswordErrorMessage;
+        let confirmSettingsAdminPasswordBtn;
+        let cancelSettingsAdminPasswordBtn;
+
+        // New DOM elements for navigation links
+        let navHomeBtn;
+        let navClassBtn;
+        let homePlaceholderContainer; // New: Home placeholder container
+
+        let currentWeeklyScores; // Declare at a scope accessible by loadWeeklyScoresFromFirebase and renderWeeklyScores
+
+        // Map to store student names and numbers for quick lookup in history table
+        const studentInfoMap = new Map();
+
+
+        async function loadStudentsFromFirebase() {
+            try {
+                const snapshot = await db.collection("students3_1").get(); // Use students3_1 collection
+                studentsData.length = 0; // Clear the existing hardcoded data
+                studentInfoMap.clear(); // Clear existing map
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const student = { ...data, studentNumber: data.studentNumber || getStudentNumberFromId(data.id) };
+                    studentsData.push(student);
+                    studentInfoMap.set(student.id, { name: `${student.prefix} ${student.name}`, studentNumber: student.studentNumber }); // Populate name and number map
+                });
+                console.log("All student details loaded from Firebase.");
+                // Sort studentsData by studentNumber for consistent display
+                studentsData.sort((a, b) => a.studentNumber - b.studentNumber);
+            } catch (e) {
+                console.error("Error loading student details from Firebase:", e);
+                // If error, you might want to handle it, e.g., display a message to the user
+            }
+        }
+        
+        // Function to set current date and time (Not used in this version for modal, but kept for reference)
+        function setCurrentDateTime() {
+            // This function is not directly used in the modal anymore for display.
+            // It was previously used for the 'last updated' timestamp in the score editing section.
+        }
+
+        // --- Student List Table Functions ---
+
+        // Function to render the student list table
+        async function renderStudentList() {
+            const snapshot = await studentsCollection.orderBy('studentNumber').get();
+            const students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            studentListTableBody.innerHTML = ''; // Clear existing rows
+            students.forEach(student => {
+                const row = studentListTableBody.insertRow();
+                row.innerHTML = `
+                    <td>${student.studentNumber || '-'}</td>
+                    <td>${student.id}</td>
+                    <td>${student.prefix}</td>
+                    <td>${student.name}</td>
+                    <td>${student.status}</td>
+                    <td><button class="details-btn" data-student-id="${student.id}">ดูรายละเอียด</button></td>
+                `;
+            });
+
+            // Attach event listeners to "ดูรายละเอียด" buttons
+            document.querySelectorAll('#studentListTableBody .details-btn').forEach(button => {
+                button.onclick = (event) => openStudentDetailModal(event.target.dataset.studentId);
+            });
+        }
+
+        // --- Student Score Table Functions ---
+
+        // Function to render the student scores table (now shows a button to view monthly scores)
+        async function renderStudentScores() {
+            const studentsSnapshot = await studentsCollection.orderBy('studentNumber').get();
+            const students = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            scoreTableBody.innerHTML = ''; // Clear existing rows
+
+            students.forEach(student => {
+                const row = scoreTableBody.insertRow();
+                row.innerHTML = `
+                    <td>${student.studentNumber || '-'}</td>
+                    <td>${student.id}</td>
+                    <td>${student.prefix} ${student.name}</td>
+                    <td><button class="edit-score-btn" data-student-id="${student.id}">ดูค่าห้องรายเดือน</button></td>
+                `;
+            });
+
+            // Attach event listeners to new "ดูค่าห้องรายเดือน" buttons
+            document.querySelectorAll('#scoreTableBody .edit-score-btn').forEach(button => {
+                button.onclick = (event) => openMonthlySelectionModal(event.target.dataset.studentId);
+            });
+        }
+
+        // --- Student Detail Modal Functions (for general student info) ---
+
+        // Function to open the student detail modal (only for general info now)
+        async function openStudentDetailModal(studentId) {
+            currentStudentId = studentId; // Set the current student ID
+
+            const studentDoc = await studentsCollection.doc(studentId).get();
+            const student = studentDoc.data();
+
+            if (student) {
+                modalStudentName.textContent = `ข้อมูลนักเรียน: ${student.prefix} ${student.name}`;
+                modalStudentNumber.textContent = student.studentNumber || '-';
+                modalStudentId.textContent = student.id;
+                modalStudentGrade.textContent = student.grade;
+                modalStudentClass.textContent = student.class;
+                modalStudentStatus.textContent = student.status;
+                modalStudentDob.textContent = student.dob;
+                modalStudentPhone.textContent = student.phone;
+
+                // Populate edit fields
+                editStudentNumber.value = student.studentNumber || '';
+                editStudentId.value = student.id;
+                editPrefix.value = student.prefix;
+                editName.value = student.name;
+                editGrade.value = student.grade;
+                editClass.value = student.class;
+                editStatus.value = student.status;
+                editDob.value = student.dob;
+                editPhone.value = student.phone;
+
+                // Always start in view mode for student details
+                toggleEditMode(false);
+
+                // Clear password input and error message for this modal
+                adminPasswordInput.value = '';
+                passwordErrorMessage.textContent = '';
+
+                studentDetailModal.style.display = 'flex'; // Show the modal
+            } else {
+                console.error("Student not found:", studentId);
+            }
+        }
+
+        // Function to close the student detail modal
+        function closeStudentDetailModal() {
+            studentDetailModal.style.display = 'none'; // Hide the modal
+            currentStudentId = null; // Clear current student ID
+        }
+
+        // Function to toggle between view and edit mode for student info
+        function toggleEditMode(isEditMode) {
+            const modalContent = studentDetailModal.querySelector('.modal-content');
+            if (isEditMode) {
+                studentDetailsView.style.display = 'none';
+                studentDetailsEdit.style.display = 'grid'; // Use grid for edit form
+                editStudentInfoBtn.style.display = 'none';
+                saveStudentInfoBtn.style.display = 'inline-block';
+                cancelStudentInfoBtn.style.display = 'inline-block';
+                modalContent.classList.add('expanded-edit-mode'); // Expand modal for editing
+                adminPasswordSection.style.display = 'flex'; // Show password section
+            } else {
+                studentDetailsView.style.display = 'block';
+                studentDetailsEdit.style.display = 'none';
+                editStudentInfoBtn.style.display = 'inline-block';
+                saveStudentInfoBtn.style.display = 'none';
+                cancelStudentInfoBtn.style.display = 'none';
+                modalContent.classList.remove('expanded-edit-mode'); // Shrink modal back
+                adminPasswordSection.style.display = 'none'; // Hide password section
+            }
+        }
+
+        // Function to save student information (admin access required)
+        async function saveStudentInfo() {
+            const password = adminPasswordInput.value;
+            if (password !== ADMIN_PASSWORD) {
+                passwordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+                passwordErrorMessage.style.color = "red";
+                return;
+            }
+            passwordErrorMessage.textContent = ""; // Clear error message
+
+            if (!currentStudentId) {
+                console.error("No student selected for saving info.");
+                return;
+            }
+
+            const oldStudentId = currentStudentId;
+            const newStudentId = editStudentId.value.trim();
+            const newStudentNumber = parseInt(editStudentNumber.value);
+
+            if (isNaN(newStudentNumber) || newStudentNumber <= 0) {
+                passwordErrorMessage.textContent = "เลขที่นักเรียนต้องเป็นตัวเลขและมากกว่า 0";
+                passwordErrorMessage.style.color = "red";
+                return;
+            }
+
+            // Check if newStudentId is unique, or if it's the same as the old ID
+            const isIdTaken = studentsData.some(s => s.id === newStudentId && s.id !== oldStudentId);
+            if (isIdTaken) {
+                passwordErrorMessage.textContent = "รหัสนักเรียนนี้มีอยู่แล้ว! โปรดใช้รหัสอื่น";
+                passwordErrorMessage.style.color = "red";
+                return;
+            }
+
+            // Check if newStudentNumber is unique, or if it's the same as the old number
+            const isStudentNumberTaken = studentsData.some(s => s.studentNumber === newStudentNumber && s.id !== oldStudentId);
+            if (isStudentNumberTaken) {
+                passwordErrorMessage.textContent = "เลขที่นักเรียนนี้มีอยู่แล้ว! โปรดใช้เลขที่อื่น";
+                passwordErrorMessage.style.color = "red";
+                return;
+            }
+
+            const updatedStudentDetails = {
+                id: newStudentId,
+                studentNumber: newStudentNumber,
+                prefix: editPrefix.value,
+                name: editName.value,
+                grade: editGrade.value,
+                class: editClass.value,
+                status: editStatus.value,
+                dob: editDob.value,
+                phone: editPhone.value
+            };
+
+            try {
+                // Fetch current student details to compare for changes
+                const oldStudentDoc = await studentsCollection.doc(oldStudentId).get();
+                const oldStudentDetails = oldStudentDoc.exists ? oldStudentDoc.data() : {};
+
+                let detailsChanged = false;
+                // Simple comparison for changes in general info
+                for (const key in updatedStudentDetails) {
+                    if (updatedStudentDetails[key] !== oldStudentDetails[key]) {
+                        detailsChanged = true;
+                        break;
+                    }
+                }
+
+                // Handle ID change: delete old doc, create new doc
+                if (oldStudentId !== newStudentId) {
+                    await studentsCollection.doc(oldStudentId).delete();
+                    console.log(`Old student detail document ${oldStudentId} deleted from Firebase.`);
+                    // Also move monthly/weekly scores if ID changes
+                    await moveFirebaseDoc(monthlyScoresCollection, oldStudentId, newStudentId);
+                    await moveFirebaseCollection(weeklyScoresCollection.doc(oldStudentId).collection('months'), weeklyScoresCollection.doc(newStudentId).collection('months'));
+                    detailsChanged = true; // ID change is also a change in details
+                }
+                
+                // Only save and log if there were actual changes
+                if (detailsChanged) {
+                    await studentsCollection.doc(newStudentId).set(updatedStudentDetails);
+                    console.log(`Student details for ${newStudentId} saved/updated in Firebase.`);
+
+                    // Update local studentsData array
+                    const studentIndex = studentsData.findIndex(s => s.id === oldStudentId);
+                    if (studentIndex > -1) {
+                        studentsData[studentIndex] = { ...updatedStudentDetails };
+                    } else {
+                        studentsData.push({ ...updatedStudentDetails });
+                    }
+                    studentsData.sort((a, b) => a.studentNumber - b.studentNumber); // Re-sort locally
+                    studentInfoMap.set(newStudentId, { name: `${updatedStudentDetails.prefix} ${updatedStudentDetails.name}`, studentNumber: updatedStudentDetails.studentNumber }); // Update name map
+
+                    currentStudentId = newStudentId; // Update current ID if it changed
+
+                    passwordErrorMessage.textContent = "บันทึกข้อมูลนักเรียนเรียบร้อยแล้ว!";
+                    passwordErrorMessage.style.color = "green";
+
+                    renderStudentList(); // Re-render main student list
+                    renderStudentScores(); // Re-render main score table
+                    toggleEditMode(false);
+                    setTimeout(() => {
+                        passwordErrorMessage.textContent = "";
+                        passwordErrorMessage.style.color = "red";
+                    }, 2000);
+
+                    // Log the save action
+                    await logSaveAction(newStudentId, `${updatedStudentDetails.prefix} ${updatedStudentDetails.name}`, "แก้ไขข้อมูลนักเรียน", null, null, updatedStudentDetails.studentNumber); // Pass studentNumber
+                    await checkAndTrimHistory(); // Check and trim history after save
+                } else {
+                    passwordErrorMessage.textContent = "ไม่มีการเปลี่ยนแปลงข้อมูลนักเรียน";
+                    passwordErrorMessage.style.color = "orange";
+                    setTimeout(() => {
+                        passwordErrorMessage.textContent = "";
+                        passwordErrorMessage.style.color = "red";
+                    }, 2000);
+                }
+
+            } catch (error) {
+                console.error("Error saving student info to Firebase:", error);
+                passwordErrorMessage.textContent = `เกิดข้อผิดพลาดในการบันทึกข้อมูลนักเรียน: ${error.message}`;
+                passwordErrorMessage.style.color = "red";
+            }
+        }
+
+        // Helper function to move a single document in Firebase
+        async function moveFirebaseDoc(collectionRef, oldId, newId) {
+            const oldDoc = await collectionRef.doc(oldId).get();
+            if (oldDoc.exists) {
+                await collectionRef.doc(newId).set(oldDoc.data());
+                await collectionRef.doc(oldId).delete();
+                console.log(`Document moved from ${oldId} to ${newId} in ${collectionRef.id} collection.`);
+            }
+        }
+
+        // Helper function to move an entire subcollection in Firebase
+        async function moveFirebaseCollection(oldCollectionRef, newCollectionRef) {
+            const snapshot = await oldCollectionRef.get();
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => {
+                batch.set(newCollectionRef.doc(doc.id), doc.data());
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            console.log(`Subcollection moved from ${oldCollectionRef.path} to ${newCollectionRef.path}.`);
+        }
+
+
+        // Monthly scores are now handled via weekly scores, so this function is less relevant for direct input
+        // async function loadMonthlyScores(studentId) { ... }
+        // function populateMonthlyScores() { ... }
+        // async function saveMonthlyScores() { ... }
+        // These functions are removed as per the new requirement to manage scores weekly.
+
+        // --- NEW Monthly Selection Modal Functions (for individual student scores) ---
+
+        async function openMonthlySelectionModal(studentId) {
+            currentStudentId = studentId; // Set the current student ID for monthly selection
+
+            const studentDoc = await studentsCollection.doc(studentId).get();
+            const student = studentDoc.data();
+
+            if (student) {
+                monthlySelectionModalStudentName.textContent = `ค่าห้องรายเดือนของ: ${student.prefix} ${student.name}`;
+                monthButtonsGrid.innerHTML = ''; // Clear existing buttons
+
+                months.forEach(month => {
+                    const monthItem = document.createElement('div');
+                    monthItem.classList.add('month-button-item');
+                    const button = document.createElement('button');
+                    button.classList.add('month-button');
+                    button.textContent = month;
+                    button.dataset.month = month;
+                    button.onclick = () => {
+                        closeMonthlySelectionModal(); // Close month selection modal
+                        openWeeklyScoresModal(studentId, month); // Open weekly scores modal for selected month
+                    };
+                    monthItem.appendChild(button);
+                    monthButtonsGrid.appendChild(monthItem);
+                });
+
+                monthlySelectionModal.style.display = 'flex'; // Show the modal
+            } else {
+                console.error("Student not found for monthly selection:", studentId);
+            }
+        }
+
+        function closeMonthlySelectionModal() {
+            monthlySelectionModal.style.display = 'none';
+        }
+
+
+        // --- Weekly Scores Modal Functions (for individual student scores) ---
+
+        let currentWeeklyStudentId = null;
+        let currentWeeklyMonth = null;
+
+        // Function to open the weekly scores modal
+        async function openWeeklyScoresModal(studentId, month) {
+            currentWeeklyStudentId = studentId;
+            currentWeeklyMonth = month;
+
+            // Update modal title
+            const studentDoc = await studentsCollection.doc(studentId).get();
+            const studentName = studentDoc.exists ? `${studentDoc.data().prefix} ${studentDoc.data().name}` : 'นักเรียนไม่พบ';
+            weeklyModalStudentName.textContent = studentName;
+            weeklyModalMonthName.textContent = month;
+
+            // Load weekly scores for the selected student and month
+            await loadWeeklyScoresFromFirebase(studentId, month);
+            renderWeeklyScores(currentWeeklyScores);
+
+            // Reset password and error
+            weeklyAdminPasswordInput.value = '';
+            weeklyPasswordErrorMessage.textContent = '';
+            weeklyAdminPasswordSection.style.display = 'flex'; // Show password section for weekly scores
+
+            weeklyScoresModal.style.display = 'flex'; // Show the modal
+        }
+
+        // Function to render weekly score inputs
+        function renderWeeklyScores(weeklyScores) {
+            weeklyScoresGrid.innerHTML = ''; // Clear existing inputs
+            const numWeeks = 5; // Assuming max 5 weeks per month
+
+            for (let i = 1; i <= numWeeks; i++) {
+                const weekKey = `week${i}`;
+                const score = weeklyScores[weekKey] !== undefined ? weeklyScores[weekKey] : 0;
+
+                const scoreItem = document.createElement('div');
+                scoreItem.classList.add('score-input-item');
+                scoreItem.innerHTML = `
+                    <label for="weeklyScore${i}">สัปดาห์ที่ ${i}</label>
+                    <input type="number" id="weeklyScore${i}" min="0" max="100" value="${score}">
+                `;
+                weeklyScoresGrid.appendChild(scoreItem);
+            }
+        }
+
+        // Function to load weekly scores from Firebase
+        async function loadWeeklyScoresFromFirebase(studentId, month) {
+            try {
+                const docRef = weeklyScoresCollection.doc(studentId).collection('months').doc(month);
+                const doc = await docRef.get();
+                currentWeeklyScores = doc.exists ? doc.data() : {}; // Ensure currentWeeklyScores is an object
+            } catch (error) {
+                console.error("Error loading weekly scores:", error);
+                currentWeeklyScores = {}; // Fallback to empty object on error
+            }
+        }
+
+        // Function to save weekly scores (admin access required)
+        async function saveWeeklyScores() {
+            const password = weeklyAdminPasswordInput.value;
+            if (password !== ADMIN_PASSWORD) {
+                weeklyPasswordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+                return;
+            }
+            weeklyPasswordErrorMessage.textContent = ""; // Clear error message
+
+            if (!currentWeeklyStudentId || !currentWeeklyMonth) {
+                console.error("No student or month selected for saving weekly scores.");
+                return;
+            }
+
+            const scoresToSave = {};
+            let newMonthlyTotal = 0; // Calculate new total for logging
+            const numWeeks = 5; // Max 5 weeks
+            for (let i = 1; i <= numWeeks; i++) {
+                const scoreInput = document.getElementById(`weeklyScore${i}`);
+                if (scoreInput) {
+                    const score = parseInt(scoreInput.value) || 0;
+                    scoresToSave[`week${i}`] = score;
+                    newMonthlyTotal += score;
+                }
+            }
+
+            try {
+                // Fetch old scores to calculate change
+                const oldScoresDoc = await weeklyScoresCollection.doc(currentWeeklyStudentId)
+                                                               .collection('months')
+                                                               .doc(currentWeeklyMonth)
+                                                               .get();
+                const oldScores = oldScoresDoc.exists ? oldScoresDoc.data() : {};
+                let oldMonthlyTotal = 0;
+                let detailedWeeklyChanges = []; // Array to store detailed changes like {week: "สัปดาห์ที่ 1", old: 50, new: 60, change: 10}
+
+                for (let i = 1; i <= numWeeks; i++) {
+                    const weekKey = `week${i}`;
+                    const oldScore = oldScores[weekKey] !== undefined ? oldScores[weekKey] : 0;
+                    const newScore = scoresToSave[weekKey] !== undefined ? scoresToSave[weekKey] : 0;
+                    
+                    if (newScore !== oldScore) {
+                        detailedWeeklyChanges.push({
+                            week: `สัปดาห์ที่ ${i}`,
+                            oldScore: oldScore,
+                            newScore: newScore,
+                            change: newScore - oldScore
+                        });
+                    }
+                    oldMonthlyTotal += oldScore;
+                }
+
+                // Only save and log if scores have changed
+                if (detailedWeeklyChanges.length > 0) {
+                    await weeklyScoresCollection.doc(currentWeeklyStudentId)
+                                                .collection('months')
+                                                .doc(currentWeeklyMonth)
+                                                .set(scoresToSave, { merge: true });
+                    weeklyScoresModal.style.display = 'none'; // Hide modal
+                    weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
+
+                    const studentInfo = studentInfoMap.get(currentWeeklyStudentId) || { name: 'ไม่พบชื่อนักเรียน', studentNumber: null };
+                    const studentName = studentInfo.name;
+                    const studentNumber = studentInfo.studentNumber;
+
+                    const amountChange = newMonthlyTotal - oldMonthlyTotal;
+                    await logSaveAction(currentWeeklyStudentId, studentName, `บันทึกค่าห้องเดือน${currentWeeklyMonth}`, amountChange, detailedWeeklyChanges, studentNumber); // Pass detailedWeeklyChanges
+                    await checkAndTrimHistory(); // Check and trim history after save
+                } else {
+                    weeklyScoresModal.style.display = 'none'; // Hide modal
+                    weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
+                }
+
+            } catch (error) {
+                console.error("Error saving weekly scores:", error);
+            }
+        }
+
+
+        // --- NEW All Students Scores Functions (now in a modal) ---
+
+        async function openAllStudentsMonthSelectionModal() {
+            // Hide other main tables
+            studentListTableContainer.style.display = 'none';
+            scoreTableContainer.style.display = 'none';
+            allStudentsWeeklyScoresMainContainer.style.display = 'none'; // Ensure main weekly table is hidden
+            studentFeeSummaryTableContainer.style.display = 'none'; // Hide fee summary table
+            saveHistoryTableContainer.style.display = 'none'; // Hide save history table
+            settingsContainer.style.display = 'none'; // Hide settings container
+            homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+            
+            // Show the all students month selection modal
+            allStudentsMonthSelectionModal.style.display = 'flex';
+            allStudentsMonthSelectionModalTitle.textContent = 'เลือกเดือนเพื่อดูค่าห้องของนักเรียนทั้งหมด';
+            
+            allStudentsMonthTableBody.innerHTML = ''; // Clear existing month rows
+            months.forEach(month => {
+                const row = allStudentsMonthTableBody.insertRow();
+                row.innerHTML = `
+                    <td>${month}</td>
+                    <td><button class="details-btn" data-month="${month}">ดูค่าห้องรายสัปดาห์</button></td>
+                `;
+            });
+
+            // Attach event listeners to "ดูค่าห้องรายสัปดาห์" buttons in the month table
+            document.querySelectorAll('#allStudentsMonthTableBody .details-btn').forEach(button => {
+                button.onclick = (event) => {
+                    closeAllStudentsMonthSelectionModal(); // Close month selection modal
+                    displayAllStudentsWeeklyScoresInMain(event.target.dataset.month); // Show weekly scores in main table
+                };
+            });
+
+            // Clear password and error messages
+            allStudentsWeeklyAdminPasswordInputAll.value = '';
+            allStudentsWeeklyPasswordErrorMessageAll.textContent = '';
+            allStudentsWeeklyAdminPasswordSectionAll.style.display = 'none'; // Hide password section
+        }
+
+        // Function to close the all students month selection modal
+        function closeAllStudentsMonthSelectionModal() {
+            allStudentsMonthSelectionModal.style.display = 'none';
+        }
+
+        // Function to display all students' weekly scores in the main table area
+        async function displayAllStudentsWeeklyScoresInMain(month) {
+            currentAllStudentsWeeklyScoresMonth = month;
+            allStudentsWeeklyModalMonthName.textContent = month;
+
+            // Hide other main tables and show the all students weekly scores container
+            studentListTableContainer.style.display = 'none';
+            scoreTableContainer.style.display = 'none';
+            studentFeeSummaryTableContainer.style.display = 'none'; // Hide fee summary table
+            saveHistoryTableContainer.style.display = 'none'; // Hide save history table
+            settingsContainer.style.display = 'none'; // Hide settings container
+            homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+            allStudentsWeeklyScoresMainContainer.style.display = 'block';
+
+            allStudentsWeeklyScoresTableBody.innerHTML = ''; // Clear existing rows
+
+            // Fetch all student details
+            const studentsSnapshot = await studentsCollection.orderBy('studentNumber').get();
+            const allStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            // Fetch all weekly scores for the selected month across all students concurrently
+            const weeklyScoresPromises = allStudents.map(student =>
+                weeklyScoresCollection.doc(student.id).collection('months').doc(month).get()
+            );
+            const weeklyScoresDocs = await Promise.all(weeklyScoresPromises);
+
+            // Create a map for quick lookup of scores by student ID
+            const studentScoresMap = new Map();
+            weeklyScoresDocs.forEach(doc => {
+                if (doc.exists) {
+                    // doc.ref.parent.parent.id gives the studentId from the path 'studentWeeklyScores/{studentId}/months/{month}'
+                    studentScoresMap.set(doc.ref.parent.parent.id, doc.data());
+                }
+                
+            });
+
+            for (const student of allStudents) {
+                const row = allStudentsWeeklyScoresTableBody.insertRow();
+                row.dataset.studentId = student.id; // Store student ID on the row
+
+                const studentNumberCell = document.createElement('td');
+                studentNumberCell.textContent = student.studentNumber || '-';
+
+                const studentIdCell = document.createElement('td');
+                studentIdCell.textContent = student.id;
+
+                const studentNameCell = document.createElement('td');
+                studentNameCell.textContent = `${student.prefix} ${student.name}`;
+
+                row.appendChild(studentNumberCell);
+                row.appendChild(studentIdCell);
+                row.appendChild(studentNameCell);
+
+                // Get scores from the map
+                const studentWeeklyScores = studentScoresMap.get(student.id) || {};
+
+                for (let i = 1; i <= numWeeksInMonth; i++) {
+                    const weekKey = `week${i}`;
+                    const score = studentWeeklyScores[weekKey] !== undefined ? studentWeeklyScores[weekKey] : 0;
+
+                    const scoreCell = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.max = '100';
+                    input.value = score;
+                    input.dataset.week = weekKey; // Store week key on the input
+                    scoreCell.appendChild(input);
+                    row.appendChild(scoreCell);
+                }
+            }
+
+            // Show password section when table is displayed
+            allStudentsWeeklyAdminPasswordSectionAll.style.display = 'flex';
+        }
+
+        // Helper function to compare two score objects
+        function areScoresDifferent(newScores, oldScores) {
+            const weeks = ['week1', 'week2', 'week3', 'week4', 'week5'];
+            for (const week of weeks) {
+                // Compare values, treating undefined as 0 for consistency
+                if ((newScores[week] || 0) !== (oldScores[week] || 0)) {
+                    return true; // Scores are different
+                }
+            }
+            return false; // Scores are the same
+        }
+
+        async function saveAllStudentsWeeklyScores() {
+            const password = allStudentsWeeklyAdminPasswordInputAll.value;
+            if (password !== ADMIN_PASSWORD) {
+                allStudentsWeeklyPasswordErrorMessageAll.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+                return;
+            }
+            allStudentsWeeklyPasswordErrorMessageAll.textContent = ""; // Clear error message
+
+            if (!currentAllStudentsWeeklyScoresMonth) {
+                console.error("No month selected for saving all students' weekly scores.");
+                return;
+            }
+
+            const batch = db.batch();
+            const rows = allStudentsWeeklyScoresTableBody.querySelectorAll('tr');
+            const savePromises = []; // To hold promises for logging individual student saves
+
+            // Re-fetch current scores to compare against, as the map might be from initial load
+            const studentsSnapshot = await studentsCollection.orderBy('studentNumber').get();
+            const allStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const weeklyScoresPromises = allStudents.map(student =>
+                weeklyScoresCollection.doc(student.id).collection('months').doc(currentAllStudentsWeeklyScoresMonth).get()
+            );
+            const weeklyScoresDocs = await Promise.all(weeklyScoresPromises);
+            const originalStudentScoresMap = new Map();
+            weeklyScoresDocs.forEach(doc => {
+                if (doc.exists) {
+                    originalStudentScoresMap.set(doc.ref.parent.parent.id, doc.data());
+                }
+            });
+
+            let changesMade = false; // Flag to track if any changes were actually saved
+
+            for (const row of rows) {
+                const studentId = row.dataset.studentId;
+                const scoresToSave = {};
+                const inputs = row.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    scoresToSave[input.dataset.week] = parseInt(input.value) || 0;
+                });
+
+                const originalScores = originalStudentScoresMap.get(studentId) || {};
+                let detailedWeeklyChangesForStudent = []; // Detailed info for this specific student
+                let newMonthlyTotalForLog = 0;
+                let oldMonthlyTotalForLog = 0;
+
+                for (let i = 1; i <= numWeeksInMonth; i++) {
+                    const weekKey = `week${i}`;
+                    const oldScore = originalScores[weekKey] !== undefined ? originalScores[weekKey] : 0;
+                    const newScore = scoresToSave[weekKey] !== undefined ? scoresToSave[weekKey] : 0;
+
+                    if (newScore !== oldScore) {
+                        detailedWeeklyChangesForStudent.push({
+                            week: `สัปดาห์ที่ ${i}`,
+                            oldScore: oldScore,
+                            newScore: newScore,
+                            change: newScore - oldScore
+                        });
+                    }
+                    newMonthlyTotalForLog += newScore;
+                    oldMonthlyTotalForLog += oldScore;
+                }
+
+                // Only proceed if scores have actually changed for this student
+                if (detailedWeeklyChangesForStudent.length > 0) {
+                    const docRef = weeklyScoresCollection.doc(studentId).collection('months').doc(currentAllStudentsWeeklyScoresMonth);
+                    batch.set(docRef, scoresToSave, { merge: true });
+                    changesMade = true; // Set flag to true if any change is detected
+
+                    const studentInfo = studentInfoMap.get(studentId) || { name: 'ไม่พบชื่อนักเรียน', studentNumber: null };
+                    const studentName = studentInfo.name;
+                    const studentNumber = studentInfo.studentNumber;
+
+                    const amountChange = newMonthlyTotalForLog - oldMonthlyTotalForLog;
+                    savePromises.push(logSaveAction(studentId, studentName, `บันทึกค่าห้องทั้งหมดเดือน${currentAllStudentsWeeklyScoresMonth}`, amountChange, detailedWeeklyChangesForStudent, studentNumber)); // Pass detailedWeeklyChangesForStudent
+                }
+            }
+
+            try {
+                if (changesMade) {
+                    await batch.commit();
+                    // Wait for all individual log entries to complete
+                    await Promise.all(savePromises);
+                    await checkAndTrimHistory(); // Check and trim history after save
+                }
+                
+                // After saving (or if no changes), go back to the default student list view
+                showClassPageContent(); // Revert to default class page view
+
+            }
+            catch (error) {
+                console.error("Error saving all students' weekly scores:", error);
+            }
+        }
+
+        // --- NEW Student Fee Summary Functions ---
+        async function renderStudentFeeSummary() {
+            // Hide other main tables
+            studentListTableContainer.style.display = 'none';
+            scoreTableContainer.style.display = 'none';
+            allStudentsWeeklyScoresMainContainer.style.display = 'none';
+            allStudentsMonthSelectionModal.style.display = 'none';
+            saveHistoryTableContainer.style.display = 'none'; // Hide save history table
+            settingsContainer.style.display = 'none'; // Hide settings container
+            homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+            
+            // Show the summary table
+            studentFeeSummaryTableContainer.style.display = 'block';
+
+            // Clear existing table content
+            studentFeeSummaryTableBody.innerHTML = '';
+            feeSummaryTableFooter.innerHTML = ''; // Clear footer too
+
+            // Re-render table header for months
+            feeSummaryTableHeader.innerHTML = `
+                <th>เลขที่</th>
+                <th>รหัสนักเรียน</th>
+                <th>ชื่อ - นามสกุล</th>
+            `;
+            months.forEach(month => {
+                const th = document.createElement('th');
+                th.textContent = month;
+                feeSummaryTableHeader.appendChild(th);
+            });
+            const totalTh = document.createElement('th');
+            totalTh.textContent = 'รวมทั้งหมด';
+            feeSummaryTableHeader.appendChild(totalTh);
+
+
+            // Fetch all student details
+            const studentsSnapshot = await studentsCollection.orderBy('studentNumber').get();
+            const allStudents = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            // Use a collection group query to get all 'months' subcollection documents
+            const monthsCollectionGroup = db.collectionGroup('months');
+            const allMonthlyScoresSnapshot = await monthsCollectionGroup.get();
+
+            // Organize scores by studentId and month for easy lookup
+            const allStudentsMonthlyScores = {};
+            allMonthlyScoresSnapshot.forEach(doc => {
+                // doc.ref.parent.parent.id gives the studentId
+                // doc.id gives the month name
+                const studentId = doc.ref.parent.parent.id;
+                const monthName = doc.id;
+                if (!allStudentsMonthlyScores[studentId]) {
+                    allStudentsMonthlyScores[studentId] = {};
+                }
+                allStudentsMonthlyScores[studentId][monthName] = doc.data();
+            });
+
+            let grandTotalForAllStudents = 0; // Initialize grand total
+
+            for (const student of allStudents) {
+                const row = studentFeeSummaryTableBody.insertRow();
+                row.innerHTML = `
+                    <td>${student.studentNumber || '-'}</td>
+                    <td>${student.id}</td>
+                    <td>${student.prefix} ${student.name}</td>
+                `;
+                let overallTotalForStudent = 0; // Total for current student across all months
+
+                for (const month of months) {
+                    const studentWeeklyScores = (allStudentsMonthlyScores[student.id] && allStudentsMonthlyScores[student.id][month]) || {};
+                    
+                    let monthlyTotal = 0;
+                    for (let i = 1; i <= numWeeksInMonth; i++) {
+                        const weekKey = `week${i}`;
+                        monthlyTotal += (studentWeeklyScores[weekKey] !== undefined ? studentWeeklyScores[weekKey] : 0);
+                    }
+                    overallTotalForStudent += monthlyTotal; // Add to student's total
+
+                    const monthCell = document.createElement('td');
+                    monthCell.textContent = monthlyTotal;
+                    row.appendChild(monthCell);
+                }
+                const overallTotalCell = document.createElement('td');
+                overallTotalCell.textContent = overallTotalForStudent;
+                overallTotalCell.style.fontWeight = 'bold'; // Make student's total stand out
+                row.appendChild(overallTotalCell);
+
+                grandTotalForAllStudents += overallTotalForStudent; // Add student's total to grand total
+            }
+
+            // Add a footer row for the grand total
+            const totalRow = feeSummaryTableFooter.insertRow();
+            const emptyCell1 = document.createElement('td');
+            emptyCell1.colSpan = 2; // Span across "เลขที่" and "รหัสนักเรียน"
+            totalRow.appendChild(emptyCell1);
+
+            const totalLabelCell = document.createElement('td');
+            totalLabelCell.textContent = 'รวมทั้งหมดของทุกคน';
+            totalRow.appendChild(totalLabelCell);
+
+            // Add empty cells for each month column to align the grand total correctly
+            for (let i = 0; i < months.length; i++) {
+                const emptyMonthCell = document.createElement('td');
+                totalRow.appendChild(emptyMonthCell);
+            }
+
+            const grandTotalCell = document.createElement('td');
+            grandTotalCell.textContent = grandTotalForAllStudents;
+            grandTotalCell.style.fontWeight = 'bold';
+            grandTotalCell.style.fontSize = '1.2em'; // Make it larger
+            totalRow.appendChild(grandTotalCell);
+
+            // Update the title to include the grand total
+            feeSummaryTitle.textContent = `สรุปค่าห้องของนักเรียน ห้อง 3/1 (ต่อเดือน) - รวมทั้งหมด: ${grandTotalForAllStudents} บาท`;
+        }
+
+        // --- NEW Save History Functions ---
+        async function logSaveAction(studentId, studentName, details, amountChange = null, weeklyChangesDetails = null, studentNumber = null) {
+            try {
+                await saveHistoryCollection.add({
+                    studentId: studentId,
+                    studentName: studentName, // Add student name
+                    details: details,
+                    amountChange: amountChange, // Store amountChange
+                    weeklyChangesDetails: weeklyChangesDetails, // Store detailed weekly changes
+                    studentNumber: studentNumber, // Store student number
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp() // Use server timestamp
+                });
+                console.log("Save action logged successfully.");
+            } catch (error) {
+                console.error("Error logging save action:", error);
+            }
+        }
+
+        async function renderSaveHistory() {
+            // Hide other main tables
+            studentListTableContainer.style.display = 'none';
+            scoreTableContainer.style.display = 'none';
+            allStudentsWeeklyScoresMainContainer.style.display = 'none';
+            allStudentsMonthSelectionModal.style.display = 'none';
+            studentFeeSummaryTableContainer.style.display = 'none';
+            settingsContainer.style.display = 'none'; // Hide settings container
+            homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+            
+            // Show the save history table
+            saveHistoryTableContainer.style.display = 'block';
+            saveHistoryTableBody.innerHTML = ''; // Clear existing rows
+
+            try {
+                const snapshot = await saveHistoryCollection.orderBy('timestamp', 'desc').get();
+                
+                // Update history count display in settings
+                if (historyCountDisplay) { // Check if element exists before updating
+                    historyCountDisplay.textContent = `จำนวนประวัติการบันทึก: ${snapshot.size}`;
+                }
+
+                if (snapshot.empty) {
+                    const row = saveHistoryTableBody.insertRow();
+                    const cell = row.insertCell(0);
+                    cell.colSpan = 6; // Adjusted colspan for new columns
+                    cell.textContent = "ไม่มีประวัติการบันทึก";
+                    cell.style.textAlign = "center";
+                    cell.style.fontStyle = "italic";
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const history = doc.data();
+                    const row = saveHistoryTableBody.insertRow();
+                    const timestamp = history.timestamp ? new Date(history.timestamp.toDate()).toLocaleString('th-TH') : 'N/A';
+                    let amountChangeDisplay = 'N/A';
+                    if (history.amountChange !== null) {
+                        amountChangeDisplay = `${history.amountChange >= 0 ? '+' : ''}${history.amountChange} บาท`;
+                    }
+                    // Check for detailed weekly changes first
+                    if (history.weeklyChangesDetails && history.weeklyChangesDetails.length > 0) {
+                        const weeklyDetails = history.weeklyChangesDetails.map(change => {
+                            const sign = change.change >= 0 ? '+' : '';
+                            return `${change.week} (${sign}${change.change})`;
+                        }).join(', ');
+                        amountChangeDisplay += ` (${weeklyDetails})`;
+                    } else if (history.changedWeeksDetails) { // Fallback for older entries or general monthly changes
+                        amountChangeDisplay += ` (${history.changedWeeksDetails})`;
+                    }
+
+                    row.innerHTML = `
+                        <td>${history.studentNumber || '-'}</td>
+                        <td>${history.studentId || '-'}</td>
+                        <td>${history.studentName || '-'}</td>
+                        <td>${history.details || '-'}</td>
+                        <td>${amountChangeDisplay}</td>
+                        <td>${timestamp}</td>
+                    `;
+                });
+            } catch (error) {
+                console.error("Error rendering save history:", error);
+                const row = saveHistoryTableBody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 6; // Adjusted colspan for new columns
+                cell.textContent = `เกิดข้อผิดพลาดในการโหลดประวัติ: ${error.message}`;
+                cell.style.color = "red";
+                cell.style.textAlign = "center";
+            }
+        }
+
+        // --- NEW: App Settings Functions ---
+        async function loadAppSettings() {
+            try {
+                const doc = await appSettingsDocRef.get();
+                if (doc.exists) {
+                    const settings = doc.data();
+                    autoDeleteToggle.checked = settings.autoDeleteEnabled || false;
+                    historyLimitInput.value = settings.historyLimit || 100;
+                } else {
+                    // Set default settings if document doesn't exist
+                    await appSettingsDocRef.set({
+                        autoDeleteEnabled: false,
+                        historyLimit: 100
+                    });
+                    autoDeleteToggle.checked = false;
+                    historyLimitInput.value = 100;
+                }
+            } catch (error) {
+                console.error("Error loading app settings:", error);
+            }
+        }
+
+        async function saveAppSettings(newSettings) {
+            try {
+                await appSettingsDocRef.set(newSettings, { merge: true });
+                console.log("App settings saved successfully.");
+                return true;
+            } catch (error) {
+                console.error("Error saving app settings:", error);
+                return false;
+            }
+        }
+
+        function toggleHistoryLimitEditMode(isEditMode) {
+            if (isEditMode) {
+                historyLimitInput.removeAttribute('readonly');
+                editHistoryLimitBtn.style.display = 'none';
+                historyLimitEditActions.style.display = 'flex';
+            } else {
+                historyLimitInput.setAttribute('readonly', true);
+                editHistoryLimitBtn.style.display = 'inline-block';
+                historyLimitEditActions.style.display = 'none';
+                historyLimitErrorMessage.textContent = ''; // Clear error
+                loadAppSettings(); // Reload to revert to saved value if cancelled
+            }
+        }
+
+        async function handleSaveHistoryLimit() {
+            historyLimitErrorMessage.textContent = "";
+
+            const newLimit = parseInt(historyLimitInput.value);
+            if (isNaN(newLimit) || newLimit <= 0) {
+                historyLimitErrorMessage.textContent = "ขีดจำกัดต้องเป็นตัวเลขและมากกว่า 0";
+                return;
+            }
+
+            const currentSettings = (await appSettingsDocRef.get()).data() || {};
+            const updatedSettings = { ...currentSettings, historyLimit: newLimit };
+
+            const success = await saveAppSettings(updatedSettings);
+            if (success) {
+                toggleHistoryLimitEditMode(false);
+                await checkAndTrimHistory(); // Run trim immediately after limit change
+            } else {
+                historyLimitErrorMessage.textContent = "เกิดข้อผิดพลาดในการบันทึกขีดจำกัด";
+            }
+        }
+
+        async function checkAndTrimHistory() {
+            try {
+                const settingsDoc = await appSettingsDocRef.get();
+                if (!settingsDoc.exists) return; // No settings, do nothing
+
+                const settings = settingsDoc.data();
+                
+                const snapshot = await saveHistoryCollection.orderBy('timestamp', 'desc').get();
+                const currentCount = snapshot.size;
+
+                if (historyCountDisplay) { // Check if element exists before updating
+                    historyCountDisplay.textContent = `จำนวนประวัติการบันทึก: ${currentCount}`;
+                }
+
+                if (!settings.autoDeleteEnabled) {
+                    return; // Auto-delete is disabled, just updated count and return
+                }
+
+                const limit = settings.historyLimit || 100; // Default limit if not set
+
+                if (currentCount > limit) {
+                    const recordsToDelete = snapshot.docs.slice(limit); // Get records beyond the limit (oldest ones)
+                    const batch = db.batch();
+                    recordsToDelete.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+                    console.log(`Deleted ${recordsToDelete.length} old history records.`);
+                    // Update history count again after deletion
+                    if (historyCountDisplay) {
+                        historyCountDisplay.textContent = `จำนวนประวัติการบันทึก: ${limit}`; // Should now be at the limit
+                    }
+                    // Re-render history if currently viewing history table
+                    if (saveHistoryTableContainer.style.display === 'block') {
+                        renderSaveHistory();
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking and trimming history:", error);
+            }
+        }
+
+
+        // --- NEW: Admin Clear History Modal Functions ---
+        function openAdminClearHistoryModal() {
+            adminClearHistoryModal.style.display = 'flex';
+        }
+
+        function closeAdminClearHistoryModal() {
+            adminClearHistoryModal.style.display = 'none';
+        }
+
+        async function clearSaveHistoryFromFirebase() {
+            try {
+                const snapshot = await saveHistoryCollection.get();
+                if (snapshot.empty) {
+                    closeAdminClearHistoryModal();
+                    return;
+                }
+
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                closeAdminClearHistoryModal();
+                // Instead of rendering history, switch back to the student list view
+                showClassPageContent(); // Revert to default class page view
+                await renderSaveHistory(); // Update history count in settings after clearing
+            } catch (error) {
+                console.error("Error clearing save history:", error);
+            }
+        }
+
+        // --- NEW: Settings Admin Password Modal Functions ---
+        function openSettingsAdminPasswordModal() {
+            settingsAdminPasswordModal.style.display = 'flex';
+            settingsAdminPasswordInput.value = ''; // Clear password input
+            settingsAdminPasswordErrorMessage.textContent = ''; // Clear error message
+            settingsAdminPasswordInput.focus(); // Focus on the password input
+        }
+
+        function closeSettingsAdminPasswordModal() {
+            settingsAdminPasswordModal.style.display = 'none';
+        }
+
+        async function handleSettingsAdminPasswordConfirm() {
+            const password = settingsAdminPasswordInput.value;
+            if (password !== ADMIN_PASSWORD) {
+                settingsAdminPasswordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+                return;
+            }
+            settingsAdminPasswordErrorMessage.textContent = ""; // Clear error message
+            closeSettingsAdminPasswordModal();
+
+            // Proceed to show settings page
+            SettingBtn.classList.add('active');
+            showStudentListBtn.classList.remove('active');
+            showStudentScoresBtn.classList.remove('active');
+            showStudentScoresBtnAll.classList.remove('active');
+            showStudentFeeSummaryBtn.classList.remove('active');
+            ScoresHistoryBtn.classList.remove('active');
+
+            // Hide all other main containers
+            studentListTableContainer.style.display = 'none';
+            scoreTableContainer.style.display = 'none';
+            allStudentsWeeklyScoresMainContainer.style.display = 'none';
+            allStudentsMonthSelectionModal.style.display = 'none';
+            studentFeeSummaryTableContainer.style.display = 'none';
+            saveHistoryTableContainer.style.display = 'none'; 
+            homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+
+            // Show settings container
+            settingsContainer.style.display = 'flex';
+            await loadAppSettings(); // Load settings when the settings page is opened
+            await checkAndTrimHistory(); // Update history count when settings are opened
+        }
+
+        // --- Helper function to hide all main content containers and deactivate buttons ---
+        function hideAllAppContent() {
+            studentListTableContainer.style.display = 'none';
+            scoreTableContainer.style.display = 'none';
+            studentFeeSummaryTableContainer.style.display = 'none';
+            saveHistoryTableContainer.style.display = 'none';
+            settingsContainer.style.display = 'none';
+            allStudentsWeeklyScoresMainContainer.style.display = 'none';
+            allStudentsMonthSelectionModal.style.display = 'none'; // Ensure this modal is hidden too
+            monthlySelectionModal.style.display = 'none'; // Ensure other modals are hidden
+            weeklyScoresModal.style.display = 'none';
+            adminClearHistoryModal.style.display = 'none';
+            settingsAdminPasswordModal.style.display = 'none';
+            homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+
+            // Remove active class from all toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        // --- Helper function to show the default "หน้าหลัก" content ---
+        async function showHomePageContent() {
+            hideAllAppContent(); // Hide everything else
+            homePlaceholderContainer.style.display = 'flex'; // Show home placeholder
+            // Ensure toggle buttons are hidden when on home page
+            document.querySelector('.toggle-buttons').style.display = 'none'; 
+        }
+
+        // --- Helper function to show the default "เก็บค่าห้อง" content ---
+        function showClassPageContent() {
+            // Show the main toggle buttons container
+            document.querySelector('.toggle-buttons').style.display = 'flex';
+            
+            // Set default view for "เก็บค่าห้อง" to student list
+            studentListTableContainer.style.display = 'block';
+            scoreTableContainer.style.display = 'none';
+            studentFeeSummaryTableContainer.style.display = 'none';
+            saveHistoryTableContainer.style.display = 'none';
+            settingsContainer.style.display = 'none';
+            allStudentsWeeklyScoresMainContainer.style.display = 'none';
+            allStudentsMonthSelectionModal.style.display = 'none';
+            homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+
+            // Set "รายชื่อของนักเรียน" button as active
+            showStudentListBtn.classList.add('active');
+            showStudentScoresBtn.classList.remove('active');
+            showStudentScoresBtnAll.classList.remove('active');
+            showStudentFeeSummaryBtn.classList.remove('active');
+            ScoresHistoryBtn.classList.remove('active');
+            SettingBtn.classList.remove('active');
+
+            renderStudentList(); // Render the default view
+        }
+
+
+        // --- Event Listeners and Initial Load ---
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Assign DOM elements inside DOMContentLoaded
+            studentListTableBody = document.getElementById('studentListTableBody');
+            scoreTableBody = document.getElementById('scoreTableBody');
+            studentDetailModal = document.getElementById('studentDetailModal');
+            closeButton = studentDetailModal.querySelector('.close-button');
+            modalOverlay = document.getElementById('studentDetailModal');
+
+            modalStudentName = document.getElementById('modalStudentName');
+            modalStudentNumber = document.getElementById('modalStudentNumber');
+            modalStudentId = document.getElementById('modalStudentId');
+            modalStudentGrade = document.getElementById('modalStudentGrade');
+            modalStudentClass = document.getElementById('modalStudentClass');
+            modalStudentStatus = document.getElementById('modalStudentStatus');
+            modalStudentDob = document.getElementById('modalStudentDob');
+            modalStudentPhone = document.getElementById('modalStudentPhone');
+
+            studentDetailsView = document.getElementById('studentDetailsView');
+            studentDetailsEdit = document.getElementById('studentDetailsEdit');
+            editStudentInfoBtn = document.getElementById('editStudentInfoBtn');
+            saveStudentInfoBtn = document.getElementById('saveStudentInfoBtn');
+            cancelStudentInfoBtn = document.getElementById('cancelStudentInfoBtn');
+
+            editStudentNumber = document.getElementById('editStudentNumber');
+            editStudentId = document.getElementById('editStudentId');
+            editPrefix = document.getElementById('editPrefix');
+            editName = document.getElementById('editName');
+            editGrade = document.getElementById('editGrade');
+            editClass = document.getElementById('editClass');
+            editStatus = document.getElementById('editStatus');
+            editDob = document.getElementById('editDob');
+            editPhone = document.getElementById('editPhone');
+
+            // Re-assign adminPasswordInput and passwordErrorMessage for studentDetailModal
+            adminPasswordInput = document.getElementById('adminPasswordInput');
+            passwordErrorMessage = document.getElementById('passwordErrorMessage');
+            adminPasswordSection = document.getElementById('adminPasswordSection'); // Get reference to the password section
+
+            showStudentListBtn = document.getElementById('showStudentListBtn');
+            showStudentScoresBtn = document.getElementById('showStudentScoresBtn');
+            showStudentScoresBtnAll = document.getElementById('showStudentScoresBtnAll'); // New button
+            showStudentFeeSummaryBtn = document.getElementById('showStudentFeeSummaryBtn'); // New button
+            ScoresHistoryBtn = document.getElementById('ScoresHistoryBtn'); // New button
+            SettingBtn = document.getElementById('SettingBtn'); // New button for settings
+
+            studentListTableContainer = document.getElementById('studentListTableContainer');
+            scoreTableContainer = document.getElementById('scoreTableContainer');
+            studentFeeSummaryTableContainer = document.getElementById('studentFeeSummaryTableContainer'); // Assign new container
+            studentFeeSummaryTableBody = document.getElementById('studentFeeSummaryTableBody'); // Assign new tbody
+            feeSummaryTableHeader = document.getElementById('feeSummaryTableHeader'); // Assign new header row
+            feeSummaryTableFooter = document.getElementById('feeSummaryTableFooter'); // Assign new footer
+            feeSummaryTitle = document.getElementById('feeSummaryTitle'); // Assign new title element
+            saveHistoryTableContainer = document.getElementById('saveHistoryTableContainer'); // Assign new container
+            saveHistoryTableBody = document.getElementById('saveHistoryTableBody'); // Assign new tbody
+            settingsContainer = document.getElementById('settingsContainer'); // Assign settings container
+            clearHistoryBtn = document.getElementById('clearHistoryBtn'); // Assign clear history button
+
+            // Assign new settings DOM elements
+            historyCountDisplay = document.getElementById('historyCountDisplay');
+            autoDeleteToggle = document.getElementById('autoDeleteToggle');
+            historyLimitInput = document.getElementById('historyLimitInput');
+            editHistoryLimitBtn = document.getElementById('editHistoryLimitBtn');
+            saveHistoryLimitBtn = document.getElementById('saveHistoryLimitBtn');
+            cancelHistoryLimitBtn = document.getElementById('cancelHistoryLimitBtn');
+            historyLimitEditActions = document.getElementById('historyLimitEditActions');
+            historyLimitErrorMessage = document.getElementById('historyLimitErrorMessage');
+
+
+            monthlySelectionModal = document.getElementById('monthlySelectionModal');
+            closeMonthlySelectionModalBtn = document.getElementById('closeMonthlySelectionModalBtn');
+            monthlySelectionModalStudentName = document.getElementById('monthlySelectionModalStudentName');
+            monthButtonsGrid = document.getElementById('monthButtonsGrid');
+            cancelMonthlySelectionBtn = document.getElementById('cancelMonthlySelectionBtn');
+
+            weeklyScoresModal = document.getElementById('weeklyScoresModal');
+            closeWeeklyScoresModalBtn = document.getElementById('closeWeeklyScoresModalBtn');
+            weeklyModalStudentName = document.getElementById('weeklyModalStudentName');
+            weeklyModalMonthName = document.getElementById('weeklyModalMonthName');
+            weeklyScoresGrid = document.getElementById('weeklyScoresGrid');
+            weeklyAdminPasswordInput = document.getElementById('weeklyAdminPasswordInput');
+            weeklyPasswordErrorMessage = document.getElementById('weeklyPasswordErrorMessage');
+            saveWeeklyScoresBtn = document.getElementById('saveWeeklyScoresBtn');
+            cancelWeeklyScoresBtn = document.getElementById('cancelWeeklyScoresBtn');
+            weeklyAdminPasswordSection = document.getElementById('weeklyAdminPasswordSection'); // Assign weekly password section
+
+            // New elements for all students scores modal
+            allStudentsMonthSelectionModal = document.getElementById('allStudentsMonthSelectionModal');
+            closeAllStudentsMonthSelectionModalBtn = document.getElementById('closeAllStudentsMonthSelectionModalBtn');
+            allStudentsMonthSelectionModalTitle = document.getElementById('allStudentsMonthSelectionModalTitle');
+            allStudentsMonthTableBody = document.getElementById('allStudentsMonthTableBody'); // Assign new tbody
+            cancelAllStudentsMonthSelectionBtn = document.getElementById('cancelAllStudentsMonthSelectionBtn');
+            
+            allStudentsWeeklyScoresMainContainer = document.getElementById('allStudentsWeeklyScoresMainContainer');
+            allStudentsWeeklyModalMonthName = document.getElementById('allStudentsWeeklyModalMonthName');
+            allStudentsWeeklyScoresTableBody = document.getElementById('allStudentsWeeklyScoresTableBody');
+            allStudentsWeeklyAdminPasswordSectionAll = document.getElementById('allStudentsWeeklyAdminPasswordSectionAll');
+            allStudentsWeeklyAdminPasswordInputAll = document.getElementById('allStudentsWeeklyAdminPasswordInputAll');
+            allStudentsWeeklyPasswordErrorMessageAll = document.getElementById('allStudentsWeeklyPasswordErrorMessageAll');
+            saveAllStudentsWeeklyScoresBtn = document.getElementById('saveAllStudentsWeeklyScoresBtn');
+            cancelAllStudentsWeeklyScoresBtn = document.getElementById('cancelAllStudentsWeeklyScoresBtn');
+
+            // Assign new admin clear history modal elements
+            adminClearHistoryModal = document.getElementById('adminClearHistoryModal');
+            closeAdminClearHistoryModalBtn = document.getElementById('closeAdminClearHistoryModalBtn');
+            confirmClearHistoryBtn = document.getElementById('confirmClearHistoryBtn');
+            cancelClearHistoryBtn = document.getElementById('cancelClearHistoryBtn');
+
+            // Assign new settings admin password modal elements
+            settingsAdminPasswordModal = document.getElementById('settingsAdminPasswordModal');
+            closeSettingsAdminPasswordModalBtn = document.getElementById('closeSettingsAdminPasswordModalBtn');
+            settingsAdminPasswordInput = document.getElementById('settingsAdminPasswordInput');
+            settingsAdminPasswordErrorMessage = document.getElementById('settingsAdminPasswordErrorMessage');
+            confirmSettingsAdminPasswordBtn = document.getElementById('confirmSettingsAdminPasswordBtn');
+            cancelSettingsAdminPasswordBtn = document.getElementById('cancelSettingsAdminPasswordBtn');
+
+            // Assign new navigation button elements
+            navHomeBtn = document.getElementById('navHomeBtn');
+            navClassBtn = document.getElementById('navClassBtn');
+            homePlaceholderContainer = document.getElementById('homePlaceholderContainer'); // Assign home placeholder container
+
+
+            // Initial data population for student details if collection is empty
+            // This is crucial to ensure studentsCollection has data before rendering.
+            await (async () => {
+                try {
+                    const snapshot = await studentsCollection.limit(1).get();
+                    if (snapshot.empty) {
+                        console.log("students3_1 collection is empty. Populating with initial data.");
+                        // Use the globally defined initialStudents array
+                        for (const student of initialStudents) {
+                            const studentDataToSave = { ...student, studentNumber: student.studentNumber !== undefined ? student.studentNumber : (initialStudents.indexOf(student) + 1) };
+                            await studentsCollection.doc(student.id).set(studentDataToSave);
+                        }
+                        console.log("Initial student details populated to Firebase.");
+                    } else {
+                        console.log("students3_1 collection already has data. Skipping initial population.");
+                    }
+                } catch (e) {
+                    console.error("Error checking/populating initial student details:", e);
+                }
+            })();
+
+            await loadStudentsFromFirebase(); // Load student details from Firebase (into studentsData array and studentInfoMap)
+            
+            // --- Initial State: Hide all content and toggle buttons when page loads ---
+            hideAllAppContent();
+            showClassPageContent(); // Show class-related content by default on load
+
+            // --- Event Listeners for Main Navigation Buttons ---
+            navHomeBtn.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent default link behavior
+                showHomePageContent(); // Show home content
+            });
+
+            navClassBtn.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent default link behavior
+                showClassPageContent(); // Show class-related content
+            });
+
+            // Set up main modal event listeners
+            closeButton.addEventListener('click', closeStudentDetailModal);
+            modalOverlay.addEventListener('click', (event) => {
+                if (event.target === modalOverlay) {
+                    closeStudentDetailModal();
+                }
+            });
+
+            // Event listeners for student info editing
+            editStudentInfoBtn.addEventListener('click', () => toggleEditMode(true));
+            saveStudentInfoBtn.addEventListener('click', saveStudentInfo);
+            cancelStudentInfoBtn.addEventListener('click', () => {
+                toggleEditMode(false); // Switch back to view mode
+                adminPasswordInput.value = ''; // Clear password
+                passwordErrorMessage.textContent = ''; // Clear error message
+            });
+
+            // Monthly Selection Modal Event Listeners (for individual student scores)
+            closeMonthlySelectionModalBtn.addEventListener('click', closeMonthlySelectionModal);
+            monthlySelectionModal.addEventListener('click', (event) => {
+                if (event.target === monthlySelectionModal) {
+                    closeMonthlySelectionModal();
+                }
+            });
+            cancelMonthlySelectionBtn.addEventListener('click', closeMonthlySelectionModal);
+
+
+            // Weekly Scores Modal Event Listeners (for individual student scores)
+            closeWeeklyScoresModalBtn.addEventListener('click', () => {
+                weeklyScoresModal.style.display = 'none';
+                weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
+            });
+            weeklyScoresModal.addEventListener('click', (event) => {
+                if (event.target === weeklyScoresModal) {
+                    weeklyScoresModal.style.display = 'none';
+                    weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
+                }
+            });
+            saveWeeklyScoresBtn.addEventListener('click', saveWeeklyScores);
+            cancelWeeklyScoresBtn.addEventListener('click', () => {
+                weeklyScoresModal.style.display = 'none';
+                weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
+            });
+
+
+            // --- All Students Scores Month Selection Modal Event Listeners ---
+            showStudentScoresBtnAll.addEventListener('click', () => {
+                hideAllAppContent(); // Hide everything first
+                showStudentScoresBtnAll.classList.add('active');
+                openAllStudentsMonthSelectionModal(); // This function will display its modal
+            });
+
+            closeAllStudentsMonthSelectionModalBtn.addEventListener('click', () => {
+                closeAllStudentsMonthSelectionModal();
+                showClassPageContent(); // Revert to default class page view
+            });
+            allStudentsMonthSelectionModal.addEventListener('click', (event) => {
+                if (event.target === allStudentsMonthSelectionModal) {
+                    closeAllStudentsMonthSelectionModal();
+                    showClassPageContent(); // Revert to default class page view
+                }
+            });
+            cancelAllStudentsMonthSelectionBtn.addEventListener('click', () => {
+                closeAllStudentsMonthSelectionModal();
+                showClassPageContent(); // Revert to default class page view
+            });
+
+            // Event listeners for the main all students weekly scores table
+            saveAllStudentsWeeklyScoresBtn.addEventListener('click', saveAllStudentsWeeklyScores);
+            cancelAllStudentsWeeklyScoresBtn.addEventListener('click', () => {
+                allStudentsWeeklyScoresMainContainer.style.display = 'none';
+                showClassPageContent(); // Revert to default class page view
+            });
+
+
+            // --- New: Event Listener for Student Fee Summary Button ---
+            showStudentFeeSummaryBtn.addEventListener('click', async () => {
+                hideAllAppContent(); // Hide everything first
+                showStudentFeeSummaryBtn.classList.add('active');
+                await renderStudentFeeSummary(); // This function will display its table
+            });
+
+            // --- New: Event Listener for Save History Button ---
+            ScoresHistoryBtn.addEventListener('click', async () => {
+                hideAllAppContent(); // Hide everything first
+                ScoresHistoryBtn.classList.add('active');
+                await renderSaveHistory(); // This function will display its table
+            });
+
+            // --- New: Event Listener for Settings Button ---
+            SettingBtn.addEventListener('click', async () => {
+                hideAllAppContent(); // Hide everything first
+                // The settings modal handles its own display logic after password verification
+                openSettingsAdminPasswordModal();
+            });
+
+            // --- New: Event Listeners for Clear History Button and Modal ---
+            clearHistoryBtn.addEventListener('click', openAdminClearHistoryModal);
+            closeAdminClearHistoryModalBtn.addEventListener('click', closeAdminClearHistoryModal);
+            adminClearHistoryModal.addEventListener('click', (event) => {
+                if (event.target === adminClearHistoryModal) {
+                    closeAdminClearHistoryModal();
+                }
+            });
+            confirmClearHistoryBtn.addEventListener('click', clearSaveHistoryFromFirebase);
+            cancelClearHistoryBtn.addEventListener('click', closeAdminClearHistoryModal);
+
+            // --- New: Event Listeners for History Limit Settings ---
+            autoDeleteToggle.addEventListener('change', async () => {
+                const currentSettings = (await appSettingsDocRef.get()).data() || {};
+                const updatedSettings = { ...currentSettings, autoDeleteEnabled: autoDeleteToggle.checked };
+                await saveAppSettings(updatedSettings);
+                await checkAndTrimHistory(); // Run trim immediately if auto-delete is enabled
+            });
+            editHistoryLimitBtn.addEventListener('click', () => toggleHistoryLimitEditMode(true));
+            saveHistoryLimitBtn.addEventListener('click', handleSaveHistoryLimit);
+            cancelHistoryLimitBtn.addEventListener('click', () => toggleHistoryLimitEditMode(false));
+
+            // --- New: Event Listeners for Settings Admin Password Modal ---
+            closeSettingsAdminPasswordModalBtn.addEventListener('click', closeSettingsAdminPasswordModal);
+            settingsAdminPasswordModal.addEventListener('click', (event) => {
+                if (event.target === settingsAdminPasswordModal) {
+                    closeSettingsAdminPasswordModal();
+                }
+            });
+            confirmSettingsAdminPasswordBtn.addEventListener('click', handleSettingsAdminPasswordConfirm);
+            cancelSettingsAdminPasswordBtn.addEventListener('click', closeSettingsAdminPasswordModal);
+
+
+            // Toggle between student list and student scores tables
+            showStudentListBtn.addEventListener('click', () => {
+                hideAllAppContent(); // Hide everything first
+                studentListTableContainer.style.display = 'block';
+                showStudentListBtn.classList.add('active');
+                renderStudentList(); // Re-render to ensure fresh data/event listeners
+            });
+
+            showStudentScoresBtn.addEventListener('click', async () => {
+                hideAllAppContent(); // Hide everything first
+                scoreTableContainer.style.display = 'block';
+                showStudentScoresBtn.classList.add('active');
+                await renderStudentScores(); // Render scores table when clicked
+            });
+        });
+    </script>
+</body>
+
+</html>
