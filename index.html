@@ -22,8 +22,8 @@
         }
 
         header {
-            background-image: url('https://scontent.fkkc4-2.fna.fbcdn.net/v/t1.15752-9/508131474_1025581716446927_9075685662320565972_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=0024fc&_nc_ohc=6FXIhjyjdh0Q7kNvwGOBoCw&_nc_oc=Adn6t6vcnN8GtoPiXpXB-xaZew85BiHeRcw6iVvO7XsjBdop8vnkIWrZfYg7uF2LE7ZGM2f6SDMF77V2NY2tXtil&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fkkc4-2.fna&oh=03_Q7cD2wF5C-h6aqnDUvnfW0wBxNshDWZDarffKwY0nJtx-ykI_g&oe=68905528');
-            /* เปลี่ยนพื้นหลังเป็นรูปภาพ */
+            background-image: url('image/Kci.jpg');
+            /* เปลี่ยนพื้นหลังเป็นรูปภาพใหม่ */
             background-size: cover;
             /* ให้รูปภาพคลุมพื้นที่ทั้งหมด */
             background-position: center;
@@ -43,6 +43,11 @@
             margin: 0;
             font-size: 2.5em;
             margin-bottom: 10px;
+            color: black; /* เปลี่ยนสีข้อความ h1 เป็นสีดำ */
+        }
+
+        header h2 {
+            color: black; /* เปลี่ยนสีข้อความ h2 เป็นสีดำ */
         }
 
         /* สไตล์สำหรับแถบนำทาง (Navigation Bar) */
@@ -61,7 +66,7 @@
         }
 
         nav ul li a {
-            color: #ecf0f1;
+            color: black; /* เปลี่ยนสีข้อความลิงก์เป็นสีดำ */
             text-decoration: none;
             font-weight: bold;
             font-size: 1.1em;
@@ -669,7 +674,7 @@
         .month-button {
             background-color: #007bff;
             color: white;
-            padding: 15px 20px;
+            padding: 5px 20px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -1228,7 +1233,7 @@
 
             <div class="score-modal-actions">
                 <button class="save-btn" id="saveWeeklyScoresBtn">บันทึกค่าห้องรายสัปดาห์</button>
-                <button class="cancel-btn" id="cancelWeeklyScoresBtn">ยกเลิก</button>
+                <button class="cancel-btn" id="cancelWeeklyScoresBtn">ยกเลG</button>
             </div>
         </div>
     </div>
@@ -1868,7 +1873,7 @@
                     detailsChanged = true; // ID change is also a change in details
                 }
                 
-                // Only save and log if there were actual changes
+                // Only save if there were actual changes
                 if (detailsChanged) {
                     await studentsCollection.doc(newStudentId).set(updatedStudentDetails);
                     console.log(`Student details for ${newStudentId} saved/updated in Firebase.`);
@@ -1889,9 +1894,9 @@
                         passwordErrorMessage.style.color = "red";
                     }, 2000);
 
-                    // Log the save action
-                    await logSaveAction(newStudentId, `${updatedStudentDetails.prefix} ${updatedStudentDetails.name}`, "แก้ไขข้อมูลนักเรียน", null, null, updatedStudentDetails.studentNumber); // Pass studentNumber
-                    await checkAndTrimHistory(); // Check and trim history after save
+                    // Removed logSaveAction for student info edits as per user request
+                    // await logSaveAction(newStudentId, `${updatedStudentDetails.prefix} ${updatedStudentDetails.name}`, "แก้ไขข้อมูลนักเรียน", null, null, updatedStudentDetails.studentNumber); // Pass studentNumber
+                    // await checkAndTrimHistory(); // Check and trim history after save
                 } else {
                     passwordErrorMessage.textContent = "ไม่มีการเปลี่ยนแปลงข้อมูลนักเรียน";
                     passwordErrorMessage.style.color = "orange";
@@ -2131,18 +2136,20 @@
             
             allStudentsMonthTableBody.innerHTML = ''; // Clear existing month rows
             months.forEach(month => {
-                const monthItem = document.createElement('div');
-                monthItem.classList.add('month-button-item');
+                const row = allStudentsMonthTableBody.insertRow(); // Create a new table row
+                const monthCell = row.insertCell(); // Cell for the month name
+                monthCell.textContent = month;
+
+                const actionCell = row.insertCell(); // Cell for the button
                 const button = document.createElement('button');
                 button.classList.add('month-button');
-                button.textContent = month;
+                button.textContent = 'ดูข้อมูล'; // Changed button text to be more generic
                 button.dataset.month = month;
                 button.onclick = () => {
                     closeAllStudentsMonthSelectionModal(); // Close month selection modal
-                    displayAllStudentsWeeklyScoresInMain(event.target.dataset.month); // Show weekly scores in main table
+                    displayAllStudentsWeeklyScoresInMain(button.dataset.month); // Show weekly scores in main table
                 };
-                monthItem.appendChild(button);
-                monthButtonsGrid.appendChild(monthItem);
+                actionCell.appendChild(button);
             });
 
             // Clear password and error messages
@@ -2676,9 +2683,8 @@
                 });
                 await batch.commit();
                 closeAdminClearHistoryModal();
-                // Instead of rendering history, switch back to the student list view
-                showClassPageContent(); // Revert to default class page view
-                await renderSaveHistory(); // Update history count in settings after clearing
+                // After clearing history, navigate to the student list page
+                showClassPageContent(); // Navigate to student list after clearing history
             } catch (error) {
                 console.error("Error clearing save history:", error);
             }
@@ -3130,7 +3136,7 @@
             confirmSettingsAdminPasswordBtn = document.getElementById('confirmSettingsAdminPasswordBtn');
             cancelSettingsAdminPasswordBtn = document.getElementById('cancelSettingsAdminPasswordBtn');
 
-            // Assign new navigation button elements
+            // New DOM elements for navigation links
             navHomeBtn = document.getElementById('navHomeBtn');
             navClassBtn = document.getElementById('navClassBtn');
             homePlaceholderContainer = document.getElementById('homePlaceholderContainer');
@@ -3329,14 +3335,21 @@
             cancelHistoryLimitBtn.addEventListener('click', () => toggleHistoryLimitEditMode(false));
 
             // --- New: Event Listeners for Settings Admin Password Modal ---
-            closeSettingsAdminPasswordModalBtn.addEventListener('click', closeSettingsAdminPasswordModal);
+            closeSettingsAdminPasswordModalBtn.addEventListener('click', () => {
+                closeSettingsAdminPasswordModal();
+                showClassPageContent(); // กลับไปที่รายชื่อนักเรียน
+            });
             settingsAdminPasswordModal.addEventListener('click', (event) => {
                 if (event.target === settingsAdminPasswordModal) {
                     closeSettingsAdminPasswordModal();
+                    showClassPageContent(); // กลับไปที่รายชื่อนักเรียน
                 }
             });
             confirmSettingsAdminPasswordBtn.addEventListener('click', handleSettingsAdminPasswordConfirm);
-            cancelSettingsAdminPasswordBtn.addEventListener('click', closeSettingsAdminPasswordModal);
+            cancelSettingsAdminPasswordBtn.addEventListener('click', () => {
+                closeSettingsAdminPasswordModal();
+                showClassPageContent(); // กลับไปที่รายชื่อนักเรียน
+            });
 
 
             // Toggle between student list and student scores tables
