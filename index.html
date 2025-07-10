@@ -987,6 +987,201 @@
             background-color: #5a6268;
         }
 
+        /* Styles for Contact Admin Form */
+        /* Updated styles for contact form to use Tailwind-like classes for consistency */
+        #contactAdminForm {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* Equivalent to space-y-4 in Tailwind */
+            width: 100%;
+            max-width: 500px; /* Limit width of the form */
+            margin: 1.25rem auto 0; /* Equivalent to mt-4 and auto margins for centering */
+        }
+
+        #contactAdminForm label {
+            display: block;
+            color: #374151; /* text-gray-700 */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            margin-bottom: 0.25rem; /* mb-1 */
+        }
+
+        #contactAdminForm input[type="text"],
+        #contactAdminForm textarea,
+        #contactAdminForm input[type="number"] { /* Added for CAPTCHA input */
+            width: 100%;
+            padding: 0.5rem 1rem; /* px-4 py-2 */
+            border: 1px solid #d1d5db; /* border border-gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-size: 1rem;
+            box-sizing: border-box; /* Include padding in width */
+            transition: all 0.2s ease-in-out; /* transition duration-200 */
+        }
+
+        #contactAdminForm input[type="text"]:focus,
+        #contactAdminForm textarea:focus,
+        #contactAdminForm input[type="number"]:focus { /* Added for CAPTCHA input */
+            outline: none;
+            border-color: #3b82f6; /* focus:ring-blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-500 */
+        }
+
+        #contactAdminForm textarea {
+            resize: vertical; /* Allow vertical resizing */
+            min-height: 100px;
+        }
+
+        #contactAdminForm button {
+            width: 100%; /* w-full */
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+            padding: 0.75rem 1rem; /* py-3 rounded-lg */
+            border: none;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* transition duration-300 ease-in-out shadow-md hover:shadow-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+
+        #contactAdminForm button:hover {
+            background-color: #1d4ed8; /* hover:bg-blue-700 */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-lg */
+        }
+        
+        #contactStatus { /* New style for status message */
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        /* CAPTCHA specific styles */
+        .captcha-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+            border-radius: 0.5rem; /* rounded-lg */
+            background-color: #f9fafb; /* bg-gray-50 */
+            margin-top: 1rem;
+        }
+
+        .captcha-question {
+            font-weight: bold;
+            color: #374151;
+            font-size: 1.1em;
+        }
+
+        .captcha-input {
+            width: 100px;
+            text-align: center;
+        }
+
+        /* Styles for setMonthlyFeesModal */
+        #setMonthlyFeesModal .modal-content {
+            max-width: 900px;
+            width: 95%;
+        }
+        #setMonthlyFeesModal h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .monthly-fees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-height: 60vh; /* Make it scrollable if too many months */
+            overflow-y: auto;
+            padding-right: 10px; /* Space for scrollbar */
+        }
+        .month-fee-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #fefefe;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .month-fee-item h4 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.1em;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .month-fee-item label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 0.9em;
+        }
+        .month-fee-item input[type="number"] {
+            width: calc(100% - 16px);
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .weekly-fees-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+            border-top: 1px dashed #eee;
+            padding-top: 10px;
+        }
+        .weekly-fees-inputs div {
+            display: flex;
+            flex-direction: column;
+        }
+        .weekly-fees-inputs label {
+            font-weight: normal; /* Less bold than monthly */
+            font-size: 0.85em;
+            text-align: center;
+        }
+        .weekly-fees-inputs input {
+            text-align: center;
+        }
+        #setMonthlyFeesModal .modal-actions {
+            margin-top: 25px;
+        }
+        #setMonthlyFeesModal .modal-actions button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 10px;
+            transition: background-color 0.3s ease;
+        }
+        #setMonthlyFeesModal .modal-actions .save-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        #setMonthlyFeesModal .modal-actions .save-btn:hover {
+            background-color: #218838;
+        }
+        #setMonthlyFeesModal .modal-actions .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        #setMonthlyFeesModal .modal-actions .cancel-btn:hover {
+            background-color: #5a6268;
+        }
+        .payment-status-yellow {
+            color: #ffc107; /* Yellow color for partial payment */
+            font-weight: bold;
+        }
+        .payment-status-red {
+            color: #dc3545; /* Red color for no payment */
+            font-weight: bold;
+        }
+
     </style>
 </head>
 
@@ -999,8 +1194,8 @@
             <ul>
                 <li><a href="#" id="navHomeBtn">หน้าหลัก</a></li>
                 <li><a href="#" id="navClassBtn">เก็บค่าห้อง</a></li>
-                <li><a href="#about">เกี่ยวกับห้องเรียน</a></li>
-                <li><a href="#contact">ติดต่อแอดมิน</a></li>
+                <li><a href="#" id="navContactBtn">ติดต่อแอดมิน</a></li>
+                <li><a href="#" id="navSettingBtn">ตั้งค่า</a></li>
             </ul>
         </nav>
     </header>
@@ -1017,7 +1212,6 @@
         <button id="showStudentScoresBtnAll" class="toggle-btn">ค่าห้องของนักเรียนทั้งหมด</button>
         <button id="showStudentFeeSummaryBtn" class="toggle-btn">สรุปค่าห้องของนักเรียน</button>
         <button id="ScoresHistoryBtn" class="toggle-btn">ประวัติการบันทึก</button>
-        <button id="SettingBtn" class="toggle-btn">ตั้งค่า</button>
     </div>
 
     <div id="studentListTableContainer" class="table-container">
@@ -1126,6 +1320,7 @@
             </div>
         </div>
 
+        <button id="setMonthlyFeesBtn" class="settings-button" style="background-color: #007bff; max-width: 350px;">ตั้งค่าค่าห้องรายเดือน</button>
         <button id="clearHistoryBtn" class="settings-button">ล้างประวัติการบันทึกทั้งหมด</button>
     </div>
 
@@ -1414,7 +1609,30 @@
         </div>
     </div>
 
+    <!-- New: Set Monthly Fees Modal -->
+    <div id="setMonthlyFeesModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeSetMonthlyFeesModalBtn">&times;</span>
+            <h3>ตั้งค่าค่าห้องรายเดือนและรายสัปดาห์</h3>
+            <div class="monthly-fees-grid" id="monthlyFeesGrid">
+                <!-- Monthly fee inputs will be dynamically generated here -->
+            </div>
+            <div class="score-modal-actions">
+                <button class="save-btn" id="saveMonthlyFeesBtn">บันทึก</button>
+                <button class="cancel-btn" id="cancelSetMonthlyFeesBtn">ยกเลิก</button>
+            </div>
+            <!-- Removed password verification section as per user request -->
+            <!-- <div class="password-verification" id="monthlyFeesAdminPasswordSection">
+                <label for="monthlyFeesAdminPasswordInput" style="font-weight: bold; color: #333;">รหัสผ่านแอดมิน:</label>
+                <input type="password" id="monthlyFeesAdminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก">
+                <p id="monthlyFeesPasswordErrorMessage" style="color: red; text-align: center; margin-top: 10px;"></p>
+            </div> -->
+        </div>
+    </div>
 
+
+    <!-- EmailJS CDN - Moved here for global access -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script type="module">
@@ -1460,6 +1678,7 @@
         const saveHistoryCollection = db.collection('saveHistory'); // New: Collection for save history
         const appSettingsCollection = db.collection('settings'); // New: Collection for app settings
         const appSettingsDocRef = appSettingsCollection.doc('appSettings'); // Single document for app settings
+        const paymentRequirementsDocRef = appSettingsCollection.doc('paymentRequirements'); // New: Document for payment requirements
 
         // Admin password (for demonstration, use Firebase Security Rules in production)
         const ADMIN_PASSWORD = "301";
@@ -1467,6 +1686,12 @@
         let currentStudentId = null; // Store the ID of the student whose details or scores are currently open
         let currentAllStudentsWeeklyScoresMonth = null; // Store the currently selected month for all students' scores
         let currentStudentToDelete = null; // New: Store student ID for deletion confirmation
+
+        // CAPTCHA variables
+        let captchaAnswer = 0;
+
+        // Payment Requirements
+        let currentPaymentRequirements = {}; // Stores the fetched payment requirements
 
         // DOM Elements (Declared here, will be assigned inside DOMContentLoaded)
         let studentListTableBody;
@@ -1509,7 +1734,7 @@
         let showStudentScoresBtnAll;
         let showStudentFeeSummaryBtn;
         let ScoresHistoryBtn;
-        let SettingBtn;
+        let SettingBtn; // Now refers to navSettingBtn
         let studentListTableContainer;
         let scoreTableContainer;
         let studentFeeSummaryTableContainer;
@@ -1521,6 +1746,7 @@
         let saveHistoryTableBody;
         let settingsContainer;
         let clearHistoryBtn;
+        let setMonthlyFeesBtn; // New: Button to open monthly fees modal
 
         // New DOM elements for settings
         let historyCountDisplay;
@@ -1581,6 +1807,9 @@
         // New DOM elements for navigation links
         let navHomeBtn;
         let navClassBtn;
+        let navContactBtn;
+        let navSettingBtn;
+
         let homePlaceholderContainer;
 
         // New: Student Add/Delete buttons
@@ -1627,6 +1856,17 @@
 
         // Map to store student names and numbers for quick lookup in history table
         const studentInfoMap = new Map();
+
+        // New: Monthly Fees Modal elements
+        let setMonthlyFeesModal;
+        let closeSetMonthlyFeesModalBtn;
+        let monthlyFeesGrid;
+        let saveMonthlyFeesBtn;
+        let cancelSetMonthlyFeesBtn;
+        // Removed password verification section as per user request
+        // let monthlyFeesAdminPasswordSection;
+        // let monthlyFeesAdminPasswordInput;
+        // let monthlyFeesPasswordErrorMessage;
 
 
         async function loadStudentsFromFirebase() {
@@ -2129,6 +2369,7 @@
             saveHistoryTableContainer.style.display = 'none'; // Hide save history table
             settingsContainer.style.display = 'none'; // Hide settings container
             homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+            studentActions.style.display = 'none'; // Hide student actions buttons
             
             // Show the all students month selection modal
             allStudentsMonthSelectionModal.style.display = 'flex';
@@ -2175,6 +2416,7 @@
             saveHistoryTableContainer.style.display = 'none'; // Hide save history table
             settingsContainer.style.display = 'none'; // Hide settings container
             homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+            studentActions.style.display = 'none'; // Hide student actions buttons
             allStudentsWeeklyScoresMainContainer.style.display = 'block';
 
             allStudentsWeeklyScoresTableBody.innerHTML = ''; // Clear existing rows
@@ -2356,6 +2598,7 @@
             saveHistoryTableContainer.style.display = 'none'; // Hide save history table
             settingsContainer.style.display = 'none'; // Hide settings container
             homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+            studentActions.style.display = 'none'; // Hide student actions buttons
             
             // Show the summary table
             studentFeeSummaryTableContainer.style.display = 'block';
@@ -2401,6 +2644,9 @@
                 allStudentsMonthlyScores[studentId][monthName] = doc.data();
             });
 
+            // Load payment requirements
+            await loadPaymentRequirements(); // Ensure currentPaymentRequirements is up-to-date
+
             let grandTotalForAllStudents = 0; // Initialize grand total
 
             for (const student of allStudents) {
@@ -2424,6 +2670,16 @@
 
                     const monthCell = document.createElement('td');
                     monthCell.textContent = monthlyTotal;
+
+                    // Apply conditional styling based on payment status
+                    const requiredMonthlyFee = (currentPaymentRequirements[month] && currentPaymentRequirements[month].monthlyFee) || 0;
+                    if (requiredMonthlyFee > 0) { // Only apply styling if a fee is set for the month
+                        if (monthlyTotal === 0) {
+                            monthCell.classList.add('payment-status-red'); // Not paid at all
+                        } else if (monthlyTotal < requiredMonthlyFee) {
+                            monthCell.classList.add('payment-status-yellow'); // Partially paid
+                        }
+                    }
                     row.appendChild(monthCell);
                 }
                 const overallTotalCell = document.createElement('td');
@@ -2487,6 +2743,7 @@
             studentFeeSummaryTableContainer.style.display = 'none';
             settingsContainer.style.display = 'none'; // Hide settings container
             homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
+            studentActions.style.display = 'none'; // Hide student actions buttons
             
             // Show the save history table
             saveHistoryTableContainer.style.display = 'block';
@@ -2712,13 +2969,8 @@
             closeSettingsAdminPasswordModal();
 
             // Proceed to show settings page
-            SettingBtn.classList.add('active');
-            showStudentListBtn.classList.remove('active');
-            showStudentScoresBtn.classList.remove('active');
-            showStudentScoresBtnAll.classList.remove('active');
-            showStudentFeeSummaryBtn.classList.remove('active');
-            ScoresHistoryBtn.classList.remove('active');
-
+            // No longer setting active class on navSettingBtn here, as it's handled by showSettingsPageContent
+            
             // Hide all other main containers
             studentListTableContainer.style.display = 'none';
             scoreTableContainer.style.display = 'none';
@@ -2728,6 +2980,7 @@
             saveHistoryTableContainer.style.display = 'none'; 
             homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
             studentActions.style.display = 'none'; // Hide student actions buttons
+            document.querySelector('.toggle-buttons').style.display = 'none'; // Hide toggle buttons
 
             // Show settings container
             settingsContainer.style.display = 'flex';
@@ -2973,50 +3226,376 @@
             adminClearHistoryModal.style.display = 'none';
             settingsAdminPasswordModal.style.display = 'none';
             homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
-            // studentActions.style.display = 'none'; // This is now handled by the parent container's display
             addStudentModal.style.display = 'none'; // Hide add student modal
             deleteStudentSelectionModal.style.display = 'none'; // Hide delete student selection modal
             confirmDeleteStudentModal.style.display = 'none'; // Hide confirm delete student modal
+            setMonthlyFeesModal.style.display = 'none'; // Hide monthly fees modal
+            // Remove any dynamically added contact container if it exists
+            const existingContactContainer = document.getElementById('contactContainer');
+            if (existingContactContainer) {
+                existingContactContainer.remove();
+            }
+
 
             // Remove active class from all toggle buttons
             document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            // Remove active class from all nav links
+            document.querySelectorAll('nav ul li a').forEach(link => link.classList.remove('active'));
+            
+            studentActions.style.display = 'none'; // Hide student actions buttons
         }
 
         // --- Helper function to show the default "หน้าหลัก" content ---
         async function showHomePageContent() {
             hideAllAppContent(); // Hide everything else
+            navHomeBtn.classList.add('active'); // Set active class for home button
             homePlaceholderContainer.style.display = 'flex'; // Show home placeholder
-            // Ensure toggle buttons are hidden when on home page
-            document.querySelector('.toggle-buttons').style.display = 'none'; 
+            document.querySelector('.toggle-buttons').style.display = 'none'; // Hide toggle buttons
         }
 
         // --- Helper function to show the default "เก็บค่าห้อง" content ---
         function showClassPageContent() {
+            hideAllAppContent(); // Hide everything else
+            navClassBtn.classList.add('active'); // Set active class for class button
+            
             // Show the main toggle buttons container
             document.querySelector('.toggle-buttons').style.display = 'flex';
             
             // Set default view for "เก็บค่าห้อง" to student list
             studentListTableContainer.style.display = 'block';
-            scoreTableContainer.style.display = 'none';
-            studentFeeSummaryTableContainer.style.display = 'none';
-            saveHistoryTableContainer.style.display = 'none';
-            settingsContainer.style.display = 'none';
-            allStudentsWeeklyScoresMainContainer.style.display = 'none';
-            allStudentsMonthSelectionModal.style.display = 'none';
-            homePlaceholderContainer.style.display = 'none'; // Hide home placeholder
-
-            // Show student actions buttons when studentListTableContainer is visible
-            studentActions.style.display = 'flex';
+            studentActions.style.display = 'flex'; // Show student actions buttons
 
             // Set "รายชื่อของนักเรียน" button as active
             showStudentListBtn.classList.add('active');
-            showStudentScoresBtn.classList.remove('active');
-            showStudentScoresBtnAll.classList.remove('active');
-            showStudentFeeSummaryBtn.classList.remove('active');
-            ScoresHistoryBtn.classList.remove('active');
-            SettingBtn.classList.remove('active');
+            renderStudentList(); // Re-render to ensure fresh data/event listeners
+        }
 
-            renderStudentList(); // Render the default view
+        // --- Helper function to show the "ติดต่อแอดมิน" content ---
+        function showContactPageContent() {
+            hideAllAppContent();
+            navContactBtn.classList.add('active');
+            document.querySelector('.toggle-buttons').style.display = 'none'; // Hide toggle buttons
+            
+            // Create or get the contact container
+            let contactContainer = document.getElementById('contactContainer');
+            if (!contactContainer) {
+                contactContainer = document.createElement('div');
+                contactContainer.id = 'contactContainer';
+                // Apply Tailwind-like styles for consistency
+                contactContainer.className = 'bg-white p-8 rounded-xl shadow-lg w-full max-w-md table-container'; 
+                document.body.appendChild(contactContainer); // Append to body or a specific content area
+            }
+            contactContainer.style.display = 'flex';
+            contactContainer.style.flexDirection = 'column';
+            contactContainer.style.alignItems = 'center';
+
+            // Inject the HTML content from test.html's contact form
+            contactContainer.innerHTML = `
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">ส่งข้อความถึงเรา</h2>
+                <form id="contactAdminForm" class="space-y-4 w-full">
+                    <!-- Hidden input for recipient email -->
+                    <input type="hidden" name="to_email" value="piywatkhohonian@gmail.com">
+                    <div>
+                        <label for="contactSubject" class="block text-gray-700 text-sm font-medium mb-1">หัวข้อ:</label>
+                        <input type="text" id="contactSubject" name="subject" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                    </div>
+                    <div>
+                        <label for="contactMessage" class="block text-gray-700 text-sm font-medium mb-1">ข้อความ:</label>
+                        <textarea id="contactMessage" name="message" rows="5" required
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 resize-y"></textarea>
+                    </div>
+                    <div class="captcha-section">
+                        <label for="captchaInput" class="captcha-question" id="captchaQuestion"></label>
+                        <input type="number" id="captchaInput" class="captcha-input" placeholder="คำตอบ" required>
+                        <p id="captchaError" style="color: red; font-size: 0.9em;"></p>
+                    </div>
+                    <button type="submit" id="contactSubmitBtn" disabled
+                            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 ease-in-out shadow-md hover:shadow-lg opacity-50 cursor-not-allowed">
+                        ส่งข้อความ
+                    </button>
+                    <div id="contactStatus" class="text-center mt-4 font-medium"></div>
+                </form>
+            `;
+
+            // Initialize EmailJS and attach event listener for the form submission
+            // Ensure EmailJS is initialized only once
+            if (typeof emailjs !== 'undefined' && !emailjs._isInitialized) { 
+                emailjs.init('7gaavlGnJ9JjhLxb7'); // Public Key ของคุณจาก EmailJS.com
+            }
+
+            const contactAdminForm = document.getElementById('contactAdminForm');
+            const contactSubmitBtn = document.getElementById('contactSubmitBtn');
+            const captchaQuestion = document.getElementById('captchaQuestion');
+            const captchaInput = document.getElementById('captchaInput');
+            const captchaError = document.getElementById('captchaError');
+            let num1, num2;
+
+            function generateCaptcha() {
+                num1 = Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
+                num2 = Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
+                captchaAnswer = num1 + num2;
+                captchaQuestion.textContent = `คุณไม่ใช่บอทใช่ไหม? ${num1} + ${num2} = ?`;
+                captchaInput.value = ''; // Clear previous input
+                captchaError.textContent = ''; // Clear previous error
+                contactSubmitBtn.disabled = true; // Disable submit button
+                contactSubmitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                contactSubmitBtn.classList.remove('hover:bg-blue-700', 'hover:shadow-lg');
+            }
+
+            function validateCaptcha() {
+                const userAnswer = parseInt(captchaInput.value);
+                if (userAnswer === captchaAnswer) {
+                    captchaError.textContent = 'ยืนยันสำเร็จ!';
+                    captchaError.style.color = 'green';
+                    contactSubmitBtn.disabled = false; // Enable submit button
+                    contactSubmitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    contactSubmitBtn.classList.add('hover:bg-blue-700', 'hover:shadow-lg');
+                } else {
+                    captchaError.textContent = 'คำตอบไม่ถูกต้อง ลองอีกครั้ง';
+                    captchaError.style.color = 'red';
+                    contactSubmitBtn.disabled = true; // Keep submit button disabled
+                    contactSubmitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    contactSubmitBtn.classList.remove('hover:bg-blue-700', 'hover:shadow-lg');
+                }
+            }
+
+            // Generate CAPTCHA when the contact form is displayed
+            generateCaptcha();
+
+            // Add event listener for CAPTCHA input change
+            captchaInput.addEventListener('input', validateCaptcha);
+            // Optionally, re-generate CAPTCHA if input is cleared or on focus out after incorrect answer
+            captchaInput.addEventListener('blur', () => {
+                if (parseInt(captchaInput.value) !== captchaAnswer) {
+                    generateCaptcha();
+                }
+            });
+
+
+            if (contactAdminForm) {
+                contactAdminForm.addEventListener('submit', function(event) {
+                    event.preventDefault(); // ป้องกันการโหลดหน้าซ้ำเมื่อส่งฟอร์ม
+
+                    // Re-validate CAPTCHA just before submission
+                    validateCaptcha();
+                    if (contactSubmitBtn.disabled) { // If button is still disabled, CAPTCHA is not solved
+                        return; 
+                    }
+
+                    const statusDiv = document.getElementById('contactStatus');
+                    statusDiv.textContent = 'กำลังส่งข้อความ...';
+                    statusDiv.className = 'text-center mt-4 font-medium text-blue-600'; // เปลี่ยนสีสถานะเป็นสีน้ำเงินขณะส่ง
+
+                    // Service ID และ Template ID ของคุณจาก EmailJS.com
+                    const serviceID = 'service_93p3p1u'; 
+                    const templateID = 'template_lx9nl0c'; 
+
+                    // ส่งอีเมลโดยใช้ EmailJS
+                    emailjs.sendForm(serviceID, templateID, this)
+                        .then(function() {
+                            statusDiv.textContent = 'ส่งข้อความเรียบร้อยแล้ว!';
+                            statusDiv.className = 'text-center mt-4 font-medium text-green-600'; // เปลี่ยนสีสถานะเป็นสีเขียวเมื่อสำเร็จ
+                            contactAdminForm.reset(); // ล้างฟอร์มหลังจากส่งสำเร็จ
+                            generateCaptcha(); // Generate new CAPTCHA after successful submission
+                        }, function(error) {
+                            console.error('การส่งข้อความล้มเหลว:', error);
+                            statusDiv.textContent = 'การส่งข้อความล้มเหลว กรุณาลองใหม่อีกครั้ง';
+                            statusDiv.className = 'text-center mt-4 font-medium text-red-600'; // เปลี่ยนสีสถานะเป็นสีแดงเมื่อล้มเหลว
+                            generateCaptcha(); // Generate new CAPTCHA on failure
+                        });
+                });
+            }
+        }
+
+        // --- Helper function to show the "ตั้งค่า" content ---
+        async function showSettingsPageContent() {
+            hideAllAppContent();
+            navSettingBtn.classList.add('active');
+            document.querySelector('.toggle-buttons').style.display = 'none'; // Hide toggle buttons
+            // The settings modal handles its own display logic after password verification
+            openSettingsAdminPasswordModal();
+        }
+
+
+        // --- NEW: Payment Requirements Functions ---
+        async function loadPaymentRequirements() {
+            try {
+                const doc = await paymentRequirementsDocRef.get();
+                if (doc.exists) {
+                    currentPaymentRequirements = doc.data();
+                } else {
+                    // Set default payment requirements if document doesn't exist
+                    const defaultRequirements = {};
+                    months.forEach(month => {
+                        defaultRequirements[month] = {
+                            monthlyFee: 100, // Default monthly fee
+                            weeklyFees: {
+                                week1: 20, week2: 20, week3: 20, week4: 20, week5: 20
+                            }
+                        };
+                    });
+                    await paymentRequirementsDocRef.set(defaultRequirements);
+                    currentPaymentRequirements = defaultRequirements;
+                }
+                console.log("Payment requirements loaded:", currentPaymentRequirements);
+            } catch (error) {
+                console.error("Error loading payment requirements:", error);
+                currentPaymentRequirements = {}; // Fallback to empty on error
+            }
+        }
+
+        function openSetMonthlyFeesModal() {
+            setMonthlyFeesModal.style.display = 'flex';
+            monthlyFeesGrid.innerHTML = ''; // Clear existing inputs
+
+            // Populate inputs with current requirements
+            months.forEach(month => {
+                const monthData = currentPaymentRequirements[month] || { monthlyFee: 0, weeklyFees: {} };
+                const monthlyFee = monthData.monthlyFee || 0;
+                const weeklyFees = monthData.weeklyFees || {};
+
+                const monthItem = document.createElement('div');
+                monthItem.classList.add('month-fee-item');
+                monthItem.innerHTML = `
+                    <h4>${month}</h4>
+                    <div>
+                        <label for="monthlyFee-${month}">ค่าห้องต่อเดือน:</label>
+                        <input type="number" id="monthlyFee-${month}" min="0" value="${monthlyFee}" data-month="${month}" data-type="monthly">
+                    </div>
+                    <div class="weekly-fees-inputs">
+                        <div>
+                            <label for="weeklyFee-${month}-week1">สัปดาห์ที่ 1:</label>
+                            <input type="number" id="weeklyFee-${month}-week1" min="0" value="${weeklyFees.week1 || 0}" data-month="${month}" data-week="week1" data-type="weekly">
+                        </div>
+                        <div>
+                            <label for="weeklyFee-${month}-week2">สัปดาห์ที่ 2:</label>
+                            <input type="number" id="weeklyFee-${month}-week2" min="0" value="${weeklyFees.week2 || 0}" data-month="${month}" data-week="week2" data-type="weekly">
+                        </div>
+                        <div>
+                            <label for="weeklyFee-${month}-week3">สัปดาห์ที่ 3:</label>
+                            <input type="number" id="weeklyFee-${month}-week3" min="0" value="${weeklyFees.week3 || 0}" data-month="${month}" data-week="week3" data-type="weekly">
+                        </div>
+                        <div>
+                            <label for="weeklyFee-${month}-week4">สัปดาห์ที่ 4:</label>
+                            <input type="number" id="weeklyFee-${month}-week4" min="0" value="${weeklyFees.week4 || 0}" data-month="${month}" data-week="week4" data-type="weekly">
+                        </div>
+                        <div>
+                            <label for="weeklyFee-${month}-week5">สัปดาห์ที่ 5:</label>
+                            <input type="number" id="weeklyFee-${month}-week5" min="0" value="${weeklyFees.week5 || 0}" data-month="${month}" data-week="week5" data-type="weekly">
+                        </div>
+                    </div>
+                `;
+                monthlyFeesGrid.appendChild(monthItem);
+
+                // Add event listeners to weekly inputs to update monthly total
+                const weeklyInputs = monthItem.querySelectorAll('.weekly-fees-inputs input');
+                weeklyInputs.forEach(input => {
+                    input.addEventListener('input', (event) => {
+                        const currentMonth = event.target.dataset.month;
+                        let sumOfWeeks = 0;
+                        monthItem.querySelectorAll('.weekly-fees-inputs input').forEach(weeklyInput => {
+                            sumOfWeeks += parseInt(weeklyInput.value) || 0;
+                        });
+                        document.getElementById(`monthlyFee-${currentMonth}`).value = sumOfWeeks;
+                    });
+                });
+            });
+
+            // Calculate initial sum for monthlyFee inputs based on weekly inputs
+            monthlyFeesGrid.querySelectorAll('.month-fee-item').forEach(monthItem => {
+                const currentMonth = monthItem.querySelector('[data-type="monthly"]').dataset.month;
+                let sumOfWeeks = 0;
+                monthItem.querySelectorAll('.weekly-fees-inputs input').forEach(weeklyInput => {
+                    sumOfWeeks += parseInt(weeklyInput.value) || 0;
+                });
+                document.getElementById(`monthlyFee-${currentMonth}`).value = sumOfWeeks;
+            });
+
+            // Removed password verification section as per user request
+            // monthlyFeesAdminPasswordInput.value = ''; // Clear password
+            // monthlyFeesPasswordErrorMessage.textContent = ''; // Clear error message
+            // monthlyFeesAdminPasswordSection.style.display = 'flex'; // Show password section
+        }
+
+        function closeSetMonthlyFeesModal() {
+            setMonthlyFeesModal.style.display = 'none';
+            // Removed password verification section as per user request
+            // monthlyFeesAdminPasswordSection.style.display = 'none'; // Hide password section
+        }
+
+        async function saveMonthlyFees() {
+            // Removed password verification as per user request
+            // const password = monthlyFeesAdminPasswordInput.value;
+            // if (password !== ADMIN_PASSWORD) {
+            //     monthlyFeesPasswordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+            //     monthlyFeesPasswordErrorMessage.style.color = "red";
+            //     return;
+            // }
+            // monthlyFeesPasswordErrorMessage.textContent = ""; // Clear error message
+
+            const newPaymentRequirements = {};
+            let changesMade = false;
+
+            months.forEach(month => {
+                const monthlyFeeInput = document.getElementById(`monthlyFee-${month}`);
+                const newMonthlyFee = parseInt(monthlyFeeInput.value) || 0;
+
+                const newWeeklyFees = {};
+                for (let i = 1; i <= numWeeksInMonth; i++) {
+                    const weeklyFeeInput = document.getElementById(`weeklyFee-${month}-week${i}`);
+                    newWeeklyFees[`week${i}`] = parseInt(weeklyFeeInput.value) || 0;
+                }
+
+                const oldMonthlyFee = (currentPaymentRequirements[month] && currentPaymentRequirements[month].monthlyFee) || 0;
+                const oldWeeklyFees = (currentPaymentRequirements[month] && currentPaymentRequirements[month].weeklyFees) || {};
+
+                // Check for changes
+                if (newMonthlyFee !== oldMonthlyFee || JSON.stringify(newWeeklyFees) !== JSON.stringify(oldWeeklyFees)) {
+                    changesMade = true;
+                }
+
+                newPaymentRequirements[month] = {
+                    monthlyFee: newMonthlyFee,
+                    weeklyFees: newWeeklyFees
+                };
+            });
+
+            if (changesMade) {
+                try {
+                    await paymentRequirementsDocRef.set(newPaymentRequirements);
+                    currentPaymentRequirements = newPaymentRequirements; // Update local copy
+                    console.log("Monthly fees saved successfully.");
+                    // Removed password verification error message display as per user request
+                    // monthlyFeesPasswordErrorMessage.textContent = "บันทึกค่าห้องรายเดือนเรียบร้อยแล้ว!";
+                    // monthlyFeesPasswordErrorMessage.style.color = "green";
+                    
+                    // Re-render summary table to reflect changes immediately
+                    if (studentFeeSummaryTableContainer.style.display === 'block') {
+                        renderStudentFeeSummary();
+                    }
+
+                    setTimeout(() => {
+                        closeSetMonthlyFeesModal();
+                        // Removed password verification error message clear as per user request
+                        // monthlyFeesPasswordErrorMessage.textContent = '';
+                    }, 500); // Reduced timeout for faster close
+                } catch (error) {
+                    console.error("Error saving monthly fees:", error);
+                    // Removed password verification error message display as per user request
+                    // monthlyFeesPasswordErrorMessage.textContent = `เกิดข้อผิดพลาดในการบันทึก: ${error.message}`;
+                    // monthlyFeesPasswordErrorMessage.style.color = "red";
+                }
+            } else {
+                // Removed password verification error message display as per user request
+                // monthlyFeesPasswordErrorMessage.textContent = "ไม่มีการเปลี่ยนแปลงค่าห้อง";
+                // monthlyFeesPasswordErrorMessage.style.color = "orange";
+                setTimeout(() => {
+                    closeSetMonthlyFeesModal();
+                    // Removed password verification error message clear as per user request
+                    // monthlyFeesPasswordErrorMessage.textContent = '';
+                }, 500); // Reduced timeout for faster close
+            }
         }
 
 
@@ -3064,8 +3643,7 @@
             showStudentScoresBtnAll = document.getElementById('showStudentScoresBtnAll');
             showStudentFeeSummaryBtn = document.getElementById('showStudentFeeSummaryBtn');
             ScoresHistoryBtn = document.getElementById('ScoresHistoryBtn');
-            SettingBtn = document.getElementById('SettingBtn');
-
+            // SettingBtn is now navSettingBtn
             studentListTableContainer = document.getElementById('studentListTableContainer');
             scoreTableContainer = document.getElementById('scoreTableContainer');
             studentFeeSummaryTableContainer = document.getElementById('studentFeeSummaryTableContainer');
@@ -3077,6 +3655,7 @@
             saveHistoryTableBody = document.getElementById('saveHistoryTableBody');
             settingsContainer = document.getElementById('settingsContainer');
             clearHistoryBtn = document.getElementById('clearHistoryBtn');
+            setMonthlyFeesBtn = document.getElementById('setMonthlyFeesBtn'); // Assign the new button
 
             // Assign new settings DOM elements
             historyCountDisplay = document.getElementById('historyCountDisplay');
@@ -3139,6 +3718,9 @@
             // New DOM elements for navigation links
             navHomeBtn = document.getElementById('navHomeBtn');
             navClassBtn = document.getElementById('navClassBtn');
+            navContactBtn = document.getElementById('navContactBtn');
+            navSettingBtn = document.getElementById('navSettingBtn');
+
             homePlaceholderContainer = document.getElementById('homePlaceholderContainer');
 
             // New: Student Add/Delete buttons
@@ -3181,6 +3763,17 @@
             confirmDeleteStudentFinalBtn = document.getElementById('confirmDeleteStudentFinalBtn');
             cancelDeleteStudentFinalBtn = document.getElementById('cancelDeleteStudentFinalBtn');
 
+            // Assign new monthly fees modal elements
+            setMonthlyFeesModal = document.getElementById('setMonthlyFeesModal');
+            closeSetMonthlyFeesModalBtn = document.getElementById('closeSetMonthlyFeesModalBtn');
+            monthlyFeesGrid = document.getElementById('monthlyFeesGrid');
+            saveMonthlyFeesBtn = document.getElementById('saveMonthlyFeesBtn');
+            cancelSetMonthlyFeesBtn = document.getElementById('cancelSetMonthlyFeesBtn');
+            // Removed password verification section as per user request
+            // monthlyFeesAdminPasswordSection = document.getElementById('monthlyFeesAdminPasswordSection');
+            // monthlyFeesAdminPasswordInput = document.getElementById('monthlyFeesAdminPasswordInput');
+            // monthlyFeesPasswordErrorMessage = document.getElementById('monthlyFeesPasswordErrorMessage');
+
 
             // Initial data population for student details if collection is empty
             // This is crucial to ensure studentsCollection has data before rendering.
@@ -3200,6 +3793,7 @@
             })();
 
             await loadStudentsFromFirebase(); // Load student details from Firebase (into studentsData array and studentInfoMap)
+            await loadPaymentRequirements(); // Load payment requirements on app start
             
             // --- Initial State: Hide all content and toggle buttons when page loads ---
             hideAllAppContent();
@@ -3215,6 +3809,17 @@
                 event.preventDefault(); // Prevent default link behavior
                 showClassPageContent(); // Show class-related content
             });
+
+            navContactBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                showContactPageContent();
+            });
+
+            navSettingBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                showSettingsPageContent();
+            });
+
 
             // Set up main modal event listeners
             closeButton.addEventListener('click', closeStudentDetailModal);
@@ -3264,6 +3869,7 @@
             // --- All Students Scores Month Selection Modal Event Listeners ---
             showStudentScoresBtnAll.addEventListener('click', () => {
                 hideAllAppContent(); // Hide everything first
+                document.querySelector('.toggle-buttons').style.display = 'flex'; // Show toggle buttons
                 showStudentScoresBtnAll.classList.add('active');
                 openAllStudentsMonthSelectionModal(); // This function will display its modal
             });
@@ -3294,6 +3900,7 @@
             // --- New: Event Listener for Student Fee Summary Button ---
             showStudentFeeSummaryBtn.addEventListener('click', async () => {
                 hideAllAppContent(); // Hide everything first
+                document.querySelector('.toggle-buttons').style.display = 'flex'; // Show toggle buttons
                 showStudentFeeSummaryBtn.classList.add('active');
                 await renderStudentFeeSummary(); // This function will display its table
             });
@@ -3301,15 +3908,9 @@
             // --- New: Event Listener for Save History Button ---
             ScoresHistoryBtn.addEventListener('click', async () => {
                 hideAllAppContent(); // Hide everything first
+                document.querySelector('.toggle-buttons').style.display = 'flex'; // Show toggle buttons
                 ScoresHistoryBtn.classList.add('active');
                 await renderSaveHistory(); // This function will display its table
-            });
-
-            // --- New: Event Listener for Settings Button ---
-            SettingBtn.addEventListener('click', async () => {
-                hideAllAppContent(); // Hide everything first
-                // The settings modal handles its own display logic after password verification
-                openSettingsAdminPasswordModal();
             });
 
             // --- New: Event Listeners for Clear History Button and Modal ---
@@ -3337,32 +3938,36 @@
             // --- New: Event Listeners for Settings Admin Password Modal ---
             closeSettingsAdminPasswordModalBtn.addEventListener('click', () => {
                 closeSettingsAdminPasswordModal();
-                showClassPageContent(); // กลับไปที่รายชื่อนักเรียน
+                showHomePageContent(); // เปลี่ยนให้กลับไปหน้าหลัก
             });
             settingsAdminPasswordModal.addEventListener('click', (event) => {
                 if (event.target === settingsAdminPasswordModal) {
                     closeSettingsAdminPasswordModal();
-                    showClassPageContent(); // กลับไปที่รายชื่อนักเรียน
+                    showHomePageContent(); // เปลี่ยนให้กลับไปหน้าหลัก
                 }
             });
             confirmSettingsAdminPasswordBtn.addEventListener('click', handleSettingsAdminPasswordConfirm);
             cancelSettingsAdminPasswordBtn.addEventListener('click', () => {
                 closeSettingsAdminPasswordModal();
-                showClassPageContent(); // กลับไปที่รายชื่อนักเรียน
+                showHomePageContent(); // เปลี่ยนให้กลับไปหน้าหลัก
             });
 
 
             // Toggle between student list and student scores tables
             showStudentListBtn.addEventListener('click', () => {
                 hideAllAppContent(); // Hide everything first
+                document.querySelector('.toggle-buttons').style.display = 'flex'; // Show toggle buttons
                 studentListTableContainer.style.display = 'block';
+                studentActions.style.display = 'flex'; // Show student actions buttons
                 showStudentListBtn.classList.add('active');
                 renderStudentList(); // Re-render to ensure fresh data/event listeners
             });
 
             showStudentScoresBtn.addEventListener('click', async () => {
                 hideAllAppContent(); // Hide everything first
+                document.querySelector('.toggle-buttons').style.display = 'flex'; // Show toggle buttons
                 scoreTableContainer.style.display = 'block';
+                studentActions.style.display = 'none'; // Hide student actions buttons
                 showStudentScoresBtn.classList.add('active');
                 await renderStudentScores(); // Render scores table when clicked
             });
@@ -3399,6 +4004,17 @@
             });
             confirmDeleteStudentFinalBtn.addEventListener('click', deleteStudentConfirmed);
             cancelDeleteStudentFinalBtn.addEventListener('click', closeConfirmDeleteStudentModal);
+
+            // --- New: Set Monthly Fees Modal Event Listeners ---
+            setMonthlyFeesBtn.addEventListener('click', openSetMonthlyFeesModal);
+            closeSetMonthlyFeesModalBtn.addEventListener('click', closeSetMonthlyFeesModal);
+            setMonthlyFeesModal.addEventListener('click', (event) => {
+                if (event.target === setMonthlyFeesModal) {
+                    closeSetMonthlyFeesModal();
+                }
+            });
+            saveMonthlyFeesBtn.addEventListener('click', saveMonthlyFees);
+            cancelSetMonthlyFeesBtn.addEventListener('click', closeSetMonthlyFeesModal);
 
         });
     </script>
