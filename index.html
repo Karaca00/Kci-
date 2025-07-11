@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ห้องเรียน 3/1 - รายละเอียดและค่าห้องนักเรียน</title>
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ===== Loader Animation ===== -->
+    <div id="loader" class="loader-overlay">
+        <div class="loader-spinner"></div>
+        <p>กำลังโหลดข้อมูล...</p>
+    </div>
+
+    <header>
+        <h1>คำชะอีวิทยาคาร</h1>
+        <h2>M.3/1</h2>
+        <nav>
+            <ul>
+                <li><a href="#" id="navHomeBtn">หน้าหลัก</a></li>
+                <li><a href="#" id="navClassBtn">เก็บค่าห้อง</a></li>
+                <li><a href="#" id="navContactBtn">ติดต่อแอดมิน</a></li>
+                <li><a href="#" id="navSettingBtn">ตั้งค่า</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="app-container">
+        <!-- Home Page Content -->
+        <div id="homePlaceholderContainer" class="page-content">
+            <h2>ยินดีต้อนรับสู่ระบบจัดการข้อมูลนักเรียน</h2>
+            <p>คุณสามารถใช้เมนูด้านบนเพื่อเข้าถึงส่วนต่างๆ ของระบบ</p>
+        </div>
+
+        <!-- Class Page Content -->
+        <div id="classPageContainer" class="page-content">
+            <div class="toggle-buttons">
+                <button id="showStudentListBtn" class="toggle-btn">รายชื่อของนักเรียน</button>
+                <button id="showStudentScoresBtn" class="toggle-btn">ค่าห้องของนักเรียน</button>
+                <button id="showStudentScoresBtnAll" class="toggle-btn">ค่าห้องของนักเรียนทั้งหมด</button>
+                <button id="showStudentFeeSummaryBtn" class="toggle-btn">สรุปค่าห้องของนักเรียน</button>
+                <button id="showPunishmentSummaryBtn" class="toggle-btn">สรุปบทลงโทษ</button>
+                <button id="ScoresHistoryBtn" class="toggle-btn">ประวัติการบันทึก</button>
+            </div>
+
+            <div id="studentListTableContainer" class="table-container content-section">
+                <div class="table-header">
+                    <h2>รายชื่อนักเรียน ห้อง 3/1</h2>
+                    <div id="studentActions" class="student-actions">
+                        <button id="addStudentBtn" class="add-student-btn">เพิ่ม</button>
+                        <button id="deleteStudentBtn" class="delete-student-btn">ลบ</button>
+                    </div>
+                </div>
+                <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>คำนำหน้า</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>สถานะ</th>
+                                <th>รายละเอียด</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentListTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="scoreTableContainer" class="table-container content-section">
+                 <div class="table-header">
+                    <h2>ค่าห้องของนักเรียน ห้อง 3/1</h2>
+                 </div>
+                <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>ดูค่าห้องรายเดือน</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="studentFeeSummaryTableContainer" class="table-container content-section">
+                 <div class="table-header">
+                    <h2 id="feeSummaryTitle">สรุปค่าห้องของนักเรียน ห้อง 3/1 (ต่อเดือน)</h2>
+                 </div>
+                 <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr id="feeSummaryTableHeader">
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>ชื่อ - นามสกุล</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentFeeSummaryTableBody"></tbody>
+                        <tfoot id="feeSummaryTableFooter"></tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div id="saveHistoryTableContainer" class="table-container content-section">
+                 <div class="table-header">
+                    <h2>ประวัติการบันทึก</h2>
+                 </div>
+                <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>รายละเอียด</th>
+                                <th>จำนวนค่าห้องที่เปลี่ยนแปลง</th>
+                                <th>เวลาที่บันทึก</th>
+                            </tr>
+                        </thead>
+                        <tbody id="saveHistoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="punishmentSummarySection" class="content-section">
+                <div id="punishmentNav" class="punishment-nav">
+                    <button id="prevMonthPunishmentBtn">เดือนที่แล้ว</button>
+                    <span id="currentPunishmentMonthDisplay"></span>
+                    <button id="nextMonthPunishmentBtn">เดือนถัดไป</button>
+                </div>
+                <div id="punishmentSummaryTableContainer" class="table-container">
+                    <div class="table-header">
+                        <h2 id="punishmentSummaryTitle">สรุปบทลงโทษนักเรียน</h2>
+                    </div>
+                    <div class="table-scroll-wrapper">
+                        <table id="punishmentSummaryTable">
+                            <thead id="punishmentSummaryTableHeader"></thead>
+                            <tbody id="punishmentSummaryTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="allStudentsWeeklyScoresMainContainer" class="table-container content-section">
+                 <div class="table-header">
+                    <h4>ค่าห้องประจำสัปดาห์ของนักเรียนทุกคนประจำเดือน <span id="allStudentsWeeklyModalMonthName"></span></h4>
+                    <button id="addMultipleWeeklyFeesBtn" class="add-multiple-fees-btn">ตั้งค่าหลายคน</button>
+                 </div>
+                <div class="table-scroll-wrapper">
+                    <table id="allStudentsWeeklyScoresTable">
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>สัปดาห์ที่ 1</th>
+                                <th>สัปดาห์ที่ 2</th>
+                                <th>สัปดาห์ที่ 3</th>
+                                <th>สัปดาห์ที่ 4</th>
+                                <th>สัปดาห์ที่ 5</th>
+                                <th>รวม</th>
+                            </tr>
+                            <tr id="allStudentsWeeklyFeesHeader">
+                                <th colspan="3">ค่าห้องที่ต้องจ่ายต่อสัปดาห์:</th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week1"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week2"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week3"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week4"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week5"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-weekall"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="allStudentsWeeklyScoresTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="password-verification" id="allStudentsWeeklyAdminPasswordSectionAll">
+                    <label for="allStudentsWeeklyAdminPasswordInput">รหัสผ่านแอดมิน:</label>
+                    <input type="password" id="allStudentsWeeklyAdminPasswordInputAll" placeholder="กรอกรหัสผ่านเพื่อบันทึก">
+                    <p id="allStudentsWeeklyPasswordErrorMessageAll" class="error-message"></p>
+                </div>
+                <div class="score-modal-actions">
+                    <button class="save-btn" id="saveAllStudentsWeeklyScoresBtn">บันทึกค่าห้อง</button>
+                    <button class="cancel-btn" id="cancelAllStudentsWeeklyScoresBtn">ยกเลิก</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page Content -->
+        <div id="settingsContainer" class="page-content">
+            <h2>ตั้งค่า</h2>
+            <div id="historyCountDisplay" class="setting-item"></div>
+            <div class="setting-item">
+                <label for="autoDeleteToggle">เปิด/ปิด ลบประวัติอัตโนมัติ:</label>
+                <input type="checkbox" id="autoDeleteToggle" class="toggle-switch">
+            </div>
+            <div class="setting-item">
+                <label for="historyLimitInput">ขีดจำกัดประวัติ:</label>
+                <input type="number" id="historyLimitInput" min="1" value="100" readonly>
+                <button id="editHistoryLimitBtn" class="edit-btn">แก้ไข</button>
+            </div>
+            <div id="historyLimitEditActions" class="setting-item" style="display: none;">
+                <p id="historyLimitErrorMessage" class="error-message"></p>
+                <button id="saveHistoryLimitBtn" class="save-btn">บันทึกขีดจำกัด</button>
+                <button class="cancel-btn" id="cancelHistoryLimitBtn">ยกเลิก</button>
+            </div>
+            <button id="setMonthlyFeesBtn" class="settings-button">ตั้งค่าค่าห้องรายเดือน</button>
+            <button id="clearHistoryBtn" class="settings-button danger">ล้างประวัติการบันทึกทั้งหมด</button>
+        </div>
+
+        <!-- Contact Page Content -->
+        <div id="contactAdminContainer" class="page-content">
+            <h2>ติดต่อแอดมิน</h2>
+            <form id="contactAdminForm">
+                <div class="form-field-item">
+                    <label for="contactSubject">หัวข้อ:</label>
+                    <input type="text" id="contactSubject" name="subject" required>
+                </div>
+                <div class="form-field-item">
+                    <label for="contactMessage">ข้อความ:</label>
+                    <textarea id="contactMessage" name="message" rows="5" required></textarea>
+                </div>
+                <div class="captcha-section">
+                    <label for="captchaInput" class="captcha-question" id="captchaQuestion"></label>
+                    <input type="number" id="captchaInput" class="captcha-input" placeholder="คำตอบ" required>
+                    <p id="captchaError" class="error-message"></p>
+                </div>
+                <button type="submit" id="contactSubmitBtn" disabled>ส่งข้อความ</button>
+                <div id="contactStatus"></div>
+            </form>
+        </div>
+    </main>
+
+    <!-- ===== Modals ===== -->
+    <div id="studentDetailModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modalStudentName"></h3>
+            <div id="studentDetailsView" class="student-detail-display view-mode">
+                <p><strong>เลขที่:</strong> <span id="modalStudentNumber"></span></p>
+                <p><strong>รหัสนักเรียน:</strong> <span id="modalStudentId"></span></p>
+                <p><strong>คำนำหน้า:</strong> <span id="modalStudentPrefix"></span></p>
+                <p><strong>ชื่อ:</strong> <span id="modalStudentFirstName"></span></p>
+                <p><strong>นามสกุล:</strong> <span id="modalStudentLastName"></span></p>
+                <p><strong>ชั้นปี:</strong> <span id="modalStudentGrade"></span></p>
+                <p><strong>ห้องเรียน:</strong> <span id="modalStudentClass"></span></p>
+                <p><strong>สถานะ:</strong> <span id="modalStudentStatus"></span></p>
+                <p><strong>วันเกิด:</strong> <span id="modalStudentDob"></span></p>
+                <p><strong>เบอร์โทรศัพท์:</strong> <span id="modalStudentPhone"></span></p>
+            </div>
+            <div id="studentDetailsEdit" class="student-detail-edit edit-mode" style="display: none;">
+                <div class="edit-field-item"><label for="editStudentNumber">เลขที่:</label><input type="number" id="editStudentNumber" placeholder="เลขที่นักเรียน" min="1"></div>
+                <div class="edit-field-item"><label for="editStudentId">รหัสนักเรียน:</label><input type="text" id="editStudentId" placeholder="รหัสนักเรียน"></div>
+                <div class="edit-field-item"><label for="editPrefix">คำนำหน้า:</label><select id="editPrefix"><option value="เด็กชาย">เด็กชาย</option><option value="นาย">นาย</option><option value="เด็กหญิง">เด็กหญิง</option><option value="นางสาว">นางสาว</option></select></div>
+                <div class="edit-field-item"><label for="editName">ชื่อ:</label><input type="text" id="editName" placeholder="ชื่อ"></div>
+                <div class="edit-field-item"><label for="editLastName">นามสกุล:</label><input type="text" id="editLastName" placeholder="นามสกุล"></div>
+                <div class="edit-field-item"><label for="editGrade">ชั้นปี:</label><input type="text" id="editGrade" placeholder="ชั้นปี"></div>
+                <div class="edit-field-item"><label for="editClass">ห้องเรียน:</label><input type="text" id="editClass" placeholder="ห้องเรียน"></div>
+                <div class="edit-field-item"><label for="editStatus">สถานะ:</label><input type="text" id="editStatus" placeholder="สถานะ"></div>
+                <div class="edit-field-item"><label for="editDob">วันเกิด:</label><input type="text" id="editDob" placeholder="วันเกิด (เช่น 01 มกราคม 2545)"></div>
+                <div class="edit-field-item"><label for="editPhone">เบอร์โทรศัพท์:</label><input type="tel" id="editPhone" placeholder="เบอร์โทรศัพท์"></div>
+            </div>
+            <div class="password-verification" id="adminPasswordSection"><label for="adminPasswordInput">รหัสผ่านแอดมิน:</label><input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก"><p id="passwordErrorMessage" class="error-message"></p></div>
+            <div class="edit-student-buttons"><button class="edit-btn" id="editStudentInfoBtn">แก้ไขข้อมูล</button><button class="save-edit-btn" id="saveStudentInfoBtn" style="display: none;">บันทึกข้อมูล</button><button class="cancel-edit-btn" id="cancelStudentInfoBtn" style="display: none;">ยกเลิก</button></div>
+        </div>
+    </div>
+
+    <div id="monthlySelectionModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeMonthlySelectionModalBtn">&times;</span><h3 id="monthlySelectionModalStudentName"></h3><h4>เลือกเดือนเพื่อดูค่าห้องรายสัปดาห์</h4><div id="monthButtonsGrid" class="score-input-grid"></div><div class="score-modal-actions"><button class="cancel-btn" id="cancelMonthlySelectionBtn">ยกเลิก</button></div></div></div>
+    <div id="weeklyScoresModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeWeeklyScoresModalBtn">&times;</span><h3 id="weeklyModalStudentName"></h3><h4>ค่าห้องประจำสัปดาห์ของ <span id="weeklyModalMonthName"></span></h4><div id="weeklyScoresGrid" class="score-input-grid" style="margin-top: 20px;"></div><div class="password-verification" id="weeklyAdminPasswordSection"><label for="weeklyAdminPasswordInput">รหัสผ่านแอดมิน:</label><input type="password" id="weeklyAdminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก"><p id="weeklyPasswordErrorMessage" class="error-message"></p></div><div class="score-modal-actions"><button class="save-btn" id="saveWeeklyScoresBtn">บันทึกค่าห้องรายสัปดาห์</button><button class="cancel-btn" id="cancelWeeklyScoresBtn">ยกเลิก</button></div></div></div>
+    <div id="allStudentsMonthSelectionModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAllStudentsMonthSelectionModalBtn">&times;</span><h3 id="allStudentsMonthSelectionModalTitle">เลือกเดือนเพื่อดูค่าห้องของนักเรียนทั้งหมด</h3><div class="table-scroll-wrapper"><table style="width: 100%; border-collapse: collapse; margin-top: 15px;"><thead><tr><th>เดือน</th><th>การจัดการ</th></tr></thead><tbody id="allStudentsMonthTableBody"></tbody></table></div><div class="score-modal-actions"><button class="cancel-btn" id="cancelAllStudentsMonthSelectionBtn">ยกเลิก</button></div></div></div>
+    <div id="adminClearHistoryModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAdminClearHistoryModalBtn">&times;</span><h3>ยืนยันการล้างประวัติ</h3><p>คุณแน่ใจใช่มั้ยที่จะลบประวัติทั้งหมด?</p><p style="color: #e74c3c; font-weight: bold; margin-top: 10px;">เมื่อกดล้างประวัติแล้วจะไม่สามารถกู้คืนได้</p><div class="modal-actions"><button class="confirm-btn danger" id="confirmClearHistoryBtn">ยืนยัน</button><button class="cancel-btn" id="cancelClearHistoryBtn">ยกเลิก</button></div></div></div>
+    <div id="settingsAdminPasswordModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeSettingsAdminPasswordModalBtn">&times;</span><h3>กรุณาใส่รหัสผ่านแอดมิน</h3><label for="settingsAdminPasswordInput">รหัสผ่าน:</label><input type="password" id="settingsAdminPasswordInput" placeholder="กรอกรหัสผ่านแอดมิน"><p id="settingsAdminPasswordErrorMessage" class="error-message"></p><div class="modal-actions"><button class="confirm-btn" id="confirmSettingsAdminPasswordBtn">ยืนยัน</button><button class="cancel-btn" id="cancelSettingsAdminPasswordBtn">ยกเลิก</button></div></div></div>
+    <div id="addStudentModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAddStudentModalBtn">&times;</span><h3>เพิ่มนักเรียนใหม่</h3><div id="addStudentFormGrid"><div class="form-field-item"><label for="addStudentNumber">เลขที่:</label><input type="number" id="addStudentNumber" placeholder="เลขที่นักเรียน" min="1"></div><div class="form-field-item"><label for="addStudentId">รหัสนักเรียน:</label><input type="text" id="addStudentId" placeholder="รหัสนักเรียน"></div><div class="form-field-item"><label for="addPrefix">คำนำหน้า:</label><select id="addPrefix"><option value="เด็กชาย">เด็กชาย</option><option value="นาย">นาย</option><option value="เด็กหญิง">เด็กหญิง</option><option value="นางสาว">นางสาว</option></select></div><div class="form-field-item"><label for="addName">ชื่อ:</label><input type="text" id="addName" placeholder="ชื่อ"></div><div class="form-field-item"><label for="addLastName">นามสกุล:</label><input type="text" id="addLastName" placeholder="นามสกุล"></div><div class="form-field-item"><label for="addGrade">ชั้นปี:</label><input type="text" id="addGrade" placeholder="ชั้นปี" value="มัธยมศึกษาปีที่ 3"></div><div class="form-field-item"><label for="addClass">ห้องเรียน:</label><input type="text" id="addClass" placeholder="ห้องเรียน" value="3/1"></div><div class="form-field-item"><label for="addStatus">สถานะ:</label><input type="text" id="addStatus" placeholder="สถานะ" value="นักเรียน"></div><div class="form-field-item"><label for="addDob">วันเกิด:</label><input type="text" id="addDob" placeholder="วันเกิด (เช่น 01 มกราคม 2545)" value="-"></div><div class="form-field-item"><label for="addPhone">เบอร์โทรศัพท์:</label><input type="tel" id="addPhone" placeholder="เบอร์โทรศัพท์" value="-"></div></div><div class="password-verification" id="addStudentPasswordSection"><label for="addStudentPasswordInput">รหัสผ่านแอดมิน:</label><input type="password" id="addStudentPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก"><p id="addStudentErrorMessage" class="error-message"></p></div><div class="modal-actions"><button class="save-btn" id="saveNewStudentBtn">บันทึก</button><button class="cancel-btn" id="cancelAddStudentBtn">ยกเลิก</button></div></div></div>
+    <div id="deleteStudentSelectionModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeDeleteStudentSelectionModalBtn">&times;</span><h3>เลือกรหัสนักเรียนที่ต้องการลบ</h3><ul id="deleteStudentList"></ul><div class="modal-actions"><button class="cancel-btn" id="cancelDeleteSelectionBtn">ยกเลิก</button></div></div></div>
+    <div id="confirmDeleteStudentModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeConfirmDeleteStudentModalBtn">&times;</span><h3>ยืนยันการลบนักเรียน</h3><p>คุณแน่ใจหรือไม่ที่จะลบข้อมูลนักเรียน <strong><span id="studentToDeleteName"></span> (<span id="studentToDeleteId"></span>)</strong>?</p><p style="color: #e74c3c; font-weight: bold;">การดำเนินการนี้ไม่สามารถยกเลิกได้ และจะลบข้อมูลทั้งหมดที่เกี่ยวข้องกับนักเรียนคนนี้!</p><div class="password-verification" id="deleteConfirmationPasswordSection"><label for="deleteConfirmationPasswordInput">รหัสผ่านแอดมิน:</label><input type="password" id="deleteConfirmationPasswordInput" placeholder="กรอกรหัสผ่านเพื่อยืนยัน"><p id="deleteConfirmationErrorMessage" class="error-message"></p></div><div class="modal-actions"><button class="confirm-btn danger" id="confirmDeleteStudentFinalBtn">ยืนยันการลบ</button><button class="cancel-btn" id="cancelDeleteStudentFinalBtn">ยกเลิก</button></div></div></div>
+    <div id="setMonthlyFeesModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeSetMonthlyFeesModalBtn">&times;</span><h3>ตั้งค่าค่าห้องรายเดือนและรายสัปดาห์</h3><div class="monthly-fees-grid" id="monthlyFeesGrid"></div><div class="score-modal-actions"><button class="save-btn" id="saveMonthlyFeesBtn">บันทึก</button><button class="cancel-btn" id="cancelSetMonthlyFeesBtn">ยกเลิก</button></div></div></div>
+    <div id="addMultipleWeeklyFeesModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAddMultipleWeeklyFeesModalBtn">&times;</span><h3 id="addMultipleWeeklyFeesModalTitle">ตั้งค่าห้องรายสัปดาห์หลายคน</h3><div style="margin-bottom: 20px; text-align: center;"><label for="multipleFeeAmountInput">ตั้งค่าเงิน (ต่อคน):</label><input type="number" id="multipleFeeAmountInput" value="20"></div><div class="table-scroll-wrapper"><table id="multipleWeeklyFeesTable"><thead><tr><th>เลือกทั้งหมด <input type="checkbox" id="selectAllStudentsCheckbox"></th><th>เลขที่</th><th>ชื่อ - นามสกุล</th><th>สัปดาห์ 1 <input type="checkbox" data-week="week1" class="select-all-week-checkbox"></th><th>สัปดาห์ 2 <input type="checkbox" data-week="week2" class="select-all-week-checkbox"></th><th>สัปดาห์ 3 <input type="checkbox" data-week="week3" class="select-all-week-checkbox"></th><th>สัปดาห์ 4 <input type="checkbox" data-week="week4" class="select-all-week-checkbox"></th><th>สัปดาห์ 5 <input type="checkbox" data-week="week5" class="select-all-week-checkbox"></th></tr></thead><tbody id="multipleWeeklyFeesTableBody"></tbody></table></div><div class="password-verification" id="addMultipleFeesPasswordSection" style="display: none;"><label for="addMultipleWeeklyFeesAdminPasswordInput">รหัสผ่านแอดมิน:</label><input type="password" id="addMultipleWeeklyFeesAdminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก"><p id="addMultipleWeeklyFeesErrorMessage" class="error-message"></p><div class="score-modal-actions"><button class="save-btn" id="confirmSaveMultipleFeesBtn">ยืนยันการบันทึก</button><button class="cancel-btn" id="cancelSaveMultipleFeesBtn">ยกเลิก</button></div></div><div class="score-modal-actions" id="initialMultipleFeesActions"><button class="save-btn" id="saveMultipleWeeklyFeesBtn">บันทึก</button><button class="cancel-btn" id="cancelMultipleWeeklyFeesBtn">ยกเลิก</button></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="script.js" type="module"></script>
+</body>
+</html>
