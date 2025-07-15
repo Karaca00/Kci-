@@ -43,7 +43,7 @@ const appSettingsDocRef = appSettingsCollection.doc('appSettings'); // Single do
 const paymentRequirementsDocRef = appSettingsCollection.doc('paymentRequirements'); // New: Document for payment requirements
 
 // Admin password (for demonstration, use Firebase Security Rules in production)
-const ADMIN_PASSWORD = "301";
+const ADMIN_PASSWORD = "1230166";
 
 let currentStudentId = null; // Store the ID of the student whose details or scores are currently open
 let currentAllStudentsWeeklyScoresMonth = null; // Store the currently selected month for all students' scores
