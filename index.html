@@ -35,9 +35,27 @@
     <main id="app-container">
         <!-- Home Page Content -->
         <div id="homePlaceholderContainer" class="page-content">
-            <h2>ยินดีต้อนรับสู่ระบบจัดการข้อมูลนักเรียน</h2>
-            <p>คุณสามารถใช้เมนูด้านบนเพื่อเข้าถึงส่วนต่างๆ ของระบบ</p>
+            <!-- Welcome Message -->
+            <div id="homeTableContainer" class="table-container content-section">
+                <h2>ยินดีต้อนรับสู่ระบบจัดการข้อมูลนักเรียน</h2>
+                <p>คุณสามารถใช้เมนูด้านบนเพื่อเข้าถึงส่วนต่างๆ ของระบบ</p>
+            </div>
+
+            <!-- News Section -->
+            <div class="table-container">
+                <div class="table-header" style="justify-content: center; border-bottom: none; margin-bottom: 0;">
+                    <h2>ข่าวสารและประกาศ</h2>
+                </div>
+                <div id="newsActions" class="student-actions" style="justify-content: flex-end; padding: 10px 0;">
+                    <button id="addNewsBtn" class="add-student-btn">เพิ่มข่าวสาร</button>
+                    <button id="deleteNewsBtn" class="delete-student-btn">ลบข่าวสาร</button>
+                </div>
+                <div id="newsContainer" style="border-top: 1px solid #ecf0f1; padding-top: 20px;">
+                    <!-- News cards will be inserted here by JavaScript -->
+                </div>
+            </div>
         </div>
+
 
         <!-- Class Page Content -->
         <div id="classPageContainer" class="page-content">
@@ -200,25 +218,58 @@
 
         <!-- Settings Page Content -->
         <div id="settingsContainer" class="page-content">
-            <h2>ตั้งค่า</h2>
-            <div id="historyCountDisplay" class="setting-item"></div>
-            <div class="setting-item">
-                <label for="autoDeleteToggle">เปิด/ปิด ลบประวัติอัตโนมัติ:</label>
-                <input type="checkbox" id="autoDeleteToggle" class="toggle-switch">
+            <div class="settings-section">
+                <h2>ตั้งค่าทั่วไป</h2>
+                <button id="setMonthlyFeesBtn" class="settings-button">ตั้งค่าค่าห้องรายเดือน</button>
             </div>
-            <div class="setting-item">
-                <label for="historyLimitInput">ขีดจำกัดประวัติ:</label>
-                <input type="number" id="historyLimitInput" min="1" value="100" readonly>
-                <button id="editHistoryLimitBtn" class="edit-btn">แก้ไข</button>
+             <div class="settings-section">
+                <h2>การจัดการข้อมูล</h2>
+                <button id="backupDataBtn" class="settings-button">Back Up Data</button>
+                <button id="loadDataBtn" class="settings-button danger">Load Data</button>
             </div>
-            <div id="historyLimitEditActions" class="setting-item" style="display: none;">
-                <p id="historyLimitErrorMessage" class="error-message"></p>
-                <button id="saveHistoryLimitBtn" class="save-btn">บันทึกขีดจำกัด</button>
-                <button class="cancel-btn" id="cancelHistoryLimitBtn">ยกเลิก</button>
+            <div class="settings-section">
+                <h2>ตั้งค่าประวัติการบันทึก</h2>
+                <div id="historyCountDisplay" class="setting-item"></div>
+                <div class="setting-item toggle-container">
+                    <label for="autoDeleteToggle">ลบประวัติอัตโนมัติ:</label>
+                    <input type="checkbox" id="autoDeleteToggle" class="toggle-switch">
+                </div>
+                <div class="setting-item">
+                    <label for="historyLimitInput">ขีดจำกัดประวัติ:</label>
+                    <div class="input-group">
+                        <input type="number" id="historyLimitInput" min="1" value="100" readonly>
+                        <button id="editHistoryLimitBtn" class="edit-btn">แก้ไข</button>
+                        <div id="historyLimitEditActions" style="display: none;">
+                            <button id="saveHistoryLimitBtn" class="save-btn">บันทึก</button>
+                            <button class="cancel-btn" id="cancelHistoryLimitBtn">ยกเลิก</button>
+                        </div>
+                    </div>
+                    <p id="historyLimitErrorMessage" class="error-message"></p>
+                </div>
+                <button id="clearHistoryBtn" class="settings-button danger">ล้างประวัติการบันทึกทั้งหมด</button>
             </div>
-            <button id="setMonthlyFeesBtn" class="settings-button">ตั้งค่าค่าห้องรายเดือน</button>
-            <button id="clearHistoryBtn" class="settings-button danger">ล้างประวัติการบันทึกทั้งหมด</button>
+            <div class="settings-section">
+                <h2>ตั้งค่าข่าวสารและประกาศ</h2>
+                <div id="newsCountDisplay" class="setting-item"></div>
+                <div class="setting-item toggle-container">
+                    <label for="autoDeleteNewsToggle">ลบข่าวสารอัตโนมัติ:</label>
+                    <input type="checkbox" id="autoDeleteNewsToggle" class="toggle-switch">
+                </div>
+                <div class="setting-item">
+                    <label for="newsLimitInput">ขีดจำกัดข่าวสาร:</label>
+                    <div class="input-group">
+                        <input type="number" id="newsLimitInput" min="1" value="10" readonly>
+                        <button id="editNewsLimitBtn" class="edit-btn">แก้ไข</button>
+                        <div id="newsLimitEditActions" style="display: none;">
+                            <button id="saveNewsLimitBtn" class="save-btn">บันทึก</button>
+                            <button id="cancelNewsLimitBtn" class="cancel-btn">ยกเลิก</button>
+                        </div>
+                    </div>
+                    <p id="newsLimitErrorMessage" class="error-message"></p>
+                </div>
+            </div>
         </div>
+
 
         <!-- Contact Page Content -->
         <div id="contactAdminContainer" class="page-content">
@@ -287,6 +338,90 @@
     <div id="confirmDeleteStudentModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeConfirmDeleteStudentModalBtn">&times;</span><h3>ยืนยันการลบนักเรียน</h3><p>คุณแน่ใจหรือไม่ที่จะลบข้อมูลนักเรียน <strong><span id="studentToDeleteName"></span> (<span id="studentToDeleteId"></span>)</strong>?</p><p style="color: #e74c3c; font-weight: bold;">การดำเนินการนี้ไม่สามารถยกเลิกได้ และจะลบข้อมูลทั้งหมดที่เกี่ยวข้องกับนักเรียนคนนี้!</p><div class="password-verification" id="deleteConfirmationPasswordSection"><label for="deleteConfirmationPasswordInput">รหัสผ่านแอดมิน:</label><input type="password" id="deleteConfirmationPasswordInput" placeholder="กรอกรหัสผ่านเพื่อยืนยัน"><p id="deleteConfirmationErrorMessage" class="error-message"></p></div><div class="modal-actions"><button class="confirm-btn danger" id="confirmDeleteStudentFinalBtn">ยืนยันการลบ</button><button class="cancel-btn" id="cancelDeleteStudentFinalBtn">ยกเลิก</button></div></div></div>
     <div id="setMonthlyFeesModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeSetMonthlyFeesModalBtn">&times;</span><h3>ตั้งค่าค่าห้องรายเดือนและรายสัปดาห์</h3><div class="monthly-fees-grid" id="monthlyFeesGrid"></div><div class="score-modal-actions"><button class="save-btn" id="saveMonthlyFeesBtn">บันทึก</button><button class="cancel-btn" id="cancelSetMonthlyFeesBtn">ยกเลิก</button></div></div></div>
     <div id="addMultipleWeeklyFeesModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAddMultipleWeeklyFeesModalBtn">&times;</span><h3 id="addMultipleWeeklyFeesModalTitle">ตั้งค่าห้องรายสัปดาห์หลายคน</h3><div style="margin-bottom: 20px; text-align: center;"><label for="multipleFeeAmountInput">ตั้งค่าเงิน (ต่อคน):</label><input type="number" id="multipleFeeAmountInput" value="20"></div><div class="table-scroll-wrapper"><table id="multipleWeeklyFeesTable"><thead><tr><th>เลือกทั้งหมด <input type="checkbox" id="selectAllStudentsCheckbox"></th><th>เลขที่</th><th>ชื่อ - นามสกุล</th><th>สัปดาห์ 1 <input type="checkbox" data-week="week1" class="select-all-week-checkbox"></th><th>สัปดาห์ 2 <input type="checkbox" data-week="week2" class="select-all-week-checkbox"></th><th>สัปดาห์ 3 <input type="checkbox" data-week="week3" class="select-all-week-checkbox"></th><th>สัปดาห์ 4 <input type="checkbox" data-week="week4" class="select-all-week-checkbox"></th><th>สัปดาห์ 5 <input type="checkbox" data-week="week5" class="select-all-week-checkbox"></th></tr></thead><tbody id="multipleWeeklyFeesTableBody"></tbody></table></div><div class="password-verification" id="addMultipleFeesPasswordSection" style="display: none;"><label for="addMultipleWeeklyFeesAdminPasswordInput">รหัสผ่านแอดมิน:</label><input type="password" id="addMultipleWeeklyFeesAdminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก"><p id="addMultipleWeeklyFeesErrorMessage" class="error-message"></p><div class="score-modal-actions"><button class="save-btn" id="confirmSaveMultipleFeesBtn">ยืนยันการบันทึก</button><button class="cancel-btn" id="cancelSaveMultipleFeesBtn">ยกเลิก</button></div></div><div class="score-modal-actions" id="initialMultipleFeesActions"><button class="save-btn" id="saveMultipleWeeklyFeesBtn">บันทึก</button><button class="cancel-btn" id="cancelMultipleWeeklyFeesBtn">ยกเลิก</button></div></div></div>
+    
+    <!-- Add News Modal -->
+    <div id="addNewsModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeAddNewsModalBtn">&times;</span>
+            <h3>เพิ่มข่าวสารใหม่</h3>
+            <div class="form-field-item">
+                <label for="newsTitleInput">หัวข้อข่าว:</label>
+                <input type="text" id="newsTitleInput" placeholder="ใส่หัวข้อข่าวสาร">
+            </div>
+            <div class="form-field-item">
+                <label for="newsContentInput">เนื้อหาข่าว:</label>
+                <textarea id="newsContentInput" rows="5" placeholder="ใส่เนื้อหาข่าวสาร"></textarea>
+            </div>
+            <div class="form-field-item">
+                <label for="newsImageUrlInput">ลิงก์รูปภาพ (URL):</label>
+                <input type="text" id="newsImageUrlInput" placeholder="เช่น https://example.com/image.png">
+            </div>
+            <div class="password-verification">
+                <label for="addNewsAdminPasswordInput">รหัสผ่านแอดมิน:</label>
+                <input type="password" id="addNewsAdminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก">
+                <p id="addNewsErrorMessage" class="error-message"></p>
+            </div>
+            <div class="modal-actions">
+                <button class="save-btn" id="saveNewsBtn">บันทึกข่าวสาร</button>
+                <button class="cancel-btn" id="cancelAddNewsBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete News Modal -->
+    <div id="deleteNewsModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeDeleteNewsModalBtn">&times;</span>
+            <h3>เลือกข่าวสารที่ต้องการลบ</h3>
+            <ul id="deleteNewsList">
+                <!-- News items to delete will be populated here -->
+            </ul>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelDeleteNewsSelectionBtn">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete News Modal -->
+    <div id="confirmDeleteNewsModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeConfirmDeleteNewsModalBtn">&times;</span>
+            <h3>ยืนยันการลบข่าวสาร</h3>
+            <p>คุณแน่ใจหรือไม่ที่จะลบข่าวสาร: <strong><span id="newsToDeleteTitle"></span></strong>?</p>
+            <div class="password-verification" id="deleteNewsPasswordSection">
+                <label for="deleteNewsPasswordInput">รหัสผ่านแอดมิน:</label>
+                <input type="password" id="deleteNewsPasswordInput" placeholder="กรอกรหัสผ่านเพื่อยืนยัน">
+                <p id="deleteNewsErrorMessage" class="error-message"></p>
+            </div>
+            <div class="modal-actions">
+                <button class="confirm-btn danger" id="confirmDeleteNewsFinalBtn">ยืนยันการลบ</button>
+                <button class="cancel-btn" id="cancelDeleteNewsFinalBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Load Data Modal -->
+    <div id="confirmLoadDataModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeConfirmLoadDataModalBtn">&times;</span>
+            <h3>ยืนยันการโหลดข้อมูล</h3>
+            <p style="color: #e74c3c; font-weight: bold;">คำเตือน: การกระทำนี้จะลบข้อมูลปัจจุบันทั้งหมดและแทนที่ด้วยข้อมูลสำรอง คุณแน่ใจหรือไม่ที่จะดำเนินการต่อ?</p>
+            <div class="modal-actions">
+                <button class="confirm-btn danger" id="confirmLoadDataFinalBtn">ยืนยันการโหลด</button>
+                <button class="cancel-btn" id="cancelLoadDataFinalBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div id="statusModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="statusModalTitle">สถานะ</h3>
+            <p id="statusModalMessage"></p>
+            <div class="loader-spinner" id="statusModalSpinner" style="display: none;"></div>
+        </div>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
