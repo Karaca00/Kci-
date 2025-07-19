@@ -27,38 +27,13 @@ const firebaseConfig = {
     measurementId: "G-H32613VB65"
 };
 
-// *** BACKUP Firebase Configuration ***
-// !! IMPORTANT !!
-// You MUST create a SECOND Firebase project for backups and put its configuration here.
-// Using the same project for backups is NOT a real backup.
-const backupFirebaseConfig = {
-    apiKey: "AIzaSyCAip6P0BMIEN2LwoWiHQfiNFoG",
-    authDomain: "kci-project.firebaseapp.com",
-    projectId: "kci-project",
-    storageBucket: "kci-project.firebasestorage.app",
-    messagingSenderId: "710550217957",
-    appId: "1:710550217957:web:210c84c4b31ed6e6c5e00c"
-};
-
-
 // Initialize Firebase Apps
-let db, backupDb;
+let db;
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
-    
-    // Initialize the backup app only if a valid projectId is provided
-    if (backupFirebaseConfig.projectId !== "YOUR_BACKUP_PROJECT_ID") {
-        const backupApp = firebase.initializeApp(backupFirebaseConfig, 'backup');
-        backupDb = backupApp.firestore();
-    } else {
-        console.warn("Backup Firebase project is not configured. Backup/Load functionality will be disabled.");
-    }
 } else {
     db = firebase.app().firestore();
-    if (firebase.apps.find(app => app.name === 'backup')) {
-        backupDb = firebase.app('backup').firestore();
-    }
 }
 
 
@@ -188,19 +163,6 @@ let saveNewsLimitBtn;
 let cancelNewsLimitBtn;
 let newsLimitEditActions;
 let newsLimitErrorMessage;
-
-// NEW: DOM elements for data management
-let backupDataBtn;
-let loadDataBtn;
-let confirmLoadDataModal;
-let closeConfirmLoadDataModalBtn;
-let confirmLoadDataFinalBtn;
-let cancelLoadDataFinalBtn;
-let statusModal;
-let statusModalTitle;
-let statusModalMessage;
-let statusModalSpinner;
-
 
 let monthlySelectionModal;
 let closeMonthlySelectionModalBtn;
@@ -346,6 +308,7 @@ let closeAddNewsModalBtn;
 let newsTitleInput;
 let newsContentInput;
 let newsImageUrlInput;
+let pinNewsToggle;
 let addNewsAdminPasswordInput;
 let addNewsErrorMessage;
 let saveNewsBtn;
@@ -363,6 +326,11 @@ let deleteNewsErrorMessage;
 let confirmDeleteNewsFinalBtn;
 let cancelDeleteNewsFinalBtn;
 let currentNewsToDeleteId = null;
+// New: Image Modal elements
+let imageModal;
+let closeImageModalBtn;
+let modalImageContent;
+let newsImagePreview;
 
 
 async function loadStudentsFromFirebase() {
@@ -1674,21 +1642,11 @@ function openAddStudentModal() {
     addStatus.value = 'นักเรียน';
     addDob.value = '-';
     addPhone.value = '-';
-    addStudentPasswordInput.value = '';
     addStudentErrorMessage.textContent = '';
-    addStudentPasswordSection.style.display = 'flex';
     addStudentNumber.focus();
 }
 
 async function addNewStudent() {
-    const password = addStudentPasswordInput.value;
-    if (password !== ADMIN_PASSWORD) {
-        addStudentErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
-        addStudentErrorMessage.style.color = "red";
-        return;
-    }
-    addStudentErrorMessage.textContent = "";
-
     const newStudentId = addStudentId.value.trim();
     const newStudentNumber = parseInt(addStudentNumber.value);
     const newPrefix = addPrefix.value;
@@ -1815,9 +1773,7 @@ function openConfirmDeleteStudentModal(studentId, studentName) {
     currentStudentToDelete = studentId;
     studentToDeleteName.textContent = studentName;
     studentToDeleteId.textContent = studentId;
-    deleteConfirmationPasswordInput.value = '';
     deleteConfirmationErrorMessage.textContent = '';
-    deleteConfirmationPasswordSection.style.display = 'flex';
     confirmDeleteStudentModal.style.display = 'flex';
 }
 
@@ -1827,14 +1783,6 @@ function closeConfirmDeleteStudentModal() {
 }
 
 async function deleteStudentConfirmed() {
-    const password = deleteConfirmationPasswordInput.value;
-    if (password !== ADMIN_PASSWORD) {
-        deleteConfirmationErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
-        deleteConfirmationErrorMessage.style.color = "red";
-        return;
-    }
-    deleteConfirmationErrorMessage.textContent = "";
-
     if (!currentStudentToDelete) {
         console.error("No student selected for deletion.");
         return;
@@ -2291,7 +2239,7 @@ async function handleContactFormSubmit(event) {
 async function renderNews() {
     newsContainer.innerHTML = ''; // Clear existing news
     try {
-        const snapshot = await newsCollection.orderBy('timestamp', 'desc').get();
+        const snapshot = await newsCollection.get();
         
         if (newsCountDisplay) {
             newsCountDisplay.textContent = `จำนวนข่าวสารปัจจุบัน: ${snapshot.size}`;
@@ -2301,22 +2249,41 @@ async function renderNews() {
             newsContainer.innerHTML = '<p>ยังไม่มีข่าวสารหรือประกาศในขณะนี้</p>';
             return;
         }
-        snapshot.forEach(doc => {
+
+        // Sort documents in JavaScript: pinned first, then by timestamp
+        const sortedDocs = snapshot.docs.sort((a, b) => {
+            const aData = a.data();
+            const bData = b.data();
+            const aIsPinned = aData.isPinned || false;
+            const bIsPinned = bData.isPinned || false;
+
+            if (aIsPinned !== bIsPinned) {
+                return aIsPinned ? -1 : 1;
+            }
+            return bData.timestamp.toMillis() - aData.timestamp.toMillis();
+        });
+
+        sortedDocs.forEach(doc => {
             const news = doc.data();
             const newsId = doc.id;
             const card = document.createElement('div');
             card.className = 'news-card';
+            if (news.isPinned) {
+                card.classList.add('pinned');
+            }
             card.dataset.id = newsId;
 
             const imageUrl = news.imageUrl;
             const timestamp = news.timestamp ? new Date(news.timestamp.toDate()).toLocaleString('th-TH') : 'ไม่ระบุเวลา';
 
-            // Conditionally add the image tag
             const imageHtml = imageUrl 
-                ? `<img src="${imageUrl}" alt="News Image" onerror="this.style.display='none';">`
+                ? `<img src="${imageUrl}" alt="News Image" onerror="this.style.display='none';" onclick="openImageModal('${imageUrl}')">`
                 : '';
+            
+            const pinHtml = news.isPinned ? '<div class="pin-icon">📌</div>' : '';
 
             card.innerHTML = `
+                ${pinHtml}
                 ${imageHtml}
                 <div class="news-card-content">
                     <h3>${news.title}</h3>
@@ -2339,7 +2306,9 @@ function openAddNewsModal() {
     newsTitleInput.value = '';
     newsContentInput.value = '';
     newsImageUrlInput.value = '';
-    addNewsAdminPasswordInput.value = '';
+    pinNewsToggle.checked = false;
+    newsImagePreview.style.display = 'none';
+    newsImagePreview.src = '';
     addNewsErrorMessage.textContent = '';
     addNewsModal.style.display = 'flex';
 }
@@ -2351,15 +2320,10 @@ function closeAddNewsModal() {
 
 // Function to save a new announcement
 async function saveNews() {
-    const password = addNewsAdminPasswordInput.value;
-    if (password !== ADMIN_PASSWORD) {
-        addNewsErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
-        return;
-    }
-
     const title = newsTitleInput.value.trim();
     const content = newsContentInput.value.trim();
     const imageUrl = newsImageUrlInput.value.trim();
+    const isPinned = pinNewsToggle.checked;
 
     if (!title || !content) {
         addNewsErrorMessage.textContent = "กรุณากรอกหัวข้อและเนื้อหาข่าว";
@@ -2373,6 +2337,7 @@ async function saveNews() {
             title: title,
             content: content,
             imageUrl: imageUrl,
+            isPinned: isPinned,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
         closeAddNewsModal();
@@ -2390,33 +2355,58 @@ async function openDeleteNewsModal() {
     deleteNewsModal.style.display = 'flex';
 
     try {
-        const snapshot = await newsCollection.orderBy('timestamp', 'desc').get();
+        const snapshot = await newsCollection.get();
+        
+        const sortedDocs = snapshot.docs.sort((a, b) => {
+            const aData = a.data();
+            const bData = b.data();
+            const aIsPinned = aData.isPinned || false;
+            const bIsPinned = bData.isPinned || false;
+            if (aIsPinned !== bIsPinned) return aIsPinned ? -1 : 1;
+            return bData.timestamp.toMillis() - aData.timestamp.toMillis();
+        });
+
         deleteNewsList.innerHTML = '';
-        if (snapshot.empty) {
-            deleteNewsList.innerHTML = '<li>ไม่มีข่าวสารให้ลบ</li>';
+        if (sortedDocs.length === 0) {
+            deleteNewsList.innerHTML = '<li>ไม่มีข่าวสารให้จัดการ</li>';
             return;
         }
-        snapshot.forEach(doc => {
+
+        sortedDocs.forEach(doc => {
             const news = doc.data();
             const newsId = doc.id;
             const timestamp = news.timestamp ? new Date(news.timestamp.toDate()).toLocaleString('th-TH') : 'ไม่ระบุเวลา';
             const listItem = document.createElement('li');
+            
+            const pinButtonText = news.isPinned ? 'ยกเลิกปักหมุด' : 'ปักหมุด';
+            const pinButtonClass = news.isPinned ? 'unpin-news-item-btn' : 'pin-news-item-btn';
+
             listItem.innerHTML = `
                 <div class="delete-news-info">
-                    <span class="delete-news-title">${news.title}</span>
+                    <span class="delete-news-title">${news.isPinned ? '📌 ' : ''}${news.title}</span>
                     <span class="delete-news-timestamp">โพสต์เมื่อ: ${timestamp}</span>
                 </div>
-                <button class="delete-news-item-btn" data-id="${newsId}" data-title="${news.title}">ลบ</button>
+                <div class="delete-news-actions">
+                    <button class="${pinButtonClass}" data-id="${newsId}" data-pinned="${news.isPinned || false}">${pinButtonText}</button>
+                    ${!news.isPinned ? `<button class="delete-news-item-btn" data-id="${newsId}" data-title="${news.title}">ลบ</button>` : ''}
+                </div>
             `;
             deleteNewsList.appendChild(listItem);
         });
 
-        // Add event listeners to the new delete buttons
+        // Add event listeners to the new buttons
         document.querySelectorAll('.delete-news-item-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const idToDelete = e.currentTarget.dataset.id;
                 const titleToDelete = e.currentTarget.dataset.title;
                 openConfirmDeleteNewsModal(idToDelete, titleToDelete);
+            });
+        });
+        document.querySelectorAll('.pin-news-item-btn, .unpin-news-item-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const idToToggle = e.currentTarget.dataset.id;
+                const isPinned = e.currentTarget.dataset.pinned === 'true';
+                togglePinStatus(idToToggle, isPinned);
             });
         });
 
@@ -2435,7 +2425,6 @@ function closeDeleteNewsModal() {
 function openConfirmDeleteNewsModal(newsId, title) {
     currentNewsToDeleteId = newsId;
     newsToDeleteTitle.textContent = title;
-    deleteNewsPasswordInput.value = '';
     deleteNewsErrorMessage.textContent = '';
     confirmDeleteNewsModal.style.display = 'flex';
 }
@@ -2448,12 +2437,6 @@ function closeConfirmDeleteNewsModal() {
 
 // Function to delete a specific news item after password confirmation
 async function deleteNewsItemConfirmed() {
-    const password = deleteNewsPasswordInput.value;
-    if (password !== ADMIN_PASSWORD) {
-        deleteNewsErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
-        return;
-    }
-    
     if (!currentNewsToDeleteId) {
         console.error("No news item ID to delete.");
         return;
@@ -2471,6 +2454,20 @@ async function deleteNewsItemConfirmed() {
     }
 }
 
+// NEW: Function to toggle the pinned status of a news item
+async function togglePinStatus(newsId, isCurrentlyPinned) {
+    try {
+        await newsCollection.doc(newsId).update({
+            isPinned: !isCurrentlyPinned
+        });
+        await renderNews();
+        await openDeleteNewsModal(); // Refresh the modal to show the updated status
+    } catch (error) {
+        console.error("Error toggling pin status:", error);
+        alert("เกิดข้อผิดพลาดในการปักหมุดข่าวสาร");
+    }
+}
+
 
 // --- News Settings ---
 async function checkAndTrimNews() {
@@ -2480,11 +2477,14 @@ async function checkAndTrimNews() {
 
         const settings = settingsDoc.data();
         
-        const snapshot = await newsCollection.orderBy('timestamp', 'desc').get();
-        const currentCount = snapshot.size;
-
+        // This query now only gets UNPINNED news for trimming
+        const query = newsCollection.where('isPinned', '==', false).orderBy('timestamp', 'desc');
+        const snapshot = await query.get();
+        
+        // Update total news count separately
+        const totalSnapshot = await newsCollection.get();
         if (newsCountDisplay) {
-            newsCountDisplay.textContent = `จำนวนข่าวสารปัจจุบัน: ${currentCount}`;
+            newsCountDisplay.textContent = `จำนวนข่าวสารปัจจุบัน: ${totalSnapshot.size}`;
         }
 
         if (!settings.autoDeleteNewsEnabled) {
@@ -2492,21 +2492,28 @@ async function checkAndTrimNews() {
         }
 
         const limit = settings.newsLimit || 10;
+        const totalNewsCount = totalSnapshot.size;
+        const unpinnedCount = snapshot.size;
 
-        if (currentCount > limit) {
-            const recordsToDelete = snapshot.docs.slice(limit); // Oldest are at the end
-            const batch = db.batch();
-            recordsToDelete.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-            await batch.commit();
-            console.log(`Deleted ${recordsToDelete.length} old news items.`);
+        if (totalNewsCount > limit) {
+            const amountToDelete = totalNewsCount - limit;
+            // We only delete from the oldest UNPINNED news
+            const recordsToDelete = snapshot.docs.slice(unpinnedCount - amountToDelete);
             
-            if (newsCountDisplay) {
-                newsCountDisplay.textContent = `จำนวนข่าวสารปัจจุบัน: ${limit}`;
-            }
-            if (activePage === 'home') {
-                renderNews(); // Re-render if on home page
+            if (recordsToDelete.length > 0) {
+                const batch = db.batch();
+                recordsToDelete.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                console.log(`Deleted ${recordsToDelete.length} old, unpinned news items.`);
+                
+                if (newsCountDisplay) {
+                    newsCountDisplay.textContent = `จำนวนข่าวสารปัจจุบัน: ${totalNewsCount - recordsToDelete.length}`;
+                }
+                if (activePage === 'home') {
+                    renderNews(); // Re-render if on home page
+                }
             }
         }
     } catch (error) {
@@ -2548,187 +2555,15 @@ async function handleSaveNewsLimit() {
     }
 }
 
-// --- Data Management (Backup/Load) ---
-
-function showStatusModal(title, message, showSpinner = false) {
-    statusModalTitle.textContent = title;
-    statusModalMessage.textContent = message;
-    statusModalSpinner.style.display = showSpinner ? 'block' : 'none';
-    statusModal.style.display = 'flex';
+// --- Image Modal Functions ---
+function openImageModal(imageUrl) {
+    modalImageContent.src = imageUrl;
+    imageModal.style.display = 'flex';
 }
 
-function hideStatusModal() {
-    statusModal.style.display = 'none';
-}
-
-// Helper to delete all documents in a collection, including in batches
-async function deleteCollection(collectionRef) {
-    const snapshot = await collectionRef.limit(500).get();
-    if (snapshot.size === 0) {
-        return;
-    }
-
-    const batch = collectionRef.firestore.batch();
-    snapshot.docs.forEach(doc => {
-        batch.delete(doc.ref);
-    });
-    await batch.commit();
-
-    // Recurse on the next process tick, to avoid hitting stack depth limits
-    if (snapshot.size > 0) {
-        await deleteCollection(collectionRef);
-    }
-}
-
-async function deleteQueryBatch(query, resolve, reject) {
-    try {
-        const snapshot = await query.get();
-        if (snapshot.size === 0) {
-            return resolve();
-        }
-
-        const batch = query.firestore.batch();
-        const subcollectionPromises = [];
-        snapshot.docs.forEach(doc => {
-            // Handle nested collections for studentWeeklyScores
-            if (query.id === 'studentWeeklyScores') {
-                 subcollectionPromises.push(deleteCollection(doc.ref.collection('months')));
-            }
-            batch.delete(doc.ref);
-        });
-
-        // Wait for all subcollection deletions to complete before deleting parent docs
-        await Promise.all(subcollectionPromises);
-        await batch.commit();
-
-        // Recurse on the next process tick, to avoid hitting stack depth limits
-        setTimeout(() => {
-            deleteQueryBatch(query, resolve, reject);
-        }, 0);
-    } catch (e) {
-        reject(e);
-    }
-}
-
-// REVISED backupData function
-async function backupData() {
-    if (!backupDb) {
-        alert("ยังไม่ได้ตั้งค่าโปรเจคสำหรับสำรองข้อมูล!");
-        return;
-    }
-    showStatusModal("กำลังสำรองข้อมูล", "กรุณารอสักครู่...", true);
-
-    try {
-        // 1. Clear all data in the backup database
-        statusModalMessage.textContent = "กำลังล้างข้อมูลสำรองเก่า...";
-        await deleteAllData(backupDb);
-
-        // 2. Copy all data from primary to backup
-        statusModalMessage.textContent = "กำลังคัดลอกข้อมูลใหม่...";
-        await copyAllData(db, backupDb);
-
-        statusModalMessage.textContent = "สำรองข้อมูลทั้งหมดเรียบร้อยแล้ว!";
-    } catch (error) {
-        console.error("Backup failed:", error);
-        statusModalMessage.textContent = `เกิดข้อผิดพลาดในการสำรองข้อมูล: ${error.message}`;
-    } finally {
-        statusModalSpinner.style.display = 'none';
-        setTimeout(hideStatusModal, 3000);
-    }
-}
-
-// REVISED loadData function
-async function loadData() {
-    if (!backupDb) {
-        alert("ยังไม่ได้ตั้งค่าโปรเจคสำหรับสำรองข้อมูล!");
-        return;
-    }
-    closeConfirmLoadDataModal();
-    showStatusModal("กำลังโหลดข้อมูล", "กำลังลบข้อมูลปัจจุบัน...", true);
-
-    try {
-        // 1. Delete all data in the primary database
-        await deleteAllData(db);
-
-        // 2. Load data from the backup database to primary
-        statusModalMessage.textContent = "กำลังคัดลอกข้อมูลสำรอง...";
-        await copyAllData(backupDb, db);
-
-        statusModalMessage.textContent = "โหลดข้อมูลสำเร็จ! กำลังรีเฟรชหน้าเว็บ...";
-        setTimeout(() => {
-            location.reload();
-        }, 2000);
-
-    } catch (error) {
-        console.error("Load data failed:", error);
-        statusModalMessage.textContent = `เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}`;
-        statusModalSpinner.style.display = 'none';
-        setTimeout(hideStatusModal, 4000);
-    }
-}
-
-// NEW explicit deleteAllData function
-async function deleteAllData(database) {
-    const collections = ['students3_1', 'settings', 'news', 'saveHistory'];
-    for (const colName of collections) {
-        await deleteCollection(database.collection(colName));
-    }
-    // Special handling for nested collection
-    const weeklyScoresRef = database.collection('studentWeeklyScores');
-    const weeklyScoresSnap = await weeklyScoresRef.get();
-    for (const studentDoc of weeklyScoresSnap.docs) {
-        await deleteCollection(studentDoc.ref.collection('months'));
-        await studentDoc.ref.delete(); // Delete the parent doc after subcollection is deleted
-    }
-}
-
-// NEW explicit copyAllData function
-async function copyAllData(sourceDb, destDb) {
-    // 1. Copy simple collections
-    const simpleCollections = ['students3_1', 'settings', 'news', 'saveHistory'];
-    for (const colName of simpleCollections) {
-        const sourceCol = sourceDb.collection(colName);
-        const destCol = destDb.collection(colName);
-        const snapshot = await sourceCol.get();
-        const batch = destDb.batch();
-        snapshot.docs.forEach(doc => {
-            batch.set(destCol.doc(doc.id), doc.data());
-        });
-        if (!snapshot.empty) {
-             await batch.commit();
-        }
-    }
-
-    // 2. Copy nested collection: studentWeeklyScores
-    const sourceWeeklyScoresCol = sourceDb.collection('studentWeeklyScores');
-    const destWeeklyScoresCol = destDb.collection('studentWeeklyScores');
-    const weeklyScoresSnapshot = await sourceWeeklyScoresCol.get();
-
-    for (const studentDoc of weeklyScoresSnapshot.docs) {
-        // Copy the parent document (it's likely empty, but good practice)
-        await destWeeklyScoresCol.doc(studentDoc.id).set(studentDoc.data());
-
-        // Copy the 'months' subcollection
-        const sourceMonthsCol = studentDoc.ref.collection('months');
-        const destMonthsCol = destWeeklyScoresCol.doc(studentDoc.id).collection('months');
-        const monthsSnapshot = await sourceMonthsCol.get();
-        if (!monthsSnapshot.empty) {
-            const monthsBatch = destDb.batch();
-            monthsSnapshot.docs.forEach(monthDoc => {
-                monthsBatch.set(destMonthsCol.doc(monthDoc.id), monthDoc.data());
-            });
-            await monthsBatch.commit();
-        }
-    }
-}
-
-
-function openConfirmLoadDataModal() {
-    confirmLoadDataModal.style.display = 'flex';
-}
-
-function closeConfirmLoadDataModal() {
-    confirmLoadDataModal.style.display = 'none';
+function closeImageModal() {
+    imageModal.style.display = 'none';
+    modalImageContent.src = ''; // Clear src to prevent showing old image briefly
 }
 
 
@@ -2832,19 +2667,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     cancelNewsLimitBtn = document.getElementById('cancelNewsLimitBtn');
     newsLimitEditActions = document.getElementById('newsLimitEditActions');
     newsLimitErrorMessage = document.getElementById('newsLimitErrorMessage');
-
-    // Assign data management DOM elements
-    backupDataBtn = document.getElementById('backupDataBtn');
-    loadDataBtn = document.getElementById('loadDataBtn');
-    confirmLoadDataModal = document.getElementById('confirmLoadDataModal');
-    closeConfirmLoadDataModalBtn = document.getElementById('closeConfirmLoadDataModalBtn');
-    confirmLoadDataFinalBtn = document.getElementById('confirmLoadDataFinalBtn');
-    cancelLoadDataFinalBtn = document.getElementById('cancelLoadDataFinalBtn');
-    statusModal = document.getElementById('statusModal');
-    statusModalTitle = document.getElementById('statusModalTitle');
-    statusModalMessage = document.getElementById('statusModalMessage');
-    statusModalSpinner = document.getElementById('statusModalSpinner');
-
 
     monthlySelectionModal = document.getElementById('monthlySelectionModal');
     closeMonthlySelectionModalBtn = document.getElementById('closeMonthlySelectionModalBtn');
@@ -2986,6 +2808,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     newsTitleInput = document.getElementById('newsTitleInput');
     newsContentInput = document.getElementById('newsContentInput');
     newsImageUrlInput = document.getElementById('newsImageUrlInput');
+    pinNewsToggle = document.getElementById('pinNewsToggle');
+    newsImagePreview = document.getElementById('newsImagePreview');
     addNewsAdminPasswordInput = document.getElementById('addNewsAdminPasswordInput');
     addNewsErrorMessage = document.getElementById('addNewsErrorMessage');
     saveNewsBtn = document.getElementById('saveNewsBtn');
@@ -3002,6 +2826,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     deleteNewsErrorMessage = document.getElementById('deleteNewsErrorMessage');
     confirmDeleteNewsFinalBtn = document.getElementById('confirmDeleteNewsFinalBtn');
     cancelDeleteNewsFinalBtn = document.getElementById('cancelDeleteNewsFinalBtn');
+    // Assign Image Modal elements
+    imageModal = document.getElementById('imageModal');
+    closeImageModalBtn = document.getElementById('closeImageModalBtn');
+    modalImageContent = document.getElementById('modalImageContent');
 
 
     // Initial data population from Firebase
@@ -3159,13 +2987,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     confirmDeleteNewsFinalBtn.addEventListener('click', deleteNewsItemConfirmed);
     cancelDeleteNewsFinalBtn.addEventListener('click', closeConfirmDeleteNewsModal);
 
-    // Data Management Listeners
-    backupDataBtn.addEventListener('click', backupData);
-    loadDataBtn.addEventListener('click', openConfirmLoadDataModal);
-    closeConfirmLoadDataModalBtn.addEventListener('click', closeConfirmLoadDataModal);
-    confirmLoadDataModal.addEventListener('click', (event) => { if (event.target === confirmLoadDataModal) closeConfirmLoadDataModal(); });
-    confirmLoadDataFinalBtn.addEventListener('click', loadData);
-    cancelLoadDataFinalBtn.addEventListener('click', closeConfirmLoadDataModal);
+    // Image Modal Listeners
+    closeImageModalBtn.addEventListener('click', closeImageModal);
+    imageModal.addEventListener('click', (event) => {
+        if (event.target === imageModal) {
+            closeImageModal();
+        }
+    });
+
+    newsImageUrlInput.addEventListener('input', () => {
+        const url = newsImageUrlInput.value.trim();
+        if (url) {
+            newsImagePreview.src = url;
+            newsImagePreview.style.display = 'block';
+            newsImagePreview.onerror = () => {
+                newsImagePreview.style.display = 'none';
+            };
+        } else {
+            newsImagePreview.style.display = 'none';
+        }
+    });
 
 
     if (typeof emailjs !== 'undefined' && !emailjs._isInitialized) {
