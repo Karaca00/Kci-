@@ -331,6 +331,13 @@ let imageModal;
 let closeImageModalBtn;
 let modalImageContent;
 let newsImagePreview;
+// New: News Detail Modal elements
+let newsDetailModal;
+let closeNewsDetailModalBtn;
+let modalNewsTitle;
+let modalNewsImage;
+let modalNewsContent;
+let modalNewsTimestamp;
 
 
 async function loadStudentsFromFirebase() {
@@ -2272,18 +2279,20 @@ async function renderNews() {
                 card.classList.add('pinned');
             }
             card.dataset.id = newsId;
+             card.onclick = (event) => {
+                if (event.target.tagName.toLowerCase() !== 'img') { 
+                    openNewsDetailModal(news);
+                }
+            };
 
             const imageUrl = news.imageUrl;
             const timestamp = news.timestamp ? new Date(news.timestamp.toDate()).toLocaleString('th-TH') : 'ไม่ระบุเวลา';
 
             const imageHtml = imageUrl 
-                ? `<img src="${imageUrl}" alt="News Image" onerror="this.style.display='none';" onclick="openImageModal('${imageUrl}')">`
+                ? `<img src="${imageUrl}" alt="News Image" onerror="this.style.display='none';" onclick="event.stopPropagation(); openImageModal('${imageUrl}')">`
                 : '';
             
-            const pinHtml = news.isPinned ? '<div class="pin-icon">📌</div>' : '';
-
             card.innerHTML = `
-                ${pinHtml}
                 ${imageHtml}
                 <div class="news-card-content">
                     <h3>${news.title}</h3>
@@ -2566,6 +2575,27 @@ function closeImageModal() {
     modalImageContent.src = ''; // Clear src to prevent showing old image briefly
 }
 
+// --- News Detail Modal Functions ---
+function openNewsDetailModal(newsData) {
+    modalNewsTitle.textContent = newsData.title;
+    modalNewsContent.textContent = newsData.content;
+    
+    if (newsData.imageUrl) {
+        modalNewsImage.src = newsData.imageUrl;
+        modalNewsImage.style.display = 'block';
+    } else {
+        modalNewsImage.style.display = 'none';
+    }
+
+    modalNewsTimestamp.textContent = `โพสต์เมื่อ: ${newsData.timestamp ? new Date(newsData.timestamp.toDate()).toLocaleString('th-TH') : 'ไม่ระบุเวลา'}`;
+    
+    newsDetailModal.style.display = 'flex';
+}
+
+function closeNewsDetailModal() {
+    newsDetailModal.style.display = 'none';
+}
+
 
 // --- Event Listeners and Initial Load ---
 
@@ -2830,6 +2860,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     imageModal = document.getElementById('imageModal');
     closeImageModalBtn = document.getElementById('closeImageModalBtn');
     modalImageContent = document.getElementById('modalImageContent');
+    // Assign News Detail Modal elements
+    newsDetailModal = document.getElementById('newsDetailModal');
+    closeNewsDetailModalBtn = document.getElementById('closeNewsDetailModalBtn');
+    modalNewsTitle = document.getElementById('modalNewsTitle');
+    modalNewsImage = document.getElementById('modalNewsImage');
+    modalNewsContent = document.getElementById('modalNewsContent');
+    modalNewsTimestamp = document.getElementById('modalNewsTimestamp');
 
 
     // Initial data population from Firebase
@@ -2992,6 +3029,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     imageModal.addEventListener('click', (event) => {
         if (event.target === imageModal) {
             closeImageModal();
+        }
+    });
+
+    // News Detail Modal Listeners
+    closeNewsDetailModalBtn.addEventListener('click', closeNewsDetailModal);
+    newsDetailModal.addEventListener('click', (event) => {
+        if (event.target === newsDetailModal) {
+            closeNewsDetailModal();
         }
     });
 
