@@ -270,8 +270,8 @@ button:active:not(:disabled) {
 .edit-score-btn { background-color: #f1c40f; color: var(--secondary-color); }
 .edit-score-btn:hover { background-color: #f39c12; }
 
-.add-student-btn, #addNewsBtn { background-color: var(--success-color); color: white; }
-.add-student-btn:hover, #addNewsBtn:hover { background-color: #27ae60; }
+.add-student-btn, .addNewsBtn { background-color: var(--success-color); color: white; }
+.add-student-btn:hover, .addNewsBtn:hover { background-color: #27ae60; }
 
 .delete-student-btn, .settings-button.danger, .confirm-btn.danger, #deleteNewsBtn { background-color: var(--danger-color); color: white; }
 .delete-student-btn:hover, .settings-button.danger:hover, .confirm-btn.danger:hover, #deleteNewsBtn:hover { background-color: #c0392b; }
