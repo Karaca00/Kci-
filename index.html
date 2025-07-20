@@ -25,9 +25,9 @@
         <nav>
             <ul>
                 <li><a href="#" id="navHomeBtn">หน้าหลัก</a></li>
-                <li><a href="#" id="navClassBtn">เก็บค่าห้อง</a></li>
+                <li><a href="#" id="navClassBtn">เกี่ยวกับห้องเรียน</a></li>
                 <li><a href="#" id="navContactBtn">ติดต่อแอดมิน</a></li>
-                <li><a href="#" id="navSettingBtn">ตั้งค่า</a></li>
+                <li><a href="#" id="navSettingBtn">ตั้งค่า (สำหรับแอดมิน)</a></li>
             </ul>
         </nav>
     </header>
@@ -404,6 +404,17 @@
     <div id="imageModal" class="modal-overlay">
         <span class="close-button" id="closeImageModalBtn">&times;</span>
         <img class="modal-image" id="modalImageContent">
+    </div>
+
+    <!-- News Detail Modal -->
+    <div id="newsDetailModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeNewsDetailModalBtn">&times;</span>
+            <h3 id="modalNewsTitle"></h3>
+            <img id="modalNewsImage" src="" alt="News Image" style="display: none;">
+            <p id="modalNewsContent"></p>
+            <div class="news-card-timestamp" id="modalNewsTimestamp"></div>
+        </div>
     </div>
 
 
