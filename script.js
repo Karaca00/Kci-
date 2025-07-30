@@ -67,12 +67,13 @@ let currentPaymentRequirements = {}; // Stores the fetched payment requirements
 // Punishment Summary Month Navigation
 let currentPunishmentMonthIndex; // Will store the index of the month currently displayed in punishment summary
 
-// Chat User ID
+// Chat User ID and Display Name
 let chatUserId = localStorage.getItem('chatUserId');
 if (!chatUserId) {
     chatUserId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     localStorage.setItem('chatUserId', chatUserId);
 }
+let chatDisplayName = localStorage.getItem('chatDisplayName');
 let unsubscribeChatListener = null; // To hold the unsubscribe function for chat
 
 // DOM Elements (Declared here, will be assigned inside DOMContentLoaded)
@@ -383,6 +384,12 @@ let updateNotificationModal;
 let localVersionDisplay;
 let remoteVersionDisplay;
 let refreshPageBtn;
+
+// New: Chat Name Prompt Modal elements
+let namePromptModal;
+let chatNameInput;
+let saveChatNameBtn;
+let chatNameErrorMessage;
 
 
 async function loadStudentsFromFirebase() {
@@ -1916,7 +1923,12 @@ function switchPage(pageName) {
         case 'chat':
             chatPageContainer.classList.add('active');
             navChatBtn.classList.add('active');
-            loadUserChat(); // Load user-specific chat
+            // Check for display name before loading chat
+            if (!chatDisplayName) {
+                namePromptModal.style.display = 'flex';
+            } else {
+                loadGroupChat();
+            }
             break;
         case 'settings':
             settingsContainer.classList.add('active');
@@ -1925,7 +1937,7 @@ function switchPage(pageName) {
             checkAndTrimHistory();
             checkAndTrimNews();
             checkAndTrimChat(); // New: check chat count on settings load
-            loadAdminChat(); // Load admin chat view
+            loadGroupChat(true); // Load admin view of group chat
             break;
     }
 }
@@ -2676,7 +2688,7 @@ function renderMessages(docs, container, currentId) {
         messageBubble.classList.add('message-bubble');
 
         // Check if the message is from the current viewer
-        if (data.senderId === currentId) {
+        if (data.senderId === currentId || (currentId === 'admin' && data.isFromAdmin)) {
             messageWrapper.classList.add('sent');
         } else {
             messageWrapper.classList.add('received');
@@ -2704,50 +2716,35 @@ function renderMessages(docs, container, currentId) {
     container.scrollTop = container.scrollHeight;
 }
 
-// Function to load messages for the user view
-function loadUserChat() {
+// Function to load all messages for the group chat
+function loadGroupChat(isAdminView = false) {
     if (unsubscribeChatListener) unsubscribeChatListener(); // Unsubscribe from previous listener
     
-    unsubscribeChatListener = chatCollection
-        .orderBy('timestamp')
-        .onSnapshot(snapshot => {
-            const messagesToShow = snapshot.docs.filter(doc => {
-                const data = doc.data();
-                // Show message if it's from the admin OR if it's from the current user
-                return data.isFromAdmin || data.senderId === chatUserId;
-            });
-            renderMessages(messagesToShow, userChatMessages, chatUserId);
-        }, error => {
-            console.error("Error loading user chat: ", error);
-            userChatMessages.innerHTML = '<p style="color: red; text-align: center;">เกิดข้อผิดพลาดในการโหลดแชท</p>';
-        });
-}
-
-// Function to load all messages for the admin view
-function loadAdminChat() {
-    if (unsubscribeChatListener) unsubscribeChatListener(); // Unsubscribe from previous listener
+    const container = isAdminView ? adminChatMessages : userChatMessages;
+    const currentId = isAdminView ? 'admin' : chatUserId;
 
     unsubscribeChatListener = chatCollection
         .orderBy('timestamp')
         .onSnapshot(snapshot => {
-            renderMessages(snapshot.docs, adminChatMessages, 'admin');
+            renderMessages(snapshot.docs, container, currentId);
         }, error => {
-            console.error("Error loading admin chat: ", error);
-            adminChatMessages.innerHTML = '<p style="color: red; text-align: center;">เกิดข้อผิดพลาดในการโหลดแชท</p>';
+            console.error("Error loading group chat: ", error);
+            container.innerHTML = '<p style="color: red; text-align: center;">เกิดข้อผิดพลาดในการโหลดแชท</p>';
         });
 }
+
 
 // Function to handle user sending a message
 async function handleUserChatSubmit(e) {
     e.preventDefault();
     const messageText = userChatMessageInput.value.trim();
-    if (messageText === '') return;
+    if (messageText === '' || !chatDisplayName) return;
 
     try {
         await chatCollection.add({
             text: messageText,
             senderId: chatUserId,
-            senderName: `User (${chatUserId.substring(5, 11)})`,
+            senderName: chatDisplayName,
             isFromAdmin: false,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -2778,6 +2775,21 @@ async function handleAdminChatSubmit(e) {
         console.error("Error sending admin message:", error);
     }
 }
+
+// --- NEW: Chat Name Prompt Functions ---
+function handleSaveChatName() {
+    const name = chatNameInput.value.trim();
+    if (name.length > 0 && name.length <= 25) {
+        chatDisplayName = name;
+        localStorage.setItem('chatDisplayName', name);
+        namePromptModal.style.display = 'none';
+        chatNameErrorMessage.textContent = '';
+        loadGroupChat(); // Load chat after name is set
+    } else {
+        chatNameErrorMessage.textContent = 'กรุณาใส่ชื่อที่มีความยาว 1-25 ตัวอักษร';
+    }
+}
+
 
 // --- NEW: Clear Chat Functions ---
 function openConfirmClearChatModal() {
@@ -2890,28 +2902,33 @@ async function handleSaveChatLimit() {
 }
 
 // --- NEW: Update Checker ---
-async function checkForUpdates() {
-    try {
-        const doc = await versionDocRef.get();
+function checkForUpdates() {
+    versionDocRef.onSnapshot(doc => {
         if (doc.exists) {
             const remoteVersion = doc.data().version;
-            if (remoteVersion && remoteVersion !== LOCAL_VERSION) {
+            // Check if an update is needed and the modal is not already shown
+            if (remoteVersion && remoteVersion !== LOCAL_VERSION && updateNotificationModal.style.display !== 'flex') {
                 console.log(`Update available! Local: ${LOCAL_VERSION}, Remote: ${remoteVersion}`);
                 // Show update notification modal
                 localVersionDisplay.textContent = LOCAL_VERSION;
                 remoteVersionDisplay.textContent = remoteVersion;
                 updateNotificationModal.style.display = 'flex';
-            } else {
-                console.log("App is up to date.");
+            } else if (remoteVersion === LOCAL_VERSION) {
+                 console.log("App is up to date.");
             }
         } else {
             // If the version document doesn't exist, create it with the current local version.
-            await versionDocRef.set({ version: LOCAL_VERSION });
-            console.log(`Version document created with version ${LOCAL_VERSION}.`);
+            versionDocRef.set({ version: LOCAL_VERSION })
+                .then(() => {
+                    console.log(`Version document created with version ${LOCAL_VERSION}.`);
+                })
+                .catch(error => {
+                    console.error("Error creating version document:", error);
+                });
         }
-    } catch (error) {
-        console.error("Error checking for updates:", error);
-    }
+    }, error => {
+        console.error("Error with real-time update checker:", error);
+    });
 }
 
 
@@ -3221,11 +3238,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     remoteVersionDisplay = document.getElementById('remoteVersionDisplay');
     refreshPageBtn = document.getElementById('refreshPageBtn');
 
+    // Assign Chat Name Prompt Modal elements
+    namePromptModal = document.getElementById('namePromptModal');
+    chatNameInput = document.getElementById('chatNameInput');
+    saveChatNameBtn = document.getElementById('saveChatNameBtn');
+    chatNameErrorMessage = document.getElementById('chatNameErrorMessage');
+
 
     // Initial data population from Firebase
     await loadStudentsFromFirebase();
     await loadPaymentRequirements();
-    await checkForUpdates(); // New: Check for updates on load
+    checkForUpdates(); // New: Set up real-time update listener
 
     // --- Hide Loader and Show Initial Page ---
     setTimeout(() => {
@@ -3428,6 +3451,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     userChatForm.addEventListener('submit', handleUserChatSubmit);
     adminChatForm.addEventListener('submit', handleAdminChatSubmit);
     clearChatBtn.addEventListener('click', openConfirmClearChatModal);
+    saveChatNameBtn.addEventListener('click', handleSaveChatName);
+
 
     // --- Update Notification Listener ---
     refreshPageBtn.addEventListener('click', () => {
