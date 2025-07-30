@@ -49,7 +49,7 @@ const versionDocRef = appSettingsCollection.doc('version'); // New: Version docu
 
 // Admin password (for demonstration, use Firebase Security Rules in production)
 const ADMIN_PASSWORD = "1230166";
-const LOCAL_VERSION = "1.1.0"; // New: Define local version of the web app
+const LOCAL_VERSION = "1.1.1"; // New: Define local version of the web app
 
 let currentStudentId = null; // Store the ID of the student whose details or scores are currently open
 let currentAllStudentsWeeklyScoresMonth = null; // Store the currently selected month for all students' scores
