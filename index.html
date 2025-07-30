@@ -326,7 +326,7 @@
         <!-- Chat Page Content -->
         <div id="chatPageContainer" class="page-content">
             <div class="table-container">
-                <h2>แชทกับแอดมิน</h2>
+                <h2>แชทกลุ่ม</h2>
                 <div id="userChatContainer" class="chat-container">
                     <div id="userChatMessages" class="chat-messages">
                         <!-- Messages will be loaded here -->
@@ -469,6 +469,22 @@
             <p>เวอร์ชันใหม่: <span id="remoteVersionDisplay"></span></p>
             <div class="modal-actions">
                 <button class="confirm-btn" id="refreshPageBtn">รีเฟรชเลย</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Name Prompt Modal -->
+    <div id="namePromptModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>ตั้งชื่อที่แสดงในแชท</h3>
+            <p>กรุณาตั้งชื่อที่จะใช้แสดงในแชทกลุ่ม</p>
+            <div class="form-field-item" style="margin-top: 20px;">
+                <label for="chatNameInput">ชื่อของคุณ:</label>
+                <input type="text" id="chatNameInput" placeholder="ใส่ชื่อ..." maxlength="25">
+            </div>
+            <p id="chatNameErrorMessage" class="error-message"></p>
+            <div class="modal-actions">
+                <button class="save-btn" id="saveChatNameBtn">บันทึก</button>
             </div>
         </div>
     </div>
