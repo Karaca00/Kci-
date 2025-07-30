@@ -42,11 +42,14 @@ const weeklyScoresCollection = db.collection('studentWeeklyScores');
 const saveHistoryCollection = db.collection('saveHistory');
 const appSettingsCollection = db.collection('settings');
 const newsCollection = db.collection('news');
+const chatCollection = db.collection('chatMessages'); // New: Chat collection
 const appSettingsDocRef = appSettingsCollection.doc('appSettings');
 const paymentRequirementsDocRef = appSettingsCollection.doc('paymentRequirements');
+const versionDocRef = appSettingsCollection.doc('version'); // New: Version document reference
 
 // Admin password (for demonstration, use Firebase Security Rules in production)
 const ADMIN_PASSWORD = "1230166";
+const LOCAL_VERSION = "1.1.0"; // New: Define local version of the web app
 
 let currentStudentId = null; // Store the ID of the student whose details or scores are currently open
 let currentAllStudentsWeeklyScoresMonth = null; // Store the currently selected month for all students' scores
@@ -63,6 +66,14 @@ let currentPaymentRequirements = {}; // Stores the fetched payment requirements
 
 // Punishment Summary Month Navigation
 let currentPunishmentMonthIndex; // Will store the index of the month currently displayed in punishment summary
+
+// Chat User ID
+let chatUserId = localStorage.getItem('chatUserId');
+if (!chatUserId) {
+    chatUserId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem('chatUserId', chatUserId);
+}
+let unsubscribeChatListener = null; // To hold the unsubscribe function for chat
 
 // DOM Elements (Declared here, will be assigned inside DOMContentLoaded)
 let loader;
@@ -119,6 +130,7 @@ let homePlaceholderContainer;
 let classPageContainer;
 let settingsContainer;
 let contactAdminContainer;
+let chatPageContainer; // New: Chat Page
 
 // Content Section Containers within Class Page
 let studentListTableContainer;
@@ -214,6 +226,7 @@ let cancelSettingsAdminPasswordBtn;
 let navHomeBtn;
 let navClassBtn;
 let navContactBtn;
+let navChatBtn; // New: Chat nav button
 let navSettingBtn;
 
 // New: Student Add/Delete buttons
@@ -338,6 +351,38 @@ let modalNewsTitle;
 let modalNewsImage;
 let modalNewsContent;
 let modalNewsTimestamp;
+
+// --- Chat System DOM Elements ---
+let userChatContainer;
+let userChatMessages;
+let userChatForm;
+let userChatMessageInput;
+let adminChatContainer;
+let adminChatMessages;
+let adminChatForm;
+let adminChatMessageInput;
+let clearChatBtn;
+// New: Chat settings DOM elements
+let chatCountDisplay;
+let autoDeleteChatToggle;
+let chatLimitInput;
+let editChatLimitBtn;
+let saveChatLimitBtn;
+let cancelChatLimitBtn;
+let chatLimitEditActions;
+let chatLimitErrorMessage;
+
+// New: Confirm Clear Chat Modal elements
+let confirmClearChatModal;
+let closeConfirmClearChatModalBtn;
+let confirmClearChatFinalBtn;
+let cancelClearChatFinalBtn;
+
+// New: Update Notification Modal elements
+let updateNotificationModal;
+let localVersionDisplay;
+let remoteVersionDisplay;
+let refreshPageBtn;
 
 
 async function loadStudentsFromFirebase() {
@@ -1472,19 +1517,26 @@ async function loadAppSettings() {
             // News settings
             autoDeleteNewsToggle.checked = settings.autoDeleteNewsEnabled || false;
             newsLimitInput.value = settings.newsLimit || 10;
+            // Chat settings
+            autoDeleteChatToggle.checked = settings.autoDeleteChatEnabled || false;
+            chatLimitInput.value = settings.chatLimit || 200;
         } else {
             // Set default settings if document doesn't exist
             const defaultSettings = {
                 autoDeleteEnabled: false,
                 historyLimit: 100,
                 autoDeleteNewsEnabled: false,
-                newsLimit: 10
+                newsLimit: 10,
+                autoDeleteChatEnabled: false,
+                chatLimit: 200
             };
             await appSettingsDocRef.set(defaultSettings);
             autoDeleteToggle.checked = defaultSettings.autoDeleteEnabled;
             historyLimitInput.value = defaultSettings.historyLimit;
             autoDeleteNewsToggle.checked = defaultSettings.autoDeleteNewsEnabled;
             newsLimitInput.value = defaultSettings.newsLimit;
+            autoDeleteChatToggle.checked = defaultSettings.autoDeleteChatEnabled;
+            chatLimitInput.value = defaultSettings.chatLimit;
         }
     } catch (error) {
         console.error("Error loading app settings:", error);
@@ -1838,6 +1890,13 @@ function switchPage(pageName) {
     document.querySelectorAll('#app-container > .page-content').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('nav ul li a').forEach(link => link.classList.remove('active'));
 
+    // Unsubscribe from any active chat listener when switching pages
+    if (unsubscribeChatListener) {
+        unsubscribeChatListener();
+        unsubscribeChatListener = null;
+        console.log("Unsubscribed from chat listener.");
+    }
+
     switch (pageName) {
         case 'home':
             homePlaceholderContainer.classList.add('active');
@@ -1854,12 +1913,19 @@ function switchPage(pageName) {
             navContactBtn.classList.add('active');
             generateCaptcha();
             break;
+        case 'chat':
+            chatPageContainer.classList.add('active');
+            navChatBtn.classList.add('active');
+            loadUserChat(); // Load user-specific chat
+            break;
         case 'settings':
             settingsContainer.classList.add('active');
             navSettingBtn.classList.add('active');
             loadAppSettings();
             checkAndTrimHistory();
-            checkAndTrimNews(); // Also check news count when visiting settings
+            checkAndTrimNews();
+            checkAndTrimChat(); // New: check chat count on settings load
+            loadAdminChat(); // Load admin chat view
             break;
     }
 }
@@ -2596,6 +2662,258 @@ function closeNewsDetailModal() {
     newsDetailModal.style.display = 'none';
 }
 
+// --- CHAT SYSTEM FUNCTIONS ---
+
+// Function to render messages in a given container
+function renderMessages(docs, container, currentId) {
+    container.innerHTML = ''; // Clear existing messages
+    docs.forEach(doc => {
+        const data = doc.data();
+        const messageWrapper = document.createElement('div');
+        messageWrapper.classList.add('chat-message');
+
+        const messageBubble = document.createElement('div');
+        messageBubble.classList.add('message-bubble');
+
+        // Check if the message is from the current viewer
+        if (data.senderId === currentId) {
+            messageWrapper.classList.add('sent');
+        } else {
+            messageWrapper.classList.add('received');
+            // Add sender name for received messages
+            const senderName = document.createElement('p');
+            senderName.classList.add('message-sender-name');
+            senderName.style.fontWeight = 'bold';
+            senderName.textContent = data.senderName || 'Anonymous';
+            messageBubble.appendChild(senderName);
+        }
+
+        const messageText = document.createElement('p');
+        messageText.textContent = data.text;
+        messageBubble.appendChild(messageText);
+
+        const timestamp = document.createElement('span');
+        timestamp.classList.add('message-timestamp');
+        timestamp.textContent = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+        messageBubble.appendChild(timestamp);
+        
+        messageWrapper.appendChild(messageBubble);
+        container.appendChild(messageWrapper);
+    });
+    // Scroll to the bottom of the chat container
+    container.scrollTop = container.scrollHeight;
+}
+
+// Function to load messages for the user view
+function loadUserChat() {
+    if (unsubscribeChatListener) unsubscribeChatListener(); // Unsubscribe from previous listener
+    
+    unsubscribeChatListener = chatCollection
+        .orderBy('timestamp')
+        .onSnapshot(snapshot => {
+            const messagesToShow = snapshot.docs.filter(doc => {
+                const data = doc.data();
+                // Show message if it's from the admin OR if it's from the current user
+                return data.isFromAdmin || data.senderId === chatUserId;
+            });
+            renderMessages(messagesToShow, userChatMessages, chatUserId);
+        }, error => {
+            console.error("Error loading user chat: ", error);
+            userChatMessages.innerHTML = '<p style="color: red; text-align: center;">เกิดข้อผิดพลาดในการโหลดแชท</p>';
+        });
+}
+
+// Function to load all messages for the admin view
+function loadAdminChat() {
+    if (unsubscribeChatListener) unsubscribeChatListener(); // Unsubscribe from previous listener
+
+    unsubscribeChatListener = chatCollection
+        .orderBy('timestamp')
+        .onSnapshot(snapshot => {
+            renderMessages(snapshot.docs, adminChatMessages, 'admin');
+        }, error => {
+            console.error("Error loading admin chat: ", error);
+            adminChatMessages.innerHTML = '<p style="color: red; text-align: center;">เกิดข้อผิดพลาดในการโหลดแชท</p>';
+        });
+}
+
+// Function to handle user sending a message
+async function handleUserChatSubmit(e) {
+    e.preventDefault();
+    const messageText = userChatMessageInput.value.trim();
+    if (messageText === '') return;
+
+    try {
+        await chatCollection.add({
+            text: messageText,
+            senderId: chatUserId,
+            senderName: `User (${chatUserId.substring(5, 11)})`,
+            isFromAdmin: false,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        userChatMessageInput.value = ''; // Clear input field
+        await checkAndTrimChat(); // Check if trimming is needed
+    } catch (error) {
+        console.error("Error sending user message:", error);
+    }
+}
+
+// Function to handle admin sending a message
+async function handleAdminChatSubmit(e) {
+    e.preventDefault();
+    const messageText = adminChatMessageInput.value.trim();
+    if (messageText === '') return;
+
+    try {
+        await chatCollection.add({
+            text: messageText,
+            senderId: 'admin',
+            senderName: 'แอดมิน',
+            isFromAdmin: true,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        adminChatMessageInput.value = ''; // Clear input field
+        await checkAndTrimChat(); // Check if trimming is needed
+    } catch (error) {
+        console.error("Error sending admin message:", error);
+    }
+}
+
+// --- NEW: Clear Chat Functions ---
+function openConfirmClearChatModal() {
+    confirmClearChatModal.style.display = 'flex';
+}
+
+function closeConfirmClearChatModal() {
+    confirmClearChatModal.style.display = 'none';
+}
+
+async function clearAllChatMessages() {
+    try {
+        const snapshot = await chatCollection.get();
+        if (snapshot.empty) {
+            console.log("No chat messages to delete.");
+            closeConfirmClearChatModal();
+            return;
+        }
+
+        const batch = db.batch();
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        console.log("All chat messages have been deleted.");
+        closeConfirmClearChatModal();
+        // The real-time listener will automatically update the view.
+    } catch (error) {
+        console.error("Error clearing all chat messages:", error);
+        // You might want to show an error message in the modal here
+    }
+}
+
+// --- NEW: Chat Settings ---
+async function checkAndTrimChat() {
+    try {
+        const settingsDoc = await appSettingsDocRef.get();
+        if (!settingsDoc.exists) return;
+
+        const settings = settingsDoc.data();
+
+        // Use get() for a one-time count to avoid conflicts with real-time listener
+        const snapshot = await chatCollection.get();
+        const currentCount = snapshot.size;
+
+        if (chatCountDisplay) {
+            chatCountDisplay.textContent = `จำนวนข้อความแชทปัจจุบัน: ${currentCount}`;
+        }
+
+        if (!settings.autoDeleteChatEnabled) {
+            return;
+        }
+
+        const limit = settings.chatLimit || 200;
+
+        if (currentCount > limit) {
+            const recordsToDeleteCount = currentCount - limit;
+            // Query for the oldest messages to delete
+            const oldMessagesQuery = chatCollection.orderBy('timestamp', 'asc').limit(recordsToDeleteCount);
+            const oldMessagesSnapshot = await oldMessagesQuery.get();
+            
+            const batch = db.batch();
+            oldMessagesSnapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            console.log(`Deleted ${oldMessagesSnapshot.size} old chat messages.`);
+            if (chatCountDisplay) {
+                chatCountDisplay.textContent = `จำนวนข้อความแชทปัจจุบัน: ${limit}`;
+            }
+        }
+    } catch (error) {
+        console.error("Error checking and trimming chat messages:", error);
+    }
+}
+
+function toggleChatLimitEditMode(isEditMode) {
+    if (isEditMode) {
+        chatLimitInput.removeAttribute('readonly');
+        editChatLimitBtn.style.display = 'none';
+        chatLimitEditActions.style.display = 'flex';
+    } else {
+        chatLimitInput.setAttribute('readonly', true);
+        editChatLimitBtn.style.display = 'inline-block';
+        chatLimitEditActions.style.display = 'none';
+        chatLimitErrorMessage.textContent = '';
+        loadAppSettings(); // Revert to saved value
+    }
+}
+
+async function handleSaveChatLimit() {
+    chatLimitErrorMessage.textContent = "";
+    const newLimit = parseInt(chatLimitInput.value);
+    if (isNaN(newLimit) || newLimit <= 0) {
+        chatLimitErrorMessage.textContent = "ขีดจำกัดต้องเป็นตัวเลขและมากกว่า 0";
+        return;
+    }
+
+    const currentSettings = (await appSettingsDocRef.get()).data() || {};
+    const updatedSettings = { ...currentSettings, chatLimit: newLimit };
+
+    const success = await saveAppSettings(updatedSettings);
+    if (success) {
+        toggleChatLimitEditMode(false);
+        await checkAndTrimChat(); // Run trim immediately
+    } else {
+        chatLimitErrorMessage.textContent = "เกิดข้อผิดพลาดในการบันทึก";
+    }
+}
+
+// --- NEW: Update Checker ---
+async function checkForUpdates() {
+    try {
+        const doc = await versionDocRef.get();
+        if (doc.exists) {
+            const remoteVersion = doc.data().version;
+            if (remoteVersion && remoteVersion !== LOCAL_VERSION) {
+                console.log(`Update available! Local: ${LOCAL_VERSION}, Remote: ${remoteVersion}`);
+                // Show update notification modal
+                localVersionDisplay.textContent = LOCAL_VERSION;
+                remoteVersionDisplay.textContent = remoteVersion;
+                updateNotificationModal.style.display = 'flex';
+            } else {
+                console.log("App is up to date.");
+            }
+        } else {
+            // If the version document doesn't exist, create it with the current local version.
+            await versionDocRef.set({ version: LOCAL_VERSION });
+            console.log(`Version document created with version ${LOCAL_VERSION}.`);
+        }
+    } catch (error) {
+        console.error("Error checking for updates:", error);
+    }
+}
+
 
 // --- Event Listeners and Initial Load ---
 
@@ -2655,6 +2973,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     classPageContainer = document.getElementById('classPageContainer');
     settingsContainer = document.getElementById('settingsContainer');
     contactAdminContainer = document.getElementById('contactAdminContainer');
+    chatPageContainer = document.getElementById('chatPageContainer');
 
     // Content Section Containers
     studentListTableContainer = document.getElementById('studentListTableContainer');
@@ -2697,6 +3016,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     cancelNewsLimitBtn = document.getElementById('cancelNewsLimitBtn');
     newsLimitEditActions = document.getElementById('newsLimitEditActions');
     newsLimitErrorMessage = document.getElementById('newsLimitErrorMessage');
+
+    // Assign chat settings DOM elements
+    chatCountDisplay = document.getElementById('chatCountDisplay');
+    autoDeleteChatToggle = document.getElementById('autoDeleteChatToggle');
+    chatLimitInput = document.getElementById('chatLimitInput');
+    editChatLimitBtn = document.getElementById('editChatLimitBtn');
+    saveChatLimitBtn = document.getElementById('saveChatLimitBtn');
+    cancelChatLimitBtn = document.getElementById('cancelChatLimitBtn');
+    chatLimitEditActions = document.getElementById('chatLimitEditActions');
+    chatLimitErrorMessage = document.getElementById('chatLimitErrorMessage');
 
     monthlySelectionModal = document.getElementById('monthlySelectionModal');
     closeMonthlySelectionModalBtn = document.getElementById('closeMonthlySelectionModalBtn');
@@ -2749,6 +3078,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     navHomeBtn = document.getElementById('navHomeBtn');
     navClassBtn = document.getElementById('navClassBtn');
     navContactBtn = document.getElementById('navContactBtn');
+    navChatBtn = document.getElementById('navChatBtn');
     navSettingBtn = document.getElementById('navSettingBtn');
 
     // New: Student Add/Delete buttons
@@ -2868,10 +3198,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalNewsContent = document.getElementById('modalNewsContent');
     modalNewsTimestamp = document.getElementById('modalNewsTimestamp');
 
+    // Assign Chat System DOM elements
+    userChatContainer = document.getElementById('userChatContainer');
+    userChatMessages = document.getElementById('userChatMessages');
+    userChatForm = document.getElementById('userChatForm');
+    userChatMessageInput = document.getElementById('userChatMessageInput');
+    adminChatContainer = document.getElementById('adminChatContainer');
+    adminChatMessages = document.getElementById('adminChatMessages');
+    adminChatForm = document.getElementById('adminChatForm');
+    adminChatMessageInput = document.getElementById('adminChatMessageInput');
+    clearChatBtn = document.getElementById('clearChatBtn');
+
+    // Assign Confirm Clear Chat Modal elements
+    confirmClearChatModal = document.getElementById('confirmClearChatModal');
+    closeConfirmClearChatModalBtn = document.getElementById('closeConfirmClearChatModalBtn');
+    confirmClearChatFinalBtn = document.getElementById('confirmClearChatFinalBtn');
+    cancelClearChatFinalBtn = document.getElementById('cancelClearChatFinalBtn');
+
+    // Assign Update Notification Modal elements
+    updateNotificationModal = document.getElementById('updateNotificationModal');
+    localVersionDisplay = document.getElementById('localVersionDisplay');
+    remoteVersionDisplay = document.getElementById('remoteVersionDisplay');
+    refreshPageBtn = document.getElementById('refreshPageBtn');
+
 
     // Initial data population from Firebase
     await loadStudentsFromFirebase();
     await loadPaymentRequirements();
+    await checkForUpdates(); // New: Check for updates on load
 
     // --- Hide Loader and Show Initial Page ---
     setTimeout(() => {
@@ -2887,6 +3241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     navHomeBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('home'); });
     navClassBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('class'); });
     navContactBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('contact'); });
+    navChatBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('chat'); });
     navSettingBtn.addEventListener('click', (e) => { e.preventDefault(); openSettingsAdminPasswordModal(); });
 
     // --- Event Listeners for Class Page Toggle Buttons ---
@@ -2979,6 +3334,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveNewsLimitBtn.addEventListener('click', handleSaveNewsLimit);
     cancelNewsLimitBtn.addEventListener('click', () => toggleNewsLimitEditMode(false));
 
+    // New: Chat Settings Listeners
+    autoDeleteChatToggle.addEventListener('change', async () => {
+        const currentSettings = (await appSettingsDocRef.get()).data() || {};
+        await saveAppSettings({ ...currentSettings, autoDeleteChatEnabled: autoDeleteChatToggle.checked });
+        await checkAndTrimChat();
+    });
+    editChatLimitBtn.addEventListener('click', () => toggleChatLimitEditMode(true));
+    saveChatLimitBtn.addEventListener('click', handleSaveChatLimit);
+    cancelChatLimitBtn.addEventListener('click', () => toggleChatLimitEditMode(false));
+
 
     closeSettingsAdminPasswordModalBtn.addEventListener('click', () => { closeSettingsAdminPasswordModal(); switchPage('home'); });
     settingsAdminPasswordModal.addEventListener('click', (event) => { if (event.target === settingsAdminPasswordModal) { closeSettingsAdminPasswordModal(); switchPage('home'); } });
@@ -3024,6 +3389,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     confirmDeleteNewsFinalBtn.addEventListener('click', deleteNewsItemConfirmed);
     cancelDeleteNewsFinalBtn.addEventListener('click', closeConfirmDeleteNewsModal);
 
+    // Confirm Clear Chat Modal Listeners
+    closeConfirmClearChatModalBtn.addEventListener('click', closeConfirmClearChatModal);
+    confirmClearChatModal.addEventListener('click', (event) => { if (event.target === confirmClearChatModal) closeConfirmClearChatModal(); });
+    confirmClearChatFinalBtn.addEventListener('click', clearAllChatMessages);
+    cancelClearChatFinalBtn.addEventListener('click', closeConfirmClearChatModal);
+
     // Image Modal Listeners
     closeImageModalBtn.addEventListener('click', closeImageModal);
     imageModal.addEventListener('click', (event) => {
@@ -3051,6 +3422,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             newsImagePreview.style.display = 'none';
         }
+    });
+
+    // --- Chat System Event Listeners ---
+    userChatForm.addEventListener('submit', handleUserChatSubmit);
+    adminChatForm.addEventListener('submit', handleAdminChatSubmit);
+    clearChatBtn.addEventListener('click', openConfirmClearChatModal);
+
+    // --- Update Notification Listener ---
+    refreshPageBtn.addEventListener('click', () => {
+        location.reload();
     });
 
 
