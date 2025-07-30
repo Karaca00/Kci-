@@ -27,7 +27,8 @@
                 <li><a href="#" id="navHomeBtn">หน้าหลัก</a></li>
                 <li><a href="#" id="navClassBtn">เกี่ยวกับห้องเรียน</a></li>
                 <li><a href="#" id="navContactBtn">ติดต่อแอดมิน</a></li>
-                <li><a href="#" id="navSettingBtn">ตั้งค่า (สำหรับแอดมิน)</a></li>
+                <li><a href="#" id="navChatBtn">แชท</a></li>
+                <li><a href="#" id="navSettingBtn">Menu Admin</a></li>
             </ul>
         </nav>
     </header>
@@ -266,6 +267,37 @@
                     <p id="newsLimitErrorMessage" class="error-message"></p>
                 </div>
             </div>
+             <!-- Admin Chat Section -->
+            <div class="settings-section">
+                <h2>แชท (Admin)</h2>
+                <div id="adminChatContainer" class="chat-container">
+                    <div id="adminChatMessages" class="chat-messages">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    <form id="adminChatForm" class="chat-input-form">
+                        <input type="text" id="adminChatMessageInput" placeholder="พิมพ์ข้อความในฐานะแอดมิน..." autocomplete="off">
+                        <button type="submit">ส่ง</button>
+                    </form>
+                </div>
+                <div id="chatCountDisplay" class="setting-item" style="margin-top: 15px;"></div>
+                <div class="setting-item toggle-container">
+                    <label for="autoDeleteChatToggle">ลบข้อความแชทอัตโนมัติ:</label>
+                    <input type="checkbox" id="autoDeleteChatToggle" class="toggle-switch">
+                </div>
+                <div class="setting-item">
+                    <label for="chatLimitInput">ขีดจำกัดข้อความ:</label>
+                    <div class="input-group">
+                        <input type="number" id="chatLimitInput" min="1" value="200" readonly>
+                        <button id="editChatLimitBtn" class="edit-btn">แก้ไข</button>
+                        <div id="chatLimitEditActions" style="display: none;">
+                            <button id="saveChatLimitBtn" class="save-btn">บันทึก</button>
+                            <button class="cancel-btn" id="cancelChatLimitBtn">ยกเลิก</button>
+                        </div>
+                    </div>
+                    <p id="chatLimitErrorMessage" class="error-message"></p>
+                </div>
+                <button id="clearChatBtn" class="settings-button danger" style="margin-top: 15px;">ลบข้อความแชททั้งหมด</button>
+            </div>
         </div>
 
 
@@ -290,6 +322,23 @@
                 <div id="contactStatus"></div>
             </form>
         </div>
+
+        <!-- Chat Page Content -->
+        <div id="chatPageContainer" class="page-content">
+            <div class="table-container">
+                <h2>แชทกับแอดมิน</h2>
+                <div id="userChatContainer" class="chat-container">
+                    <div id="userChatMessages" class="chat-messages">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    <form id="userChatForm" class="chat-input-form">
+                        <input type="text" id="userChatMessageInput" placeholder="พิมพ์ข้อความ..." autocomplete="off">
+                        <button type="submit">ส่ง</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- ===== Modals ===== -->
@@ -393,6 +442,33 @@
             <div class="modal-actions">
                 <button class="confirm-btn danger" id="confirmDeleteNewsFinalBtn">ยืนยันการลบ</button>
                 <button class="cancel-btn" id="cancelDeleteNewsFinalBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Clear Chat Modal -->
+    <div id="confirmClearChatModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeConfirmClearChatModalBtn">&times;</span>
+            <h3>ยืนยันการลบข้อความแชททั้งหมด</h3>
+            <p>คุณแน่ใจหรือไม่ที่จะลบข้อความแชททั้งหมด?</p>
+            <p style="color: #e74c3c; font-weight: bold; margin-top: 10px;">การดำเนินการนี้ไม่สามารถย้อนกลับได้!</p>
+            <div class="modal-actions">
+                <button class="confirm-btn danger" id="confirmClearChatFinalBtn">ยืนยัน</button>
+                <button class="cancel-btn" id="cancelClearChatFinalBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Notification Modal -->
+    <div id="updateNotificationModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>มีเวอร์ชันใหม่พร้อมใช้งาน!</h3>
+            <p>มีการอัปเดตใหม่สำหรับเว็บไซต์นี้ เพื่อให้ได้ประสบการณ์การใช้งานที่ดีที่สุด กรุณารีเฟรชหน้าเว็บ</p>
+            <p>เวอร์ชันปัจจุบัน: <span id="localVersionDisplay"></span></p>
+            <p>เวอร์ชันใหม่: <span id="remoteVersionDisplay"></span></p>
+            <div class="modal-actions">
+                <button class="confirm-btn" id="refreshPageBtn">รีเฟรชเลย</button>
             </div>
         </div>
     </div>
