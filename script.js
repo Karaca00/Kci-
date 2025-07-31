@@ -8,7 +8,7 @@ function getStudentNumberFromId(id) {
 
 // Admin password (for demonstration, use Firebase Security Rules in production)
 const ADMIN_PASSWORD = "1230166";
-const LOCAL_VERSION = "1.1.1"; // New: Define local version of the web app
+const LOCAL_VERSION = "1.2.0"; // New: Define local version of the web app
 
 // Student data for Class 3/1 (initial - will be overwritten by Firebase data)
 // Removed hardcoded initialStudents array as per user request.
