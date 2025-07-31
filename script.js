@@ -6,6 +6,10 @@ function getStudentNumberFromId(id) {
     return parseInt(id);
 }
 
+// Admin password (for demonstration, use Firebase Security Rules in production)
+const ADMIN_PASSWORD = "1230166";
+const LOCAL_VERSION = "1.1.1"; // New: Define local version of the web app
+
 // Student data for Class 3/1 (initial - will be overwritten by Firebase data)
 // Removed hardcoded initialStudents array as per user request.
 // Data will now be loaded solely from Firebase.
@@ -46,10 +50,6 @@ const chatCollection = db.collection('chatMessages'); // New: Chat collection
 const appSettingsDocRef = appSettingsCollection.doc('appSettings');
 const paymentRequirementsDocRef = appSettingsCollection.doc('paymentRequirements');
 const versionDocRef = appSettingsCollection.doc('version'); // New: Version document reference
-
-// Admin password (for demonstration, use Firebase Security Rules in production)
-const ADMIN_PASSWORD = "1230166";
-const LOCAL_VERSION = "1.1.1"; // New: Define local version of the web app
 
 let currentStudentId = null; // Store the ID of the student whose details or scores are currently open
 let currentAllStudentsWeeklyScoresMonth = null; // Store the currently selected month for all students' scores
@@ -390,6 +390,10 @@ let namePromptModal;
 let chatNameInput;
 let saveChatNameBtn;
 let chatNameErrorMessage;
+
+// New: Chat Name Display elements
+let currentUserChatName;
+let changeChatNameBtn;
 
 
 async function loadStudentsFromFirebase() {
@@ -1927,7 +1931,10 @@ function switchPage(pageName) {
             if (!chatDisplayName) {
                 namePromptModal.style.display = 'flex';
             } else {
+                // START: Updated section
+                currentUserChatName.textContent = `ชื่อที่แสดง: ${chatDisplayName}`;
                 loadGroupChat();
+                // END: Updated section
             }
             break;
         case 'settings':
@@ -2700,6 +2707,14 @@ function renderMessages(docs, container, currentId) {
             messageBubble.appendChild(senderName);
         }
 
+        // NEW: Add admin badge and special class for admin messages
+        if (data.isFromAdmin) {
+            messageBubble.classList.add('admin-message'); // Add a special class
+            const adminBadge = document.createElement('strong');
+            adminBadge.classList.add('admin-badge');
+            messageBubble.appendChild(adminBadge); // Add badge to the bubble
+        }
+
         const messageText = document.createElement('p');
         messageText.textContent = data.text;
         messageBubble.appendChild(messageText);
@@ -2782,9 +2797,19 @@ function handleSaveChatName() {
     if (name.length > 0 && name.length <= 25) {
         chatDisplayName = name;
         localStorage.setItem('chatDisplayName', name);
+
+        // NEW: Update the name display on the chat page immediately
+        if(currentUserChatName) {
+            currentUserChatName.textContent = `ชื่อที่แสดง: ${chatDisplayName}`;
+        }
+        
         namePromptModal.style.display = 'none';
         chatNameErrorMessage.textContent = '';
-        loadGroupChat(); // Load chat after name is set
+        
+        // Load chat if it's not already loaded
+        if (activePage === 'chat' && !unsubscribeChatListener) {
+            loadGroupChat();
+        }
     } else {
         chatNameErrorMessage.textContent = 'กรุณาใส่ชื่อที่มีความยาว 1-25 ตัวอักษร';
     }
@@ -3244,6 +3269,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveChatNameBtn = document.getElementById('saveChatNameBtn');
     chatNameErrorMessage = document.getElementById('chatNameErrorMessage');
 
+    // NEW: Assign chat name display elements
+    currentUserChatName = document.getElementById('currentUserChatName');
+    changeChatNameBtn = document.getElementById('changeChatNameBtn');
+
 
     // Initial data population from Firebase
     await loadStudentsFromFirebase();
@@ -3452,6 +3481,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     adminChatForm.addEventListener('submit', handleAdminChatSubmit);
     clearChatBtn.addEventListener('click', openConfirmClearChatModal);
     saveChatNameBtn.addEventListener('click', handleSaveChatName);
+
+    // NEW: Event listener for the change name button
+    changeChatNameBtn.addEventListener('click', () => {
+        // Pre-fill the input with the current name
+        chatNameInput.value = chatDisplayName || '';
+        // Show the name prompt modal
+        namePromptModal.style.display = 'flex';
+        chatNameInput.focus();
+    });
 
 
     // --- Update Notification Listener ---
