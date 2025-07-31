@@ -920,3 +920,51 @@ input:focus, select:focus, textarea:focus {
     .toggle-btn { padding: 8px 12px; font-size: 0.9em; }
     .settings-button-group { flex-direction: column; }
 }
+
+/* =================================
+   CHAT NAME CONTROLS
+   ================================= */
+.chat-name-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    background-color: #f9fafb;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--light-gray);
+}
+
+.chat-name-controls h3 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 500;
+    flex-grow: 1;
+}
+
+#changeChatNameBtn {
+    padding: 8px 18px;
+    font-size: 0.95em;
+    width: auto; /* Override settings-button width */
+    margin-top: 0; /* Override settings-button margin */
+    flex-shrink: 0;
+}
+
+/* =================================
+   ADMIN CHAT MESSAGE HIGHLIGHT
+   ================================= */
+.message-bubble.admin-message {
+    background-color: #fef9e7; /* Light yellow background */
+    border: 2px solid var(--warning-color);
+}
+
+.admin-badge {
+    display: block;
+    font-weight: 700;
+    color: var(--warning-color);
+    font-size: 0.8em;
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
