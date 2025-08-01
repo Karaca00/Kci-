@@ -8,7 +8,7 @@ function getStudentNumberFromId(id) {
 
 // Admin password (for demonstration, use Firebase Security Rules in production)
 const ADMIN_PASSWORD = "1230166";
-const LOCAL_VERSION = "1.2.0"; // New: Define local version of the web app
+const LOCAL_VERSION = "1.2.1"; // New: Define local version of the web app
 
 // Student data for Class 3/1 (initial - will be overwritten by Firebase data)
 // Removed hardcoded initialStudents array as per user request.
@@ -77,323 +77,316 @@ let chatDisplayName = localStorage.getItem('chatDisplayName');
 let unsubscribeChatListener = null; // To hold the unsubscribe function for chat
 
 // DOM Elements (Declared here, will be assigned inside DOMContentLoaded)
-let loader;
-let studentListTableBody;
-let scoreTableBody;
-let studentDetailModal;
-let addNewModal;
-let closeButton;
-let modalOverlay;
+var loader;
+var studentListTableBody;
+var scoreTableBody;
+var studentDetailModal;
+var addNewModal;
+var closeButton;
+var modalOverlay;
 
-let modalStudentName;
-let modalStudentNumber;
-let modalStudentId;
-let modalStudentPrefix; // Added for prefix
-let modalStudentFirstName; // Added for first name
-let modalStudentLastName; // Added for last name
-let modalStudentGrade;
-let modalStudentClass;
-let modalStudentStatus;
-let modalStudentDob;
-let modalStudentPhone;
+var modalStudentName;
+var modalStudentNumber;
+var modalStudentId;
+var modalStudentPrefix; // Added for prefix
+var modalStudentFirstName; // Added for first name
+var modalStudentLastName; // Added for last name
+var modalStudentGrade;
+var modalStudentClass;
+var modalStudentStatus;
+var modalStudentDob;
+var modalStudentPhone;
 
-let studentDetailsView;
-let studentDetailsEdit;
-let editStudentInfoBtn;
-let saveStudentInfoBtn;
-let cancelStudentInfoBtn;
+var studentDetailsView;
+var studentDetailsEdit;
+var editStudentInfoBtn;
+var saveStudentInfoBtn;
+var cancelStudentInfoBtn;
 
-let editStudentNumber;
-let editStudentId;
-let editPrefix;
-let editName;
-let editLastName; // Added for last name
-let editGrade;
-let editClass;
-let editStatus;
-let editDob;
-let editPhone;
+var editStudentNumber;
+var editStudentId;
+var editPrefix;
+var editName;
+var editLastName; // Added for last name
+var editGrade;
+var editClass;
+var editStatus;
+var editDob;
+var editPhone;
 
-let adminPasswordInput;
-let passwordErrorMessage;
-let adminPasswordSection;
+var adminPasswordInput;
+var passwordErrorMessage;
+var adminPasswordSection;
 
-let showStudentListBtn;
-let showStudentScoresBtn;
-let showStudentScoresBtnAll;
-let showStudentFeeSummaryBtn;
-let ScoresHistoryBtn;
-let showPunishmentSummaryBtn; // New: Punishment Summary Button
-let SettingBtn; // Now refers to navSettingBtn
+var showStudentListBtn;
+var showStudentScoresBtn;
+var showStudentScoresBtnAll;
+var showStudentFeeSummaryBtn;
+var ScoresHistoryBtn;
+var showPunishmentSummaryBtn; // New: Punishment Summary Button
+var SettingBtn; // Now refers to navSettingBtn
 
 // Page Containers
-let homePlaceholderContainer;
-let classPageContainer;
-let settingsContainer;
-let contactAdminContainer;
-let chatPageContainer; // New: Chat Page
+var homePlaceholderContainer;
+var classPageContainer;
+var settingsContainer;
+var contactAdminContainer;
+var chatPageContainer; // New: Chat Page
 
 // Content Section Containers within Class Page
-let studentListTableContainer;
-let homeTableContainer;
-let newTableContainer;
-let scoreTableContainer;
-let studentFeeSummaryTableContainer;
-let studentFeeSummaryTableBody;
-let feeSummaryTableHeader;
-let feeSummaryTableFooter;
-let feeSummaryTitle;
-let saveHistoryTableContainer;
-let saveHistoryTableBody;
-let punishmentSummarySection;
-let punishmentSummaryTableContainer; // New: Punishment Summary Table Container
-let punishmentSummaryTable; // New: Punishment Summary Table
-let punishmentSummaryTableHeader; // New: Punishment Summary Table Header
-let punishmentSummaryTableBody; // New: Punishment Summary Table Body
-let punishmentSummaryTitle; // New: Punishment Summary Table Title
-let allStudentsWeeklyScoresMainContainer;
+var studentListTableContainer;
+var homeTableContainer;
+var newTableContainer;
+var scoreTableContainer;
+var studentFeeSummaryTableContainer;
+var studentFeeSummaryTableBody;
+var feeSummaryTableHeader;
+var feeSummaryTableFooter;
+var feeSummaryTitle;
+var saveHistoryTableContainer;
+var saveHistoryTableBody;
+var punishmentSummarySection;
+var punishmentSummaryTableContainer; // New: Punishment Summary Table Container
+var punishmentSummaryTable; // New: Punishment Summary Table
+var punishmentSummaryTableHeader; // New: Punishment Summary Table Header
+var punishmentSummaryTableBody; // New: Punishment Summary Table Body
+var punishmentSummaryTitle; // New: Punishment Summary Table Title
+var allStudentsWeeklyScoresMainContainer;
 
 
-let clearHistoryBtn;
-let setMonthlyFeesBtn; // New: Button to open monthly fees modal
+var clearHistoryBtn;
+var setMonthlyFeesBtn; // New: Button to open monthly fees modal
 
 // DOM elements for settings
-let historyCountDisplay;
-let autoDeleteToggle;
-let historyLimitInput;
-let editHistoryLimitBtn;
-let saveHistoryLimitBtn;
-let cancelHistoryLimitBtn;
-let historyLimitEditActions;
-let historyLimitErrorMessage;
+var historyCountDisplay;
+var autoDeleteToggle;
+var historyLimitInput;
+var editHistoryLimitBtn;
+var saveHistoryLimitBtn;
+var cancelHistoryLimitBtn;
+var historyLimitEditActions;
+var historyLimitErrorMessage;
 
 // NEW: DOM elements for news settings
-let newsCountDisplay;
-let autoDeleteNewsToggle;
-let newsLimitInput;
-let editNewsLimitBtn;
-let saveNewsLimitBtn;
-let cancelNewsLimitBtn;
-let newsLimitEditActions;
-let newsLimitErrorMessage;
+var newsCountDisplay;
+var autoDeleteNewsToggle;
+var newsLimitInput;
+var editNewsLimitBtn;
+var saveNewsLimitBtn;
+var cancelNewsLimitBtn;
+var newsLimitEditActions;
+var newsLimitErrorMessage;
 
-let monthlySelectionModal;
-let closeMonthlySelectionModalBtn;
-let monthlySelectionModalStudentName;
-let monthButtonsGrid;
-let cancelMonthlySelectionBtn;
+var monthlySelectionModal;
+var closeMonthlySelectionModalBtn;
+var monthlySelectionModalStudentName;
+var monthButtonsGrid;
+var cancelMonthlySelectionBtn;
 
-let weeklyScoresModal;
-let closeWeeklyScoresModalBtn;
-let weeklyModalStudentName;
-let weeklyModalMonthName;
-let weeklyScoresGrid;
-let weeklyAdminPasswordInput;
-let weeklyPasswordErrorMessage;
-let saveWeeklyScoresBtn;
-let cancelWeeklyScoresBtn;
-let weeklyAdminPasswordSection;
+var weeklyScoresModal;
+var closeWeeklyScoresModalBtn;
+var weeklyModalStudentName;
+var weeklyModalMonthName;
+var weeklyScoresGrid;
+var weeklyAdminPasswordInput;
+var weeklyPasswordErrorMessage;
+var saveWeeklyScoresBtn;
+var cancelWeeklyScoresBtn;
+var weeklyAdminPasswordSection;
 
-let allStudentsMonthSelectionModal;
-let closeAllStudentsMonthSelectionModalBtn;
-let allStudentsMonthSelectionModalTitle;
-let allStudentsMonthTableBody;
-let cancelAllStudentsMonthSelectionBtn;
+var allStudentsMonthSelectionModal;
+var closeAllStudentsMonthSelectionModalBtn;
+var allStudentsMonthSelectionModalTitle;
+var allStudentsMonthTableBody;
+var cancelAllStudentsMonthSelectionBtn;
 
 
-let allStudentsWeeklyModalMonthName;
-let allStudentsWeeklyScoresTableBody;
-let allStudentsWeeklyAdminPasswordSectionAll;
-let allStudentsWeeklyAdminPasswordInputAll;
-let allStudentsWeeklyPasswordErrorMessageAll;
-let saveAllStudentsWeeklyScoresBtn;
-let cancelAllStudentsWeeklyScoresBtn;
-let addMultipleWeeklyFeesBtn; // Button to trigger the multiple fees modal
+var allStudentsWeeklyModalMonthName;
+var allStudentsWeeklyScoresTableBody;
+var allStudentsWeeklyAdminPasswordSectionAll;
+var allStudentsWeeklyAdminPasswordInputAll;
+var allStudentsWeeklyPasswordErrorMessageAll;
+var saveAllStudentsWeeklyScoresBtn;
+var cancelAllStudentsWeeklyScoresBtn;
+var addMultipleWeeklyFeesBtn; // Button to trigger the multiple fees modal
 
-let adminClearHistoryModal;
-let closeAdminClearHistoryModalBtn;
-let confirmClearHistoryBtn;
-let cancelClearHistoryBtn;
+var adminClearHistoryModal;
+var closeAdminClearHistoryModalBtn;
+var confirmClearHistoryBtn;
+var cancelClearHistoryBtn;
 
 // New: Admin password modal for Settings entry
-let settingsAdminPasswordModal;
-let closeSettingsAdminPasswordModalBtn;
-let settingsAdminPasswordInput;
-let settingsAdminPasswordErrorMessage;
-let confirmSettingsAdminPasswordBtn;
-let cancelSettingsAdminPasswordBtn;
-
-// New DOM elements for navigation links
-let navHomeBtn;
-let navClassBtn;
-let navContactBtn;
-let navChatBtn; // New: Chat nav button
-let navSettingBtn;
+var settingsAdminPasswordModal;
+var closeSettingsAdminPasswordModalBtn;
+var settingsAdminPasswordInput;
+var settingsAdminPasswordErrorMessage;
+var confirmSettingsAdminPasswordBtn;
+var cancelSettingsAdminPasswordBtn;
 
 // New: Student Add/Delete buttons
-let studentActions;
-let addStudentBtn;
-let deleteStudentBtn;
+var addStudentBtn;
+var deleteStudentBtn;
 
 // New: Add Student Modal elements
-let addStudentModal;
-let closeAddStudentModalBtn;
-let addStudentNumber;
-let addStudentId;
-let addPrefix;
-let addName;
-let addLastName; // Added for last name
-let addGrade;
-let addClass;
-let addStatus;
-let addDob;
-let addPhone;
-let addStudentPasswordSection;
-let addStudentPasswordInput;
-let addStudentErrorMessage;
-let saveNewStudentBtn;
-let cancelAddStudentBtn;
+var addStudentModal;
+var closeAddStudentModalBtn;
+var addStudentNumber;
+var addStudentId;
+var addPrefix;
+var addName;
+var addLastName; // Added for last name
+var addGrade;
+var addClass;
+var addStatus;
+var addDob;
+var addPhone;
+var addStudentErrorMessage;
+var saveNewStudentBtn;
+var cancelAddStudentBtn;
 
 // New: Delete Student Selection Modal elements
-let deleteStudentSelectionModal;
-let closeDeleteStudentSelectionModalBtn;
-let deleteStudentList;
-let cancelDeleteSelectionBtn;
+var deleteStudentSelectionModal;
+var closeDeleteStudentSelectionModalBtn;
+var deleteStudentList;
+var cancelDeleteSelectionBtn;
 
 // New: Confirm Delete Student Modal elements
-let confirmDeleteStudentModal;
-let closeConfirmDeleteStudentModalBtn;
-let studentToDeleteName;
-let studentToDeleteId;
-let deleteConfirmationPasswordSection;
-let deleteConfirmationPasswordInput;
-let deleteConfirmationErrorMessage;
-let confirmDeleteStudentFinalBtn;
-let cancelDeleteStudentFinalBtn;
+var confirmDeleteStudentModal;
+var closeConfirmDeleteStudentModalBtn;
+var studentToDeleteName;
+var studentToDeleteId;
+var deleteConfirmationErrorMessage;
+var confirmDeleteStudentFinalBtn;
+var cancelDeleteStudentFinalBtn;
 
 // New: Add Multiple Weekly Fees Modal elements
-let addMultipleWeeklyFeesModal;
-let closeAddMultipleWeeklyFeesModalBtn;
-let addMultipleWeeklyFeesModalTitle;
-let multipleFeeAmountInput;
-let multipleWeeklyFeesTableBody;
-let selectAllStudentsCheckbox;
-let saveMultipleWeeklyFeesBtn;
-let cancelMultipleWeeklyFeesBtn;
-let addMultipleFeesPasswordSection;
-let addMultipleWeeklyFeesAdminPasswordInput;
-let addMultipleWeeklyFeesErrorMessage;
-let initialMultipleFeesActions;
-let confirmSaveMultipleFeesBtn;
-let cancelSaveMultipleFeesBtn;
+var addMultipleWeeklyFeesModal;
+var closeAddMultipleWeeklyFeesModalBtn;
+var addMultipleWeeklyFeesModalTitle;
+var multipleFeeAmountInput;
+var multipleWeeklyFeesTableBody;
+var selectAllStudentsCheckbox;
+var saveMultipleWeeklyFeesBtn;
+var cancelMultipleWeeklyFeesBtn;
+var addMultipleFeesPasswordSection;
+var addMultipleWeeklyFeesAdminPasswordInput;
+var addMultipleWeeklyFeesErrorMessage;
+var initialMultipleFeesActions;
+var confirmSaveMultipleFeesBtn;
+var cancelSaveMultipleFeesBtn;
 
 
-let currentWeeklyScores; // Declare at a scope accessible by loadWeeklyScoresFromFirebase and renderWeeklyScores
+var currentWeeklyScores; // Declare at a scope accessible by loadWeeklyScoresFromFirebase and renderWeeklyScores
 
 // Map to store student names and numbers for quick lookup in history table
 const studentInfoMap = new Map();
 
 // New: Monthly Fees Modal elements
-let setMonthlyFeesModal;
-let closeSetMonthlyFeesModalBtn;
-let monthlyFeesGrid;
-let saveMonthlyFeesBtn;
-let cancelSetMonthlyFeesBtn;
+var setMonthlyFeesModal;
+var closeSetMonthlyFeesModalBtn;
+var monthlyFeesGrid;
+var saveMonthlyFeesBtn;
+var cancelSetMonthlyFeesBtn;
 
 // New: Punishment Summary Navigation elements
-let punishmentNav;
-let prevMonthPunishmentBtn;
-let nextMonthPunishmentBtn;
-let currentPunishmentMonthDisplay;
+var punishmentNav;
+var prevMonthPunishmentBtn;
+var nextMonthPunishmentBtn;
+var currentPunishmentMonthDisplay;
 
 // New: Contact Admin Form elements (globally accessible after DOMContentLoaded)
-let contactAdminForm;
-let contactSubmitBtn;
-let captchaQuestion;
-let captchaInput;
-let captchaError;
+var contactAdminForm;
+var contactSubmitBtn;
+var captchaQuestion;
+var captchaInput;
+var captchaError;
 
 // --- News System DOM Elements ---
-let newsContainer;
-let addNewsBtn;
-let deleteNewsBtn;
-let addNewsModal;
-let closeAddNewsModalBtn;
-let newsTitleInput;
-let newsContentInput;
-let newsImageUrlInput;
-let pinNewsToggle;
-let addNewsAdminPasswordInput;
-let addNewsErrorMessage;
-let saveNewsBtn;
-let cancelAddNewsBtn;
-let deleteNewsModal;
-let closeDeleteNewsModalBtn;
-let deleteNewsList;
-let cancelDeleteNewsSelectionBtn;
+var newsContainer;
+var addNewsBtn;
+var deleteNewsBtn;
+var addNewsModal;
+var closeAddNewsModalBtn;
+var newsTitleInput;
+var newsContentInput;
+var newsImageUrlInput;
+var pinNewsToggle;
+var addNewsErrorMessage;
+var saveNewsBtn;
+var cancelAddNewsBtn;
+var deleteNewsModal;
+var closeDeleteNewsModalBtn;
+var deleteNewsList;
+var cancelDeleteNewsSelectionBtn;
 // New: Confirm Delete News Modal elements
-let confirmDeleteNewsModal;
-let closeConfirmDeleteNewsModalBtn;
-let newsToDeleteTitle;
-let deleteNewsPasswordInput;
-let deleteNewsErrorMessage;
-let confirmDeleteNewsFinalBtn;
-let cancelDeleteNewsFinalBtn;
-let currentNewsToDeleteId = null;
+var confirmDeleteNewsModal;
+var closeConfirmDeleteNewsModalBtn;
+var newsToDeleteTitle;
+var deleteNewsErrorMessage;
+var confirmDeleteNewsFinalBtn;
+var cancelDeleteNewsFinalBtn;
+var currentNewsToDeleteId = null;
 // New: Image Modal elements
-let imageModal;
-let closeImageModalBtn;
-let modalImageContent;
-let newsImagePreview;
+var imageModal;
+var closeImageModalBtn;
+var modalImageContent;
+var newsImagePreview;
 // New: News Detail Modal elements
-let newsDetailModal;
-let closeNewsDetailModalBtn;
-let modalNewsTitle;
-let modalNewsImage;
-let modalNewsContent;
-let modalNewsTimestamp;
+var newsDetailModal;
+var closeNewsDetailModalBtn;
+var modalNewsTitle;
+var modalNewsImage;
+var modalNewsContent;
+var modalNewsTimestamp;
 
 // --- Chat System DOM Elements ---
-let userChatContainer;
-let userChatMessages;
-let userChatForm;
-let userChatMessageInput;
-let adminChatContainer;
-let adminChatMessages;
-let adminChatForm;
-let adminChatMessageInput;
-let clearChatBtn;
+var userChatContainer;
+var userChatMessages;
+var userChatForm;
+var userChatMessageInput;
+var adminChatContainer;
+var adminChatMessages;
+var adminChatForm;
+var adminChatMessageInput;
+var clearChatBtn;
 // New: Chat settings DOM elements
-let chatCountDisplay;
-let autoDeleteChatToggle;
-let chatLimitInput;
-let editChatLimitBtn;
-let saveChatLimitBtn;
-let cancelChatLimitBtn;
-let chatLimitEditActions;
-let chatLimitErrorMessage;
+var chatCountDisplay;
+var autoDeleteChatToggle;
+var chatLimitInput;
+var editChatLimitBtn;
+var saveChatLimitBtn;
+var cancelChatLimitBtn;
+var chatLimitEditActions;
+var chatLimitErrorMessage;
 
 // New: Confirm Clear Chat Modal elements
-let confirmClearChatModal;
-let closeConfirmClearChatModalBtn;
-let confirmClearChatFinalBtn;
-let cancelClearChatFinalBtn;
+var confirmClearChatModal;
+var closeConfirmClearChatModalBtn;
+var confirmClearChatFinalBtn;
+var cancelClearChatFinalBtn;
 
 // New: Update Notification Modal elements
-let updateNotificationModal;
-let localVersionDisplay;
-let remoteVersionDisplay;
-let refreshPageBtn;
+var updateNotificationModal;
+var localVersionDisplay;
+var remoteVersionDisplay;
+var refreshPageBtn;
 
 // New: Chat Name Prompt Modal elements
-let namePromptModal;
-let chatNameInput;
-let saveChatNameBtn;
-let chatNameErrorMessage;
+var namePromptModal;
+var chatNameInput;
+var saveChatNameBtn;
+var chatNameErrorMessage;
 
 // New: Chat Name Display elements
-let currentUserChatName;
-let changeChatNameBtn;
+var currentUserChatName;
+var changeChatNameBtn;
+
+// New DOM elements for navigation links
+var navHomeBtn;
+var navClassBtn;
+var navContactBtn;
+var navChatBtn; // New: Chat nav button
+var navSettingBtn;
 
 
 async function loadStudentsFromFirebase() {
@@ -3124,7 +3117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     navSettingBtn = document.getElementById('navSettingBtn');
 
     // New: Student Add/Delete buttons
-    studentActions = document.getElementById('studentActions');
     addStudentBtn = document.getElementById('addStudentBtn');
     deleteStudentBtn = document.getElementById('deleteStudentBtn');
 
@@ -3141,8 +3133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     addStatus = document.getElementById('addStatus');
     addDob = document.getElementById('addDob');
     addPhone = document.getElementById('addPhone');
-    addStudentPasswordSection = document.getElementById('addStudentPasswordSection');
-    addStudentPasswordInput = document.getElementById('addStudentPasswordInput');
     addStudentErrorMessage = document.getElementById('addStudentErrorMessage');
     saveNewStudentBtn = document.getElementById('saveNewStudentBtn');
     cancelAddStudentBtn = document.getElementById('cancelAddStudentBtn');
@@ -3158,8 +3148,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeConfirmDeleteStudentModalBtn = document.getElementById('closeConfirmDeleteStudentModalBtn');
     studentToDeleteName = document.getElementById('studentToDeleteName');
     studentToDeleteId = document.getElementById('studentToDeleteId');
-    deleteConfirmationPasswordSection = document.getElementById('deleteConfirmationPasswordSection');
-    deleteConfirmationPasswordInput = document.getElementById('deleteConfirmationPasswordInput');
     deleteConfirmationErrorMessage = document.getElementById('deleteConfirmationErrorMessage');
     confirmDeleteStudentFinalBtn = document.getElementById('confirmDeleteStudentFinalBtn');
     cancelDeleteStudentFinalBtn = document.getElementById('cancelDeleteStudentFinalBtn');
@@ -3212,7 +3200,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     newsImageUrlInput = document.getElementById('newsImageUrlInput');
     pinNewsToggle = document.getElementById('pinNewsToggle');
     newsImagePreview = document.getElementById('newsImagePreview');
-    addNewsAdminPasswordInput = document.getElementById('addNewsAdminPasswordInput');
     addNewsErrorMessage = document.getElementById('addNewsErrorMessage');
     saveNewsBtn = document.getElementById('saveNewsBtn');
     cancelAddNewsBtn = document.getElementById('cancelAddNewsBtn');
@@ -3220,11 +3207,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeDeleteNewsModalBtn = document.getElementById('closeDeleteNewsModalBtn');
     deleteNewsList = document.getElementById('deleteNewsList');
     cancelDeleteNewsSelectionBtn = document.getElementById('cancelDeleteNewsSelectionBtn');
+    
     // Assign Confirm Delete News Modal elements
     confirmDeleteNewsModal = document.getElementById('confirmDeleteNewsModal');
     closeConfirmDeleteNewsModalBtn = document.getElementById('closeConfirmDeleteNewsModalBtn');
     newsToDeleteTitle = document.getElementById('newsToDeleteTitle');
-    deleteNewsPasswordInput = document.getElementById('deleteNewsPasswordInput');
     deleteNewsErrorMessage = document.getElementById('deleteNewsErrorMessage');
     confirmDeleteNewsFinalBtn = document.getElementById('confirmDeleteNewsFinalBtn');
     cancelDeleteNewsFinalBtn = document.getElementById('cancelDeleteNewsFinalBtn');
