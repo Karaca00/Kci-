@@ -578,7 +578,7 @@ input:focus, select:focus, textarea:focus {
 
 .message-timestamp {
     font-size: 0.75em;
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--dark-gray);
     text-align: right;
 }
 
@@ -595,7 +595,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .chat-message.sent .message-timestamp {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--dark-gray);
 }
 
 
@@ -617,12 +617,18 @@ input:focus, select:focus, textarea:focus {
     background-color: #f9f9f9;
 }
 
-.chat-input-form input {
+.chat-input-form textarea {
     flex-grow: 1;
     border: 1px solid var(--medium-gray);
     border-radius: 20px;
-    padding: 10px 15px;
+    padding: 12px 15px;
     margin-right: 10px;
+    font-family: var(--font-family);
+    font-size: 1em;
+    line-height: 1.5;
+    resize: none; /* ป้องกันไม่ให้ผู้ใช้ขยายกล่องข้อความเอง */
+    overflow-y: hidden; /* ซ่อน scrollbar */
+    transition: height 0.2s ease; /* ทำให้การขยาย/ลดขนาดสมูทขึ้น */
 }
 
 .chat-input-form button {
@@ -955,16 +961,177 @@ input:focus, select:focus, textarea:focus {
    ADMIN CHAT MESSAGE HIGHLIGHT
    ================================= */
 .message-bubble.admin-message {
-    background-color: #fef9e7; /* Light yellow background */
-    border: 2px solid var(--warning-color);
+    background-color: var(--primary-color); /* Blue background */
+    color: var(--white-color);              /* White text */
+    border: none;                           /* No border */
 }
 
-.admin-badge {
-    display: block;
-    font-weight: 700;
+/* =================================
+   REVISED CHAT STYLES (WITH REPLY FUNCTION)
+   ================================= */
+
+/* Container for the entire message row (name, bubble, etc.) */
+.chat-message {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    max-width: 75%;
+}
+
+/* Wrapper for the bubble, reply button, and timestamp */
+.message-content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Style for sender name (outside the bubble) */
+.message-sender-name {
+    font-size: 0.85em;
+    font-weight: 500;
+    color: var(--dark-gray);
+    margin-bottom: 4px;
+}
+
+.message-sender-name.admin-name {
     color: var(--warning-color);
-    font-size: 0.8em;
-    margin-bottom: 5px;
-    padding-bottom: 3px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+}
+
+/* Sent messages (Right side) */
+.chat-message.sent {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+.chat-message.sent .message-content-wrapper {
+    flex-direction: row-reverse;
+}
+
+/* Received messages (Left side) */
+.chat-message.received {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+.chat-message.received .message-sender-name {
+    margin-left: 10px;
+}
+
+.message-bubble p {
+    margin: 0;
+    white-space: pre-wrap;      /* แก้ไขบรรทัดนี้: เพื่อให้แสดงผลการเว้นวรรคและขึ้นบรรทัดใหม่ */
+    overflow-wrap: break-word;  /* ตัดคำที่ยาวมากๆ ไม่ให้ล้นกรอบ */
+    word-break: break-word;     /* ช่วยเสริมการตัดคำ */
+}
+
+/* NEW: Style for the replied-to message block inside a bubble */
+.replied-to-message {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    border-left: 3px solid var(--primary-color);
+    opacity: 0.9;
+}
+.chat-message.sent .replied-to-message {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-left-color: var(--white-color);
+}
+.replied-to-sender {
+    font-weight: bold;
+    font-size: 0.9em;
+    margin: 0 0 2px 0 !important;
+}
+.replied-to-text {
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+    opacity: 0.8;
+    margin: 0 !important;
+}
+
+/* Reply Button Style */
+.reply-btn {
+    background-color: transparent;
+    border: none;
+    color: var(--dark-gray);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 1.2em;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+.reply-btn:hover {
+    background-color: var(--light-gray);
+}
+
+/* Timestamp Style */
+.message-timestamp {
+    font-size: 0.75em;
+    color: var(--dark-gray);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* The Hover Effect */
+.chat-message:hover .reply-btn,
+.chat-message:hover .message-timestamp {
+    opacity: 1;
+}
+
+/* NEW: Chat Input Area styles */
+.chat-input-area {
+    padding: 10px;
+    border-top: 1px solid var(--medium-gray);
+    background-color: #f9f9f9;
+}
+.chat-input-form {
+    display: flex;
+    padding: 0; 
+    border-top: none;
+    align-items: flex-end; /* เพิ่มบรรทัดนี้ */
+}
+
+/* NEW: Reply Preview styles */
+.reply-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+    animation: fadeIn 0.3s ease;
+}
+.reply-preview-content {
+    overflow: hidden;
+}
+.reply-preview-content strong {
+    display: block;
+    font-size: 0.9em;
+    color: var(--primary-dark);
+}
+.reply-preview-content p {
+    margin: 0;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cancel-reply-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--dark-gray);
+    padding: 0 5px;
 }
