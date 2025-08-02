@@ -272,12 +272,20 @@
                 <h2>แชท (Admin)</h2>
                 <div id="adminChatContainer" class="chat-container">
                     <div id="adminChatMessages" class="chat-messages">
-                        <!-- Messages will be loaded here -->
-                    </div>
-                    <form id="adminChatForm" class="chat-input-form">
-                        <input type="text" id="adminChatMessageInput" placeholder="พิมพ์ข้อความในฐานะแอดมิน..." autocomplete="off">
-                        <button type="submit">ส่ง</button>
-                    </form>
+                        </div>
+                    <div class="chat-input-area">
+                        <div id="adminReplyPreview" class="reply-preview" style="display: none;">
+                            <div class="reply-preview-content">
+                                <strong>ตอบกลับ:</strong>
+                                <p id="adminReplyPreviewText"></p>
+                            </div>
+                            <button type="button" id="cancelAdminReplyBtn" class="cancel-reply-btn">&times;</button>
+                        </div>
+                        <form id="adminChatForm" class="chat-input-form">
+                            <textarea id="adminChatMessageInput" placeholder="พิมพ์ข้อความในฐานะแอดมิน..." rows="1"></textarea>
+                            <button type="submit">ส่ง</button>
+                      </form>
+                   </div>
                 </div>
                 <div id="chatCountDisplay" class="setting-item" style="margin-top: 15px;"></div>
                 <div class="setting-item toggle-container">
@@ -333,16 +341,23 @@
                 </div>
                 <div id="userChatContainer" class="chat-container">
                     <div id="userChatMessages" class="chat-messages">
-                        <!-- Messages will be loaded here -->
+                        </div>
+                    <div class="chat-input-area">
+                        <div id="userReplyPreview" class="reply-preview" style="display: none;">
+                            <div class="reply-preview-content">
+                                <strong>ตอบกลับ:</strong>
+                                <p id="userReplyPreviewText"></p>
+                            </div>
+                            <button type="button" id="cancelUserReplyBtn" class="cancel-reply-btn">&times;</button>
+                        </div>
+                        <form id="userChatForm" class="chat-input-form">
+                            <textarea id="userChatMessageInput" placeholder="พิมพ์ข้อความ..." rows="1"></textarea>
+                            <button type="submit">ส่ง</button>
+                        </form>
                     </div>
-                    <form id="userChatForm" class="chat-input-form">
-                        <input type="text" id="userChatMessageInput" placeholder="พิมพ์ข้อความ..." autocomplete="off">
-                        <button type="submit">ส่ง</button>
-                    </form>
                 </div>
             </div>
         </div>
-
     </main>
 
     <!-- ===== Modals ===== -->
