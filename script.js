@@ -8,7 +8,7 @@ function getStudentNumberFromId(id) {
 
 // Admin password (for demonstration, use Firebase Security Rules in production)
 const ADMIN_PASSWORD = "1230166";
-const LOCAL_VERSION = "1.2.1"; // New: Define local version of the web app
+const LOCAL_VERSION = "1.2.2"; // New: Define local version of the web app
 
 // Student data for Class 3/1 (initial - will be overwritten by Firebase data)
 // Removed hardcoded initialStudents array as per user request.
@@ -56,6 +56,8 @@ let currentAllStudentsWeeklyScoresMonth = null; // Store the currently selected 
 let currentStudentToDelete = null; // New: Store student ID for deletion confirmation
 let activePage = 'home'; // To track the current active page/view
 let activeClassSection = 'studentList'; // To track active section within class page
+
+let currentReplyInfo = null; // Will store { text, senderName }
 
 // CAPTCHA variables
 let captchaAnswer = 0;
@@ -387,6 +389,11 @@ var navClassBtn;
 var navContactBtn;
 var navChatBtn; // New: Chat nav button
 var navSettingBtn;
+
+// Chat Reply Preview DOM Elements
+var userReplyPreview, adminReplyPreview;
+var userReplyPreviewText, adminReplyPreviewText;
+var cancelUserReplyBtn, cancelAdminReplyBtn;
 
 
 async function loadStudentsFromFirebase() {
@@ -1389,8 +1396,7 @@ async function renderPunishmentSummary(displayMonthIndex) {
             <th class="weekly-fee-header" id="punishmentWeeklyFeeHeader-week4"></th>
             <th class="weekly-fee-header" id="punishmentWeeklyFeeHeader-week5"></th>
             <th class="weekly-fee-header" id="punishmentWeeklyFeeHeader-weekall"></th>
-            <th></th> <!-- Empty header for Punishment Status column -->
-        </tr>
+            <th></th> </tr>
     `;
 
     const studentsSnapshot = await studentsCollection.orderBy('studentNumber').get();
@@ -2676,51 +2682,108 @@ function closeNewsDetailModal() {
 
 // --- CHAT SYSTEM FUNCTIONS ---
 
+function showReplyPreview(replyInfo, isAdminView = false) {
+    currentReplyInfo = replyInfo;
+    if (isAdminView) {
+        adminReplyPreviewText.textContent = replyInfo.text;
+        adminReplyPreview.style.display = 'flex';
+        adminChatMessageInput.focus();
+    } else {
+        userReplyPreviewText.textContent = replyInfo.text;
+        userReplyPreview.style.display = 'flex';
+        userChatMessageInput.focus();
+    }
+}
+
+function hideReplyPreview() {
+    currentReplyInfo = null;
+    if (userReplyPreview) userReplyPreview.style.display = 'none';
+    if (adminReplyPreview) adminReplyPreview.style.display = 'none';
+}
+
 // Function to render messages in a given container
 function renderMessages(docs, container, currentId) {
     container.innerHTML = ''; // Clear existing messages
+    const isAdminView = (container.id === 'adminChatMessages');
+
     docs.forEach(doc => {
         const data = doc.data();
+        const docId = doc.id; // Get the unique ID of the message document
+
         const messageWrapper = document.createElement('div');
         messageWrapper.classList.add('chat-message');
+        messageWrapper.id = `msg-${docId}`; // Assign a unique ID to the message wrapper
+
+        const messageContentWrapper = document.createElement('div');
+        messageContentWrapper.classList.add('message-content-wrapper');
 
         const messageBubble = document.createElement('div');
         messageBubble.classList.add('message-bubble');
 
-        // Check if the message is from the current viewer
         if (data.senderId === currentId || (currentId === 'admin' && data.isFromAdmin)) {
             messageWrapper.classList.add('sent');
         } else {
             messageWrapper.classList.add('received');
-            // Add sender name for received messages
             const senderName = document.createElement('p');
             senderName.classList.add('message-sender-name');
-            senderName.style.fontWeight = 'bold';
             senderName.textContent = data.senderName || 'Anonymous';
-            messageBubble.appendChild(senderName);
+            if (data.isFromAdmin) {
+                senderName.classList.add('admin-name');
+            }
+            messageWrapper.appendChild(senderName);
         }
 
-        // NEW: Add admin badge and special class for admin messages
         if (data.isFromAdmin) {
-            messageBubble.classList.add('admin-message'); // Add a special class
-            const adminBadge = document.createElement('strong');
-            adminBadge.classList.add('admin-badge');
-            messageBubble.appendChild(adminBadge); // Add badge to the bubble
+            messageBubble.classList.add('admin-message');
+        }
+
+        if (data.replyTo && data.replyTo.messageId) {
+            const replyBlock = document.createElement('div');
+            replyBlock.classList.add('replied-to-message', 'clickable');
+            replyBlock.title = 'คลิกเพื่อไปที่ข้อความที่ตอบกลับ';
+            replyBlock.innerHTML = `
+                <p class="replied-to-sender">${data.replyTo.senderName || 'Anonymous'}</p>
+                <p class="replied-to-text">${data.replyTo.text}</p>
+            `;
+
+            // --- UPDATED: Simplified click-to-scroll functionality ---
+            replyBlock.onclick = () => {
+                const targetMessageElement = document.getElementById(`msg-${data.replyTo.messageId}`);
+                if (targetMessageElement) {
+                    targetMessageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            };
+            messageBubble.appendChild(replyBlock);
         }
 
         const messageText = document.createElement('p');
         messageText.textContent = data.text;
         messageBubble.appendChild(messageText);
 
+        messageContentWrapper.appendChild(messageBubble);
+
+        const replyButton = document.createElement('button');
+        replyButton.classList.add('reply-btn');
+        replyButton.innerHTML = '&#x21A9;';
+        replyButton.title = 'ตอบกลับ';
+        replyButton.onclick = () => {
+            const replyInfo = {
+                messageId: docId,
+                text: data.text,
+                senderName: data.senderName || 'Anonymous'
+            };
+            showReplyPreview(replyInfo, isAdminView);
+        };
+        messageContentWrapper.appendChild(replyButton);
+
         const timestamp = document.createElement('span');
         timestamp.classList.add('message-timestamp');
         timestamp.textContent = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
-        messageBubble.appendChild(timestamp);
-        
-        messageWrapper.appendChild(messageBubble);
+        messageContentWrapper.appendChild(timestamp);
+
+        messageWrapper.appendChild(messageContentWrapper);
         container.appendChild(messageWrapper);
     });
-    // Scroll to the bottom of the chat container
     container.scrollTop = container.scrollHeight;
 }
 
@@ -2742,43 +2805,67 @@ function loadGroupChat(isAdminView = false) {
 }
 
 
-// Function to handle user sending a message
 async function handleUserChatSubmit(e) {
     e.preventDefault();
-    const messageText = userChatMessageInput.value.trim();
-    if (messageText === '' || !chatDisplayName) return;
+    const messageText = userChatMessageInput.value; // ดึงข้อความดิบ
+    const trimmedMessage = messageText.trim();     // ตัดช่องว่างหน้า-หลัง
+
+    // ถ้าข้อความที่ตัดแล้วเป็นค่าว่าง (หมายถึงมีแต่การเว้นวรรคหรือขึ้นบรรทัดใหม่)
+    if (trimmedMessage === '' || !chatDisplayName) {
+        userChatMessageInput.value = ''; // สั่งให้เคลียร์ข้อความในช่องพิมพ์
+        return; // และหยุดการทำงาน
+    }
+
+    const messageData = {
+        text: trimmedMessage, // ส่งข้อความที่ตัดช่องว่างแล้ว
+        senderId: chatUserId,
+        senderName: chatDisplayName,
+        isFromAdmin: false,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (currentReplyInfo) {
+        messageData.replyTo = currentReplyInfo;
+    }
 
     try {
-        await chatCollection.add({
-            text: messageText,
-            senderId: chatUserId,
-            senderName: chatDisplayName,
-            isFromAdmin: false,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        userChatMessageInput.value = ''; // Clear input field
-        await checkAndTrimChat(); // Check if trimming is needed
+        await chatCollection.add(messageData);
+        userChatMessageInput.value = ''; // เคลียร์ข้อความหลังส่งสำเร็จ
+        hideReplyPreview();
+        await checkAndTrimChat();
     } catch (error) {
         console.error("Error sending user message:", error);
     }
 }
 
-// Function to handle admin sending a message
 async function handleAdminChatSubmit(e) {
     e.preventDefault();
-    const messageText = adminChatMessageInput.value.trim();
-    if (messageText === '') return;
+    const messageText = adminChatMessageInput.value; // ดึงข้อความดิบ
+    const trimmedMessage = messageText.trim();     // ตัดช่องว่างหน้า-หลัง
+
+    // ถ้าข้อความที่ตัดแล้วเป็นค่าว่าง
+    if (trimmedMessage === '') {
+        adminChatMessageInput.value = ''; // สั่งให้เคลียร์ข้อความในช่องพิมพ์
+        return; // และหยุดการทำงาน
+    }
+
+    const messageData = {
+        text: trimmedMessage, // ส่งข้อความที่ตัดช่องว่างแล้ว
+        senderId: 'admin',
+        senderName: 'แอดมิน',
+        isFromAdmin: true,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (currentReplyInfo) {
+        messageData.replyTo = currentReplyInfo;
+    }
 
     try {
-        await chatCollection.add({
-            text: messageText,
-            senderId: 'admin',
-            senderName: 'แอดมิน',
-            isFromAdmin: true,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        adminChatMessageInput.value = ''; // Clear input field
-        await checkAndTrimChat(); // Check if trimming is needed
+        await chatCollection.add(messageData);
+        adminChatMessageInput.value = ''; // เคลียร์ข้อความหลังส่งสำเร็จ
+        hideReplyPreview();
+        await checkAndTrimChat();
     } catch (error) {
         console.error("Error sending admin message:", error);
     }
@@ -3260,6 +3347,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentUserChatName = document.getElementById('currentUserChatName');
     changeChatNameBtn = document.getElementById('changeChatNameBtn');
 
+    // BUG FIX: Moved reply preview assignments and listeners here
+    userReplyPreview = document.getElementById('userReplyPreview');
+    adminReplyPreview = document.getElementById('adminReplyPreview');
+    userReplyPreviewText = document.getElementById('userReplyPreviewText');
+    adminReplyPreviewText = document.getElementById('adminReplyPreviewText');
+    cancelUserReplyBtn = document.getElementById('cancelUserReplyBtn');
+    cancelAdminReplyBtn = document.getElementById('cancelAdminReplyBtn');
+
+    cancelUserReplyBtn.addEventListener('click', hideReplyPreview);
+    cancelAdminReplyBtn.addEventListener('click', hideReplyPreview);
+    // END BUG FIX
 
     // Initial data population from Firebase
     await loadStudentsFromFirebase();
@@ -3464,8 +3562,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // --- Chat System Event Listeners ---
-    userChatForm.addEventListener('submit', handleUserChatSubmit);
-    adminChatForm.addEventListener('submit', handleAdminChatSubmit);
     clearChatBtn.addEventListener('click', openConfirmClearChatModal);
     saveChatNameBtn.addEventListener('click', handleSaveChatName);
 
@@ -3484,6 +3580,68 @@ document.addEventListener('DOMContentLoaded', async () => {
         location.reload();
     });
 
+    // =============================================
+    // ===== START: Auto-growing Textarea Logic =====
+    // =============================================
+
+    function autoGrowTextarea(textarea) {
+        textarea.style.height = 'auto'; // รีเซ็ตความสูง
+        textarea.style.height = (textarea.scrollHeight) + 'px'; // ตั้งค่าความสูงตามเนื้อหา
+    }
+
+    function handleTextareaKeydown(event) {
+        const textarea = event.target;
+        const form = textarea.closest('form');
+
+        // ถ้ากด Enter (โดยไม่กด Shift)
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault(); // ป้องกันการขึ้นบรรทัดใหม่
+
+            // ส่งฟอร์มตาม id
+            if (form && typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            }
+            
+            // หลังจากส่งแล้ว ให้รีเซ็ตความสูงกลับไปเท่าเดิม
+            setTimeout(() => {
+                textarea.style.height = 'auto';
+            }, 0);
+        }
+        // ถ้ากด Shift + Enter จะเป็นการขึ้นบรรทัดใหม่ตามปกติ
+    }
+    
+    // ทำให้ textarea ขยาย/หด อัตโนมัติเมื่อพิมพ์
+    if(userChatMessageInput) {
+        userChatMessageInput.addEventListener('input', () => autoGrowTextarea(userChatMessageInput));
+        userChatMessageInput.addEventListener('keydown', handleTextareaKeydown);
+    }
+    if(adminChatMessageInput) {
+        adminChatMessageInput.addEventListener('input', () => autoGrowTextarea(adminChatMessageInput));
+        adminChatMessageInput.addEventListener('keydown', handleTextareaKeydown);
+    }
+
+    // แก้ไขฟังก์ชัน submit เดิมให้รองรับการรีเซ็ตความสูงของ textarea
+    const originalHandleUserChatSubmit = handleUserChatSubmit;
+    handleUserChatSubmit = function(e) {
+        originalHandleUserChatSubmit(e).then(() => {
+            if(userChatMessageInput) autoGrowTextarea(userChatMessageInput);
+        });
+    }
+
+    const originalHandleAdminChatSubmit = handleAdminChatSubmit;
+    handleAdminChatSubmit = function(e) {
+        originalHandleAdminChatSubmit(e).then(() => {
+            if(adminChatMessageInput) autoGrowTextarea(adminChatMessageInput);
+        });
+    }
+    
+    // --- ผูก event submit ใหม่หลังจากการแก้ไขฟังก์ชัน ---
+    if(userChatForm) userChatForm.addEventListener('submit', handleUserChatSubmit);
+    if(adminChatForm) adminChatForm.addEventListener('submit', handleAdminChatSubmit);
+    
+    // ===========================================
+    // ===== END: Auto-growing Textarea Logic =====
+    // ===========================================
 
     if (typeof emailjs !== 'undefined' && !emailjs._isInitialized) {
         emailjs.init('7gaavlGnJ9JjhLxb7');
