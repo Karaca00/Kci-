@@ -6,9 +6,8 @@ function getStudentNumberFromId(id) {
     return parseInt(id);
 }
 
-// Admin password (for demonstration, use Firebase Security Rules in production)
-const ADMIN_PASSWORD = "1230166";
-const LOCAL_VERSION = "1.2.2"; // New: Define local version of the web app
+let ADMIN_PASSWORD = null;
+const LOCAL_VERSION = "1.3.0"; // New: Define local version of the web app
 
 // Student data for Class 3/1 (initial - will be overwritten by Firebase data)
 // Removed hardcoded initialStudents array as per user request.
@@ -47,6 +46,8 @@ const saveHistoryCollection = db.collection('saveHistory');
 const appSettingsCollection = db.collection('settings');
 const newsCollection = db.collection('news');
 const chatCollection = db.collection('chatMessages'); // New: Chat collection
+const formsCollection = db.collection('forms'); // เพิ่มบรรทัดนี้
+const formSubmissionsCollection = db.collection('formSubmissions'); // เพิ่มบรรทัดนี้
 const appSettingsDocRef = appSettingsCollection.doc('appSettings');
 const paymentRequirementsDocRef = appSettingsCollection.doc('paymentRequirements');
 const versionDocRef = appSettingsCollection.doc('version'); // New: Version document reference
@@ -86,6 +87,14 @@ var studentDetailModal;
 var addNewModal;
 var closeButton;
 var modalOverlay;
+
+var addFormsBtn, deleteFormsBtn;
+var addFormsModal, closeAddFormsModalBtn, formTitleInput, formDescriptionInput, questionsContainer, addQuestionBtn, publishFormToggle, addFormErrorMessage, saveFormBtn, cancelAddFormBtn;
+var deleteFormsModal, closeDeleteFormsModalBtn, deleteFormsList, cancelDeleteFormsSelectionBtn;
+var doFormModal, closeDoFormModalBtn, doFormTitle, doFormDescription, userNameInput, formSubmissionContainer, formSubmissionError, submitFormBtn;
+var formSummaryModal, closeFormSummaryModalBtn, summaryFormTitle, formSummaryContainer;
+let currentEditingFormId = null;
+let currentSubmittingFormId = null;
 
 var modalStudentName;
 var modalStudentNumber;
@@ -488,11 +497,15 @@ async function renderStudentScores() {
 // Function to open the student detail modal (only for general info now)
 async function openStudentDetailModal(studentId) {
     currentStudentId = studentId; // Set the current student ID
-
-    const studentDoc = await studentsCollection.doc(studentId).get();
-    const student = studentDoc.data();
-
-    if (student) {
+    // ยกเลิก listener เดิมถ้ามี
+    if (window._studentDetailUnsub) window._studentDetailUnsub();
+    // Subscribe แบบเรียลไทม์
+    window._studentDetailUnsub = studentsCollection.doc(studentId).onSnapshot(doc => {
+        if (!doc.exists) {
+            console.error("Student not found:", studentId);
+            return;
+        }
+        const student = doc.data();
         modalStudentName.textContent = `ข้อมูลนักเรียน: ${student.prefix} ${student.name} ${student.lastName}`;
         modalStudentNumber.textContent = student.studentNumber || '-';
         modalStudentId.textContent = student.id;
@@ -521,50 +534,56 @@ async function openStudentDetailModal(studentId) {
         toggleEditMode(false);
 
         // Clear password input and error message for this modal
-        adminPasswordInput.value = '';
-        passwordErrorMessage.textContent = '';
+        if (adminPasswordInput) adminPasswordInput.value = '';
+        if (passwordErrorMessage) passwordErrorMessage.textContent = '';
 
         studentDetailModal.style.display = 'flex'; // Show the modal
-    } else {
-        console.error("Student not found:", studentId);
-    }
+    });
 }
 
 // Function to close the student detail modal
 function closeStudentDetailModal() {
     studentDetailModal.style.display = 'none'; // Hide the modal
     currentStudentId = null; // Clear current student ID
+    // ยกเลิก listener realtime ถ้ามี
+    if (window._studentDetailUnsub) {
+        window._studentDetailUnsub();
+        window._studentDetailUnsub = null;
+    }
 }
 
 // Function to toggle between view and edit mode for student info
 function toggleEditMode(isEditMode) {
     const modalContent = studentDetailModal.querySelector('.modal-content');
     if (isEditMode) {
-        studentDetailsView.style.display = 'none';
-        studentDetailsEdit.style.display = 'grid'; // Use grid for edit form
-        editStudentInfoBtn.style.display = 'none';
-        saveStudentInfoBtn.style.display = 'inline-block';
-        cancelStudentInfoBtn.style.display = 'inline-block';
-        modalContent.classList.add('expanded-edit-mode'); // Expand modal for editing
-        adminPasswordSection.style.display = 'flex'; // Show password section
+        studentDetailsView.classList.add('hidden');
+        studentDetailsEdit.classList.add('grid');
+        editStudentInfoBtn.classList.add('hidden');
+        saveStudentInfoBtn.classList.remove('hidden');
+        cancelStudentInfoBtn.classList.remove('hidden');
+        modalContent.classList.add('expanded-edit-mode');
+        adminPasswordSection.classList.remove('hidden');
     } else {
-        studentDetailsView.style.display = 'block';
-        studentDetailsEdit.style.display = 'none';
-        editStudentInfoBtn.style.display = 'inline-block';
-        saveStudentInfoBtn.style.display = 'none';
-        cancelStudentInfoBtn.style.display = 'none';
-        modalContent.classList.remove('expanded-edit-mode'); // Shrink modal back
-        adminPasswordSection.style.display = 'none'; // Hide password section
+        studentDetailsView.classList.remove('hidden');
+        studentDetailsEdit.classList.remove('grid');
+        editStudentInfoBtn.classList.remove('hidden');
+        saveStudentInfoBtn.classList.add('hidden');
+        cancelStudentInfoBtn.classList.add('hidden');
+        modalContent.classList.remove('expanded-edit-mode');
+        adminPasswordSection.classList.add('hidden');
     }
 }
 
 // Function to save student information (admin access required)
 async function saveStudentInfo() {
-    const password = adminPasswordInput.value;
-    if (password !== ADMIN_PASSWORD) {
-        passwordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
-        passwordErrorMessage.style.color = "red";
-        return;
+    // ตรวจสอบรหัสผ่านแอดมินก่อนบันทึก (ยกเว้นถ้าอยู่หน้า Menu Admin)
+    if (!window.location.hash.includes('admin')) { // สมมติว่าหน้า Admin มี hash 'admin'
+        const password = adminPasswordInput ? adminPasswordInput.value : '';
+        if (!password || password !== ADMIN_PASSWORD) {
+            passwordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+            passwordErrorMessage.style.color = "red";
+            return;
+        }
     }
     passwordErrorMessage.textContent = ""; // Clear error message
 
@@ -763,45 +782,29 @@ async function openWeeklyScoresModal(studentId, month) {
     renderWeeklyScores(currentWeeklyScores);
 
     // Reset password and error
-    weeklyAdminPasswordInput.value = '';
-    weeklyPasswordErrorMessage.textContent = '';
-    weeklyAdminPasswordSection.style.display = 'flex'; // Show password section for weekly scores
+    if (weeklyAdminPasswordInput) weeklyAdminPasswordInput.value = '';
+    if (weeklyPasswordErrorMessage) weeklyPasswordErrorMessage.textContent = '';
+    if (weeklyAdminPasswordSection) weeklyAdminPasswordSection.style.display = 'flex'; // Show password section for weekly scores
 
     weeklyScoresModal.style.display = 'flex'; // Show the modal
 }
 
 // Function to render weekly score inputs
 function renderWeeklyScores(weeklyScores) {
-    weeklyScoresGrid.innerHTML = ''; // Clear existing inputs
-    const numWeeks = 5; // Assuming max 5 weeks per month
-
-    const monthRequirements = currentPaymentRequirements[currentWeeklyMonth] || {
-        weeklyFees: {}
-    };
+    weeklyScoresGrid.innerHTML = '';
+    const numWeeks = 5;
+    const monthRequirements = currentPaymentRequirements[currentWeeklyMonth] || { weeklyFees: {} };
     const weeklyFeesRequired = monthRequirements.weeklyFees || {};
-
     for (let i = 1; i <= numWeeks; i++) {
         const weekKey = `week${i}`;
         const score = weeklyScores[weekKey] !== undefined ? weeklyScores[weekKey] : 0;
         const requiredFee = weeklyFeesRequired[weekKey] !== undefined ? weeklyFeesRequired[weekKey] : 0;
-
-
         const scoreItem = document.createElement('div');
         scoreItem.classList.add('score-input-item');
         scoreItem.innerHTML = `
             <label for="weeklyScore${i}">สัปดาห์ที่ ${i} (${requiredFee} บาท)</label>
-            <input type="number" id="weeklyScore${i}" min="0" value="${score}">
+            <input type="number" id="weeklyScore${i}" min="0" value="${score}" class="${requiredFee > 0 && score === 0 ? 'payment-status-red' : requiredFee > 0 && score < requiredFee ? 'payment-status-yellow' : ''}">
         `;
-        const inputElement = scoreItem.querySelector(`#weeklyScore${i}`);
-
-        // Apply color based on payment status
-        if (requiredFee > 0) {
-            if (score === 0) {
-                inputElement.classList.add('payment-status-red');
-            } else if (score < requiredFee) {
-                inputElement.classList.add('payment-status-yellow');
-            }
-        }
         weeklyScoresGrid.appendChild(scoreItem);
     }
 }
@@ -820,12 +823,15 @@ async function loadWeeklyScoresFromFirebase(studentId, month) {
 
 // Function to save weekly scores (admin access required)
 async function saveWeeklyScores() {
-    const password = weeklyAdminPasswordInput.value;
-    if (password !== ADMIN_PASSWORD) {
-        weeklyPasswordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
-        return;
+    // ตรวจสอบรหัสผ่านแอดมินก่อนบันทึก (ยกเว้นถ้าอยู่หน้า Menu Admin)
+    if (!window.location.hash.includes('admin')) {
+        const password = weeklyAdminPasswordInput ? weeklyAdminPasswordInput.value : '';
+        if (!password || password !== ADMIN_PASSWORD) {
+            weeklyPasswordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+            return;
+        }
     }
-    weeklyPasswordErrorMessage.textContent = ""; // Clear error message
+    if (weeklyPasswordErrorMessage) weeklyPasswordErrorMessage.textContent = ""; // Clear error message
 
     if (!currentWeeklyStudentId || !currentWeeklyMonth) {
         console.error("No student or month selected for saving weekly scores.");
@@ -879,7 +885,7 @@ async function saveWeeklyScores() {
                     merge: true
                 });
             weeklyScoresModal.style.display = 'none'; // Hide modal
-            weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
+            if (weeklyAdminPasswordSection) weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
 
             const studentInfo = studentInfoMap.get(currentWeeklyStudentId) || {
                 name: 'ไม่พบชื่อนักเรียน',
@@ -893,7 +899,7 @@ async function saveWeeklyScores() {
             await checkAndTrimHistory(); // Check and trim history after save
         } else {
             weeklyScoresModal.style.display = 'none'; // Hide modal
-            weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
+            if (weeklyAdminPasswordSection) weeklyAdminPasswordSection.style.display = 'none'; // Hide password section
         }
 
     } catch (error) {
@@ -928,9 +934,9 @@ async function openAllStudentsMonthSelectionModal() {
     });
 
     // Clear password and error messages
-    allStudentsWeeklyAdminPasswordInputAll.value = '';
-    allStudentsWeeklyPasswordErrorMessageAll.textContent = '';
-    allStudentsWeeklyAdminPasswordSectionAll.style.display = 'none'; // Hide password section
+    if (allStudentsWeeklyAdminPasswordInputAll) allStudentsWeeklyAdminPasswordInputAll.value = '';
+    if (allStudentsWeeklyPasswordErrorMessageAll) allStudentsWeeklyPasswordErrorMessageAll.textContent = '';
+    if (allStudentsWeeklyAdminPasswordSectionAll) allStudentsWeeklyAdminPasswordSectionAll.style.display = 'none'; // Hide password section
 }
 
 // Function to close the all students month selection modal
@@ -1037,16 +1043,19 @@ async function displayAllStudentsWeeklyScoresInMain(month) {
     }
 
     // Show password section when table is displayed
-    allStudentsWeeklyAdminPasswordSectionAll.style.display = 'flex';
+    if (allStudentsWeeklyAdminPasswordSectionAll) allStudentsWeeklyAdminPasswordSectionAll.style.display = 'flex';
 }
 
 async function saveAllStudentsWeeklyScores() {
-    const password = allStudentsWeeklyAdminPasswordInputAll.value;
-    if (password !== ADMIN_PASSWORD) {
-        allStudentsWeeklyPasswordErrorMessageAll.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
-        return;
+    // ตรวจสอบรหัสผ่านแอดมินก่อนบันทึก (ยกเว้นถ้าอยู่หน้า Menu Admin)
+    if (!window.location.hash.includes('admin')) {
+        const password = allStudentsWeeklyAdminPasswordInputAll ? allStudentsWeeklyAdminPasswordInputAll.value : '';
+        if (!password || password !== ADMIN_PASSWORD) {
+            allStudentsWeeklyPasswordErrorMessageAll.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+            return;
+        }
     }
-    allStudentsWeeklyPasswordErrorMessageAll.textContent = ""; // Clear error message
+    if (allStudentsWeeklyPasswordErrorMessageAll) allStudentsWeeklyPasswordErrorMessageAll.textContent = ""; // Clear error message
 
     if (!currentAllStudentsWeeklyScoresMonth) {
         console.error("No month selected for saving all students' weekly scores.");
@@ -1678,9 +1687,9 @@ async function clearSaveHistoryFromFirebase() {
 // --- Settings Admin Password Modal Functions ---
 function openSettingsAdminPasswordModal() {
     settingsAdminPasswordModal.style.display = 'flex';
-    settingsAdminPasswordInput.value = '';
-    settingsAdminPasswordErrorMessage.textContent = '';
-    settingsAdminPasswordInput.focus();
+    if(settingsAdminPasswordInput) settingsAdminPasswordInput.value = '';
+    if(settingsAdminPasswordErrorMessage) settingsAdminPasswordErrorMessage.textContent = '';
+    if(settingsAdminPasswordInput) settingsAdminPasswordInput.focus();
 }
 
 function closeSettingsAdminPasswordModal() {
@@ -1688,12 +1697,12 @@ function closeSettingsAdminPasswordModal() {
 }
 
 async function handleSettingsAdminPasswordConfirm() {
-    const password = settingsAdminPasswordInput.value;
+    const password = settingsAdminPasswordInput ? settingsAdminPasswordInput.value : '';
     if (password !== ADMIN_PASSWORD) {
-        settingsAdminPasswordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
+        if(settingsAdminPasswordErrorMessage) settingsAdminPasswordErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
         return;
     }
-    settingsAdminPasswordErrorMessage.textContent = "";
+    if(settingsAdminPasswordErrorMessage) settingsAdminPasswordErrorMessage.textContent = "";
     closeSettingsAdminPasswordModal();
     switchPage('settings');
 }
@@ -1870,6 +1879,7 @@ async function deleteStudentConfirmed() {
         console.log(`Student details for ${studentId} deleted.`);
 
         const weeklyMonthsSnapshot = await weeklyScoresCollection.doc(studentId).collection('months').get();
+
         const batch = db.batch();
         weeklyMonthsSnapshot.docs.forEach(doc => {
             batch.delete(doc.ref);
@@ -1909,36 +1919,36 @@ function switchPage(pageName) {
 
     switch (pageName) {
         case 'home':
-            homePlaceholderContainer.classList.add('active');
-            navHomeBtn.classList.add('active');
+            if (homePlaceholderContainer) homePlaceholderContainer.classList.add('active');
+            if (navHomeBtn) navHomeBtn.classList.add('active');
             renderNews(); // Render news when switching to home
             break;
         case 'class':
-            classPageContainer.classList.add('active');
-            navClassBtn.classList.add('active');
+            if (classPageContainer) classPageContainer.classList.add('active');
+            if (navClassBtn) navClassBtn.classList.add('active');
             switchContentSection(activeClassSection || 'studentList');
             break;
         case 'contact':
-            contactAdminContainer.classList.add('active');
-            navContactBtn.classList.add('active');
+            if (contactAdminContainer) contactAdminContainer.classList.add('active');
+            if (navContactBtn) navContactBtn.classList.add('active');
             generateCaptcha();
             break;
         case 'chat':
-            chatPageContainer.classList.add('active');
-            navChatBtn.classList.add('active');
+            if (chatPageContainer) chatPageContainer.classList.add('active');
+            if (navChatBtn) navChatBtn.classList.add('active');
             // Check for display name before loading chat
             if (!chatDisplayName) {
-                namePromptModal.style.display = 'flex';
+                if (namePromptModal) namePromptModal.style.display = 'flex';
             } else {
                 // START: Updated section
-                currentUserChatName.textContent = `ชื่อที่แสดง: ${chatDisplayName}`;
+                if(currentUserChatName) currentUserChatName.textContent = `ชื่อที่แสดง: ${chatDisplayName}`;
                 loadGroupChat();
                 // END: Updated section
             }
             break;
         case 'settings':
-            settingsContainer.classList.add('active');
-            navSettingBtn.classList.add('active');
+            if (settingsContainer) settingsContainer.classList.add('active');
+            if (navSettingBtn) navSettingBtn.classList.add('active');
             loadAppSettings();
             checkAndTrimHistory();
             checkAndTrimNews();
@@ -1963,42 +1973,41 @@ async function switchContentSection(sectionName, month) {
         case 'saveHistory': btnId = 'ScoresHistoryBtn'; break;
         case 'allStudentsWeeklyScores': btnId = 'showStudentScoresBtnAll'; break;
     }
-    if(btnId) document.getElementById(btnId).classList.add('active');
+    if(btnId && document.getElementById(btnId)) document.getElementById(btnId).classList.add('active');
 
 
     switch (sectionName) {
         case 'studentList':
-            studentListTableContainer.classList.add('active');
+            if (studentListTableContainer) studentListTableContainer.classList.add('active');
             await renderStudentList();
             break;
         case 'studentScores':
-            scoreTableContainer.classList.add('active');
+            if (scoreTableContainer) scoreTableContainer.classList.add('active');
             await renderStudentScores();
             break;
         case 'studentScoresAll':
             openAllStudentsMonthSelectionModal();
             document.querySelector(`#classPageContainer .content-section.active`)?.classList.remove('active');
-            studentListTableContainer.classList.add('active'); // Fallback to a visible section
+            if (studentListTableContainer) studentListTableContainer.classList.add('active'); // Fallback to a visible section
             break;
         case 'allStudentsWeeklyScores':
-             allStudentsWeeklyScoresMainContainer.classList.add('active');
+             if (allStudentsWeeklyScoresMainContainer) allStudentsWeeklyScoresMainContainer.classList.add('active');
              await displayAllStudentsWeeklyScoresInMain(month);
              break;
         case 'studentFeeSummary':
-            studentFeeSummaryTableContainer.classList.add('active');
+            if (studentFeeSummaryTableContainer) studentFeeSummaryTableContainer.classList.add('active');
             await renderStudentFeeSummary();
             break;
         case 'punishmentSummary':
-            punishmentSummarySection.classList.add('active');
+            if (punishmentSummarySection) punishmentSummarySection.classList.add('active');
             await renderPunishmentSummary();
             break;
         case 'saveHistory':
-            saveHistoryTableContainer.classList.add('active');
+            if (saveHistoryTableContainer) saveHistoryTableContainer.classList.add('active');
             await renderSaveHistory();
             break;
     }
 }
-
 
 // --- Payment Requirements Functions ---
 async function loadPaymentRequirements() {
@@ -2160,14 +2169,14 @@ function openAddMultipleWeeklyFeesModal() {
         `;
     });
 
-    multipleFeeAmountInput.value = "20";
+    multipleFeeAmountInput.value = "0";
     selectAllStudentsCheckbox.checked = false;
     document.querySelectorAll('.select-all-week-checkbox').forEach(cb => cb.checked = false);
-    addMultipleWeeklyFeesAdminPasswordInput.value = '';
-    addMultipleWeeklyFeesErrorMessage.textContent = '';
+    if (addMultipleWeeklyFeesAdminPasswordInput) addMultipleWeeklyFeesAdminPasswordInput.value = '';
+    if (addMultipleWeeklyFeesErrorMessage) addMultipleWeeklyFeesErrorMessage.textContent = '';
     
-    initialMultipleFeesActions.style.display = 'block';
-    addMultipleFeesPasswordSection.style.display = 'none';
+    if (initialMultipleFeesActions) initialMultipleFeesActions.style.display = 'block';
+    if (addMultipleFeesPasswordSection) addMultipleFeesPasswordSection.style.display = 'none';
 
     addMultipleWeeklyFeesModal.style.display = 'flex';
 }
@@ -2177,12 +2186,15 @@ function closeAddMultipleWeeklyFeesModal() {
 }
 
 async function confirmAndSaveMultipleFees() {
+    // CHANGE: Password check removed for security refactoring.
+    /*
     const password = addMultipleWeeklyFeesAdminPasswordInput.value;
     if (password !== ADMIN_PASSWORD) {
         addMultipleWeeklyFeesErrorMessage.textContent = "รหัสผ่านแอดมินไม่ถูกต้อง";
         return;
     }
-    addMultipleWeeklyFeesErrorMessage.textContent = "";
+    */
+    if (addMultipleWeeklyFeesErrorMessage) addMultipleWeeklyFeesErrorMessage.textContent = "";
 
     const month = currentAllStudentsWeeklyScoresMonth;
     if (!month) {
@@ -2192,7 +2204,7 @@ async function confirmAndSaveMultipleFees() {
     
     const amountToSet = parseInt(multipleFeeAmountInput.value);
     if (isNaN(amountToSet) || amountToSet < 0) {
-        addMultipleWeeklyFeesErrorMessage.textContent = "กรุณาใส่จำนวนเงินเป็นตัวเลขที่ไม่ติดลบ";
+        if(addMultipleWeeklyFeesErrorMessage) addMultipleWeeklyFeesErrorMessage.textContent = "กรุณาใส่จำนวนเงินเป็นตัวเลขที่ไม่ติดลบ";
         return;
     }
 
@@ -2254,7 +2266,7 @@ async function confirmAndSaveMultipleFees() {
     });
 
     if (!changesMade) {
-        addMultipleWeeklyFeesErrorMessage.textContent = "ไม่มีการเลือกนักเรียนหรือสัปดาห์";
+        if(addMultipleWeeklyFeesErrorMessage) addMultipleWeeklyFeesErrorMessage.textContent = "ไม่มีการเลือกนักเรียนหรือสัปดาห์";
         return;
     }
 
@@ -2268,7 +2280,7 @@ async function confirmAndSaveMultipleFees() {
 
     } catch (error) {
         console.error("Error saving multiple weekly fees:", error);
-        addMultipleWeeklyFeesErrorMessage.textContent = "เกิดข้อผิดพลาดในการบันทึก";
+        if(addMultipleWeeklyFeesErrorMessage) addMultipleWeeklyFeesErrorMessage.textContent = "เกิดข้อผิดพลาดในการบันทึก";
     }
 }
 
@@ -2277,21 +2289,23 @@ function generateCaptcha() {
     captchaNum1 = Math.floor(Math.random() * 10) + 1;
     captchaNum2 = Math.floor(Math.random() * 10) + 1;
     captchaAnswer = captchaNum1 + captchaNum2;
-    captchaQuestion.textContent = `คุณไม่ใช่บอทใช่ไหม? ${captchaNum1} + ${captchaNum2} = ?`;
-    captchaInput.value = '';
-    captchaError.textContent = '';
-    contactSubmitBtn.disabled = true;
+    if(captchaQuestion) captchaQuestion.textContent = `คุณไม่ใช่บอทใช่ไหม? ${captchaNum1} + ${captchaNum2} = ?`;
+    if(captchaInput) captchaInput.value = '';
+    if(captchaError) captchaError.textContent = '';
+    if(contactSubmitBtn) contactSubmitBtn.disabled = true;
 }
 
 function validateCaptcha() {
     const userAnswer = parseInt(captchaInput.value);
     if (userAnswer === captchaAnswer) {
-        captchaError.textContent = 'ยืนยันสำเร็จ!';
-        captchaError.style.color = 'var(--success-color)';
-        contactSubmitBtn.disabled = false;
+        if(captchaError) {
+            captchaError.textContent = 'ยืนยันสำเร็จ!';
+            captchaError.style.color = 'var(--success-color)';
+        }
+        if(contactSubmitBtn) contactSubmitBtn.disabled = false;
     } else {
-        captchaError.textContent = '';
-        contactSubmitBtn.disabled = true;
+        if(captchaError) captchaError.textContent = '';
+        if(contactSubmitBtn) contactSubmitBtn.disabled = true;
     }
 }
 
@@ -2299,62 +2313,69 @@ async function handleContactFormSubmit(event) {
     event.preventDefault();
 
     if (contactSubmitBtn.disabled) {
-        captchaError.textContent = 'กรุณากรอกคำตอบให้ถูกต้อง';
+        if(captchaError) captchaError.textContent = 'กรุณากรอกคำตอบให้ถูกต้อง';
         return;
     }
 
     const statusDiv = document.getElementById('contactStatus');
-    statusDiv.textContent = 'กำลังส่งข้อความ...';
-    statusDiv.style.color = 'var(--primary-color)';
+    if (statusDiv) {
+        statusDiv.textContent = 'กำลังส่งข้อความ...';
+        statusDiv.style.color = 'var(--primary-color)';
+    }
 
     const serviceID = 'service_93p3p1u';
     const templateID = 'template_lx9nl0c';
 
     emailjs.sendForm(serviceID, templateID, this)
         .then(() => {
-            statusDiv.textContent = 'ส่งข้อความเรียบร้อยแล้ว!';
-            statusDiv.style.color = 'var(--success-color)';
+            if(statusDiv) {
+                statusDiv.textContent = 'ส่งข้อความเรียบร้อยแล้ว!';
+                statusDiv.style.color = 'var(--success-color)';
+            }
             contactAdminForm.reset();
             generateCaptcha();
         }, (error) => {
             console.error('การส่งข้อความล้มเหลว:', error);
-            statusDiv.textContent = 'การส่งข้อความล้มเหลว กรุณาลองใหม่อีกครั้ง';
-            statusDiv.style.color = 'var(--danger-color)';
+            if(statusDiv) {
+                statusDiv.textContent = 'การส่งข้อความล้มเหลว กรุณาลองใหม่อีกครั้ง';
+                statusDiv.style.color = 'var(--danger-color)';
+            }
             generateCaptcha();
         });
 }
 
 // --- NEWS SYSTEM FUNCTIONS ---
-
-// Function to render news cards from Firebase
+// CHANGE: Refactored to use DocumentFragment for better performance.
+// Event listeners are now handled by Event Delegation in DOMContentLoaded.
 async function renderNews() {
-    newsContainer.innerHTML = ''; // Clear existing news
+    if (!newsContainer) return;
+    newsContainer.innerHTML = ''; // Clear old content
+    const fragment = document.createDocumentFragment(); // Use a fragment for performance
+
     try {
         const snapshot = await newsCollection.get();
-        
         if (newsCountDisplay) {
             newsCountDisplay.textContent = `จำนวนข่าวสารปัจจุบัน: ${snapshot.size}`;
         }
-
         if (snapshot.empty) {
             newsContainer.innerHTML = '<p>ยังไม่มีข่าวสารหรือประกาศในขณะนี้</p>';
             return;
         }
 
-        // Sort documents in JavaScript: pinned first, then by timestamp
         const sortedDocs = snapshot.docs.sort((a, b) => {
             const aData = a.data();
             const bData = b.data();
             const aIsPinned = aData.isPinned || false;
             const bIsPinned = bData.isPinned || false;
-
-            if (aIsPinned !== bIsPinned) {
-                return aIsPinned ? -1 : 1;
-            }
-            return bData.timestamp.toMillis() - aData.timestamp.toMillis();
+            if (aIsPinned !== bIsPinned) return aIsPinned ? -1 : 1;
+            // Handle cases where timestamp might be null
+            const aTime = aData.timestamp ? aData.timestamp.toMillis() : 0;
+            const bTime = bData.timestamp ? bData.timestamp.toMillis() : 0;
+            return bTime - aTime;
         });
 
-        sortedDocs.forEach(doc => {
+        // ใช้ Promise.all เพื่อเช็ค formId กับ collection forms ก่อนแสดงปุ่ม
+        const newsCardsPromises = sortedDocs.map(async doc => {
             const news = doc.data();
             const newsId = doc.id;
             const card = document.createElement('div');
@@ -2362,32 +2383,52 @@ async function renderNews() {
             if (news.isPinned) {
                 card.classList.add('pinned');
             }
-            card.dataset.id = newsId;
-             card.onclick = (event) => {
-                if (event.target.tagName.toLowerCase() !== 'img') { 
-                    openNewsDetailModal(news);
-                }
-            };
 
-            const imageUrl = news.imageUrl;
-            const timestamp = news.timestamp ? new Date(news.timestamp.toDate()).toLocaleString('th-TH') : 'ไม่ระบุเวลา';
+            // Store data on the element for the event delegate
+            card.dataset.newsData = JSON.stringify({ ...news, id: newsId });
 
-            const imageHtml = imageUrl 
-                ? `<img src="${imageUrl}" alt="News Image" onerror="this.style.display='none';" onclick="event.stopPropagation(); openImageModal('${imageUrl}')">`
-                : '';
+            let innerHTML = '';
+            if (news.imageUrl) {
+                innerHTML += `<img src="${news.imageUrl}" alt="${news.title}" loading="lazy">`;
+            }
+            innerHTML += '<div class="news-card-content">';
+            innerHTML += `<h3>${news.isPinned ? '📌 ' : ''}${news.title}</h3>`;
             
-            card.innerHTML = `
-                ${imageHtml}
-                <div class="news-card-content">
-                    <h3>${news.title}</h3>
-                    <p>${news.content}</p>
-                    <div class="news-card-timestamp">
-                        <span>โพสต์เมื่อ: ${timestamp}</span>
-                    </div>
-                </div>
-            `;
-            newsContainer.appendChild(card);
+            // Truncate long content for the card view
+            const contentPreview = news.content.length > 100 ? news.content.substring(0, 100) + '...' : news.content;
+            innerHTML += `<p>${contentPreview}</p>`;
+
+            if (news.timestamp) {
+                innerHTML += `<div class="news-card-timestamp">โพสต์เมื่อ: ${new Date(news.timestamp.toDate()).toLocaleString('th-TH')}</div>`;
+            }
+
+            // ตรวจสอบว่ามี field formId และมีฟอร์มจริงใน collection forms
+            let showFormBtn = false;
+            if (news.formId) {
+                try {
+                    const formDoc = await formsCollection.doc(news.formId).get();
+                    if (formDoc.exists) {
+                        showFormBtn = true;
+                    }
+                } catch (err) {
+                    // ไม่แสดงปุ่มถ้า error
+                }
+            }
+            if (showFormBtn) {
+                innerHTML += `<button class="start-form-btn" data-form-id="${news.formId}">เริ่มทำแบบประเมิน</button>`;
+                card.dataset.formId = news.formId;
+            }
+
+            innerHTML += '</div>';
+            card.innerHTML = innerHTML;
+
+            return card;
         });
+        const newsCards = await Promise.all(newsCardsPromises);
+        newsCards.forEach(card => fragment.appendChild(card));
+
+        newsContainer.appendChild(fragment); // Append the entire fragment once
+
     } catch (error) {
         console.error("Error rendering news:", error);
         newsContainer.innerHTML = '<p>เกิดข้อผิดพลาดในการโหลดข่าวสาร</p>';
@@ -2410,7 +2451,6 @@ function openAddNewsModal() {
 function closeAddNewsModal() {
     addNewsModal.style.display = 'none';
 }
-
 // Function to save a new announcement
 async function saveNews() {
     const title = newsTitleInput.value.trim();
@@ -2661,20 +2701,118 @@ function closeImageModal() {
 
 // --- News Detail Modal Functions ---
 function openNewsDetailModal(newsData) {
+    if (!newsData) return;
     modalNewsTitle.textContent = newsData.title;
-    modalNewsContent.textContent = newsData.content;
-    
-    if (newsData.imageUrl) {
-        modalNewsImage.src = newsData.imageUrl;
-        modalNewsImage.style.display = 'block';
-    } else {
-        modalNewsImage.style.display = 'none';
-    }
+    modalNewsContent.innerHTML = ''; // Clear previous content
 
-    modalNewsTimestamp.textContent = `โพสต์เมื่อ: ${newsData.timestamp ? new Date(newsData.timestamp.toDate()).toLocaleString('th-TH') : 'ไม่ระบุเวลา'}`;
+    if (newsData.isForm) {
+        // --- FIX: Create button element and add event listener directly ---
+        const contentParagraph = document.createElement('p');
+        contentParagraph.textContent = newsData.content;
+        modalNewsContent.appendChild(contentParagraph);
+
+        // เพิ่มปุ่ม "เริ่มทำแบบประเมิน" ใต้คำอธิบาย
+        if (newsData.formId) {
+            const startFormBtn = document.createElement('button');
+            startFormBtn.className = 'start-form-btn';
+            startFormBtn.textContent = 'เริ่มทำแบบประเมิน';
+            startFormBtn.style.marginTop = '18px';
+            startFormBtn.onclick = function() {
+                openDoFormModal(newsData.formId);
+            };
+            modalNewsContent.appendChild(startFormBtn);
+        }
+
+        // เพิ่มส่วนแสดงรายชื่อผู้ที่ยังไม่ได้ทำแบบประเมิน ถ้าเป็นข่าวสารที่มีแบบประเมิน
+        if (newsData.isForm && newsData.formId && typeof formsCollection !== 'undefined' && typeof formSubmissionsCollection !== 'undefined') {
+            // สร้าง container สำหรับรายชื่อ
+            const formStatusDiv = document.createElement('div');
+            formStatusDiv.style.marginTop = '20px';
+            formStatusDiv.innerHTML = '<strong>รายชื่อผู้ที่ยังไม่ได้ทำแบบประเมิน:</strong><br><span>กำลังโหลด...</span>';
+            modalNewsContent.appendChild(formStatusDiv);
+
+            // ดึงข้อมูลแบบประเมินและการส่งคำตอบ
+            (async () => {
+                try {
+                    // ดึง submissions
+                    const submissionsSnapshot = await formSubmissionsCollection.where('formId', '==', newsData.formId).get();
+                    const submittedIds = new Set();
+                    submissionsSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.submitterStudentId) submittedIds.add(data.submitterStudentId);
+                    });
+
+                    // ดึงรายชื่อนักเรียนทั้งหมด
+                    let notDoneNames = [];
+                    if (Array.isArray(studentsData)) {
+                        studentsData.forEach(student => {
+                            const name = `เลขที่ ${student.studentNumber} - ${student.prefix}${student.name} ${student.lastName}`;
+                            if (!submittedIds.has(student.id)) {
+                                notDoneNames.push(name);
+                            }
+                        });
+                    }
+
+                    formStatusDiv.innerHTML = `<strong>รายชื่อผู้ที่ยังไม่ได้ทำแบบประเมิน:</strong><br>${notDoneNames.length ? notDoneNames.join('<br>') : '<em>ทุกคนทำครบแล้ว</em>'}`;
+                } catch (err) {
+                    formStatusDiv.innerHTML = '<span style="color:red">เกิดข้อผิดพลาดในการโหลดสถานะแบบประเมิน</span>';
+                }
+            })();
+        }
+
+        if (modalNewsImage) modalNewsImage.style.display = 'none';
+    } else {
+    // Otherwise, show normal content
+    modalNewsContent.textContent = newsData.content;
+    if (modalNewsImage) {
+        if (newsData.imageUrl) {
+            modalNewsImage.src = newsData.imageUrl;
+            modalNewsImage.style.display = 'block';
+        } else {
+            modalNewsImage.style.display = 'none';
+        }
+    }
+}
+
+    // --- FIXED TIMESTAMP HANDLING (REVISED) ---
+    let displayDate = 'ไม่ระบุเวลา';
+    if (newsData.timestamp) {
+        let dateObject;
+        // Case 1: It's a live Firebase Timestamp object
+        if (typeof newsData.timestamp.toDate === 'function') {
+            dateObject = newsData.timestamp.toDate();
+        } 
+        // Case 2: It's a stringified Timestamp object from JSON.parse() which has a `seconds` property
+        else if (typeof newsData.timestamp.seconds === 'number') {
+            dateObject = new Date(newsData.timestamp.seconds * 1000);
+        }
+        // Fallback for other potential string formats
+        else {
+             dateObject = new Date(newsData.timestamp);
+        }
+        
+        // Check if the created date is valid before formatting
+        if (dateObject && !isNaN(dateObject.getTime())) {
+            displayDate = dateObject.toLocaleString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+    }
+    modalNewsTimestamp.textContent = `โพสต์เมื่อ: ${displayDate}`;
+    // --- END OF FIX ---
     
     newsDetailModal.style.display = 'flex';
 }
+
+
+
+
+
 
 function closeNewsDetailModal() {
     newsDetailModal.style.display = 'none';
@@ -2793,6 +2931,8 @@ function loadGroupChat(isAdminView = false) {
     
     const container = isAdminView ? adminChatMessages : userChatMessages;
     const currentId = isAdminView ? 'admin' : chatUserId;
+
+    if (!container) return; // Add null check for robustness
 
     unsubscribeChatListener = chatCollection
         .orderBy('timestamp')
@@ -2952,9 +3092,9 @@ async function checkAndTrimChat() {
         const limit = settings.chatLimit || 200;
 
         if (currentCount > limit) {
-            const recordsToDeleteCount = currentCount - limit;
+            const recordsToDelete = snapshot.docs.slice(limit);
             // Query for the oldest messages to delete
-            const oldMessagesQuery = chatCollection.orderBy('timestamp', 'asc').limit(recordsToDeleteCount);
+            const oldMessagesQuery = chatCollection.orderBy('timestamp', 'aกsc').limit(recordsToDelete.length);
             const oldMessagesSnapshot = await oldMessagesQuery.get();
             
             const batch = db.batch();
@@ -3040,16 +3180,142 @@ function checkForUpdates() {
 // --- Event Listeners and Initial Load ---
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // --- Edit Form Submission Modal Logic ---
+    const editFormSubmissionModal = document.getElementById('editFormSubmissionModal');
+    const closeEditFormSubmissionModalBtn = document.getElementById('closeEditFormSubmissionModalBtn');
+    const editFormSubmissionStudentList = document.getElementById('editFormSubmissionStudentList');
+    const cancelEditFormSubmissionBtn = document.getElementById('cancelEditFormSubmissionBtn');
+    let currentEditingFormId = null;
+
+    // เปิด modal รายชื่อนักเรียนที่ส่งคำตอบแล้ว
+    async function openEditFormSubmissionModal(formId) {
+        currentEditingFormId = formId;
+        editFormSubmissionStudentList.innerHTML = '<li>กำลังโหลด...</li>';
+        editFormSubmissionModal.style.display = 'flex';
+        try {
+            // ดึงข้อมูลการส่งของแบบประเมินนี้
+            const submissionsSnapshot = await formSubmissionsCollection.where('formId', '==', formId).get();
+            if (submissionsSnapshot.empty) {
+                editFormSubmissionStudentList.innerHTML = '<li>ยังไม่มีนักเรียนส่งคำตอบ</li>';
+                return;
+            }
+            // สร้างรายการนักเรียนที่ส่งคำตอบแล้ว
+            const items = [];
+            submissionsSnapshot.forEach(doc => {
+                const data = doc.data();
+                const student = studentsData.find(s => s.id === data.submitterStudentId);
+                if (!student) return;
+                items.push(`<li><span>เลขที่ ${student.studentNumber} - ${student.prefix}${student.name} ${student.lastName}</span> <button class="edit-student-answer-btn" data-id="${doc.id}">แก้ไขคำตอบ</button></li>`);
+            });
+            editFormSubmissionStudentList.innerHTML = items.length ? items.join('') : '<li>ยังไม่มีนักเรียนส่งคำตอบ</li>';
+        } catch (error) {
+            editFormSubmissionStudentList.innerHTML = '<li>เกิดข้อผิดพลาดในการโหลดข้อมูล</li>';
+        }
+    }
+
+    // ปิด modal
+    if (closeEditFormSubmissionModalBtn) closeEditFormSubmissionModalBtn.addEventListener('click', () => { editFormSubmissionModal.style.display = 'none'; });
+    if (cancelEditFormSubmissionBtn) cancelEditFormSubmissionBtn.addEventListener('click', () => { editFormSubmissionModal.style.display = 'none'; });
+
+    // Event delegation สำหรับปุ่มแก้ไขคำตอบแต่ละคน
+    if (editFormSubmissionStudentList) editFormSubmissionStudentList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('edit-student-answer-btn')) {
+            const submissionId = e.target.dataset.id;
+            // ปิด popup รายชื่อนักเรียนก่อน
+            editFormSubmissionModal.style.display = 'none';
+            // ดึงข้อมูล submission
+            try {
+                const submissionDoc = await formSubmissionsCollection.doc(submissionId).get();
+                if (!submissionDoc.exists) {
+                    document.getElementById('editFormModalError').textContent = 'ไม่พบข้อมูลคำตอบ';
+                    return;
+                }
+                const submissionData = submissionDoc.data();
+                // ดึงข้อมูลฟอร์ม
+                const formDoc = await formsCollection.doc(currentEditingFormId).get();
+                if (!formDoc.exists) {
+                    document.getElementById('editFormModalError').textContent = 'ไม่พบแบบประเมิน';
+                    return;
+                }
+                const formData = formDoc.data();
+                // เปิด modal editFormModal พร้อมข้อมูลเดิม
+                document.getElementById('editFormModalTitle').textContent = formData.title + ' (แก้ไขคำตอบ)';
+                document.getElementById('editFormModalDescription').textContent = formData.description;
+                const editFormModalContainer = document.getElementById('editFormModalContainer');
+                editFormModalContainer.innerHTML = '';
+                document.getElementById('editFormModalError').textContent = '';
+                // สร้างฟอร์มคำถามพร้อมเติมคำตอบเดิม
+                formData.questions.forEach((q, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'form-question';
+                    let inputHtml = '';
+                    if (q.type === 'text') {
+                        inputHtml = `<input type="text" name="q_${index}" required value="${submissionData.answers[`q_${index}`] || ''}">`;
+                    } else if (q.type === 'multiple-choice') {
+                        inputHtml = '<div class="form-options">';
+                        q.options.forEach((opt, optIndex) => {
+                            const checked = submissionData.answers[`q_${index}`] === opt ? 'checked' : '';
+                            inputHtml += `<label><input type="radio" name="q_${index}" value="${opt}" ${checked}> ${opt}</label>`;
+                        });
+                        inputHtml += '</div>';
+                    }
+                    questionDiv.innerHTML = `<p><strong>ข้อ ${index + 1}.</strong> ${q.title}</p>${inputHtml}`;
+                    editFormModalContainer.appendChild(questionDiv);
+                });
+                // เปิด modal
+                document.getElementById('editFormModal').style.display = 'flex';
+                // กำหนด handler ใหม่สำหรับการแก้ไข
+                const saveBtn = document.getElementById('editFormModalSaveBtn');
+                saveBtn.onclick = async () => {
+                    const answers = {};
+                    const formElements = editFormModalContainer.elements;
+                    let allAnswered = true;
+                    const questions = formData.questions;
+                    for (let i = 0; i < questions.length; i++) {
+                        const input = formElements[`q_${i}`];
+                        if (!input) continue;
+                        if (input.type === 'text') {
+                            if (!input.value.trim()) { allAnswered = false; break; }
+                            answers[`q_${i}`] = input.value.trim();
+                        } else if (input.length) {
+                            const checked = Array.from(input).find(radio => radio.checked);
+                            if (!checked) { allAnswered = false; break; }
+                            answers[`q_${i}`] = checked.value;
+                        }
+                    }
+                    if (!allAnswered) {
+                        document.getElementById('editFormModalError').textContent = 'กรุณาตอบคำถามให้ครบทุกข้อ';
+                        return;
+                    }
+                    try {
+                        await formSubmissionsCollection.doc(submissionId).update({ answers });
+                        document.getElementById('editFormModalError').textContent = 'บันทึกการแก้ไขคำตอบเรียบร้อยแล้ว';
+                        setTimeout(() => { document.getElementById('editFormModal').style.display = 'none'; document.getElementById('editFormModalError').textContent = ''; }, 1200);
+                    } catch (error) {
+                        document.getElementById('editFormModalError').textContent = 'เกิดข้อผิดพลาดในการบันทึก';
+                    }
+                };
+                // ปุ่มยกเลิก
+                document.getElementById('editFormModalCancelBtn').onclick = () => {
+                    document.getElementById('editFormModal').style.display = 'none';
+                };
+                document.getElementById('closeEditFormModalBtn').onclick = () => {
+                    document.getElementById('editFormModal').style.display = 'none';
+                };
+            } catch (error) {
+                document.getElementById('editFormModalError').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
+            }
+        }
+    });
     // Assign DOM elements inside DOMContentLoaded
     loader = document.getElementById('loader');
-    document.body.classList.add('is-loading');
+    if (loader) document.body.classList.add('is-loading');
 
     studentListTableBody = document.getElementById('studentListTableBody');
     scoreTableBody = document.getElementById('scoreTableBody');
     studentDetailModal = document.getElementById('studentDetailModal');
-    closeButton = studentDetailModal.querySelector('.close-button');
-    modalOverlay = document.getElementById('studentDetailModal');
-
+    if (studentDetailModal) closeButton = studentDetailModal.querySelector('.close-button');
+    
     modalStudentName = document.getElementById('modalStudentName');
     modalStudentNumber = document.getElementById('modalStudentNumber');
     modalStudentId = document.getElementById('modalStudentId');
@@ -3262,7 +3528,641 @@ document.addEventListener('DOMContentLoaded', async () => {
     confirmSaveMultipleFeesBtn = document.getElementById('confirmSaveMultipleFeesBtn');
     cancelSaveMultipleFeesBtn = document.getElementById('cancelSaveMultipleFeesBtn');
 
+    // =============================================
+    // ===== START: Admin Settings Menu Logic   =====
+    // =============================================
+    const settingsMenuItems = document.querySelectorAll('.settings-menu-item');
+    const settingsPanels = document.querySelectorAll('.settings-panel');
 
+    if (settingsMenuItems) {
+        settingsMenuItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                // นำ class 'active' ออกจากทุกเมนูและทุก panel
+                settingsMenuItems.forEach(i => i.classList.remove('active'));
+                settingsPanels.forEach(p => p.classList.remove('active'));
+
+                // เพิ่ม class 'active' ให้กับเมนูที่ถูกคลิก
+                item.classList.add('active');
+
+                // แสดง panel ที่ตรงกับเมนูที่เลือก
+                const targetId = item.getAttribute('data-target');
+                const targetPanel = document.getElementById(targetId);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                }
+            });
+        });
+    }
+    // ===========================================
+    // ===== END: Admin Settings Menu Logic   =====
+    // ===========================================
+
+    // =============================================
+    // ===== START: FORMS SYSTEM LOGIC          =====
+    // =============================================
+
+    // --- Assign Form System DOM Elements ---
+    addFormsBtn = document.getElementById('addFormsBtn');
+    deleteFormsBtn = document.getElementById('deleteFormsBtn');
+
+    addFormsModal = document.getElementById('addFormsModal');
+    closeAddFormsModalBtn = document.getElementById('closeAddFormsModalBtn');
+    formTitleInput = document.getElementById('formTitleInput');
+    formDescriptionInput = document.getElementById('formDescriptionInput');
+    questionsContainer = document.getElementById('questionsContainer');
+    addQuestionBtn = document.getElementById('addQuestionBtn');
+    addFormErrorMessage = document.getElementById('addFormErrorMessage');
+    saveFormBtn = document.getElementById('saveFormBtn');
+    cancelAddFormBtn = document.getElementById('cancelAddFormBtn');
+
+    deleteFormsModal = document.getElementById('deleteFormsModal');
+    closeDeleteFormsModalBtn = document.getElementById('closeDeleteFormsModalBtn');
+    deleteFormsList = document.getElementById('deleteFormsList');
+    cancelDeleteFormsSelectionBtn = document.getElementById('cancelDeleteFormsSelectionBtn');
+    doFormModal = document.getElementById('doFormModal');
+    closeDoFormModalBtn = document.getElementById('closeDoFormModalBtn');
+    doFormTitle = document.getElementById('doFormTitle');
+    doFormDescription = document.getElementById('doFormDescription');
+    userNameInput = document.getElementById('userNameInput');
+    formSubmissionContainer = document.getElementById('formSubmissionContainer');
+    formSubmissionError = document.getElementById('formSubmissionError');
+    submitFormBtn = document.getElementById('submitFormBtn');
+    formSummaryModal = document.getElementById('formSummaryModal');
+    closeFormSummaryModalBtn = document.getElementById('closeFormSummaryModalBtn');
+    summaryFormTitle = document.getElementById('summaryFormTitle');
+    formSummaryContainer = document.getElementById('formSummaryContainer');
+
+
+
+    // --- Functions for Creating Forms ---
+
+    let questionCounter = 0;
+    function addQuestionField(type = 'text', title = '', options = []) {
+        questionCounter++;
+        const realIndex = questionsContainer ? questionsContainer.children.length + 1 : questionCounter;
+        const questionId = `q_${questionCounter}`;
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-item';
+        questionDiv.id = `question-item-${questionId}`;
+
+        let optionsHtml = '';
+        if (type === 'multiple-choice') {
+            optionsHtml = `<div class="option-input-container" id="options-for-${questionId}">
+                ${options.map((opt, idx) => `<div class="option-item"><input type="text" value="${opt}" placeholder="ตัวเลือกที่ ${idx + 1}" class="option-input"><button type="button" class="remove-option-btn">&times;</button></div>`).join('')}
+            </div>
+            <button type="button" class="add-option-btn" data-target="${questionId}">+ เพิ่มตัวเลือก</button>`;
+        }
+
+        questionDiv.innerHTML = `<div class="question-item-header">
+            <label for="question-title-${questionId}">คำถามที่ ${realIndex}:</label>
+            <button type="button" class="delete-question-btn" data-target="${questionId}">&times;</button>
+        </div>
+        <input type="text" id="question-title-${questionId}" value="${title}" placeholder="พิมพ์คำถามของคุณที่นี่" class="question-title-input">
+        <select class="question-type-select" data-target="${questionId}">
+            <option value="text" ${type === 'text' ? 'selected' : ''}>ข้อความสั้น</option>
+            <option value="multiple-choice" ${type === 'multiple-choice' ? 'selected' : ''}>หลายตัวเลือก</option>
+        </select>
+        <div id="options-container-${questionId}">${optionsHtml}</div>`;
+        questionsContainer.appendChild(questionDiv);
+
+        // Scroll to latest question
+        setTimeout(() => {
+            questionDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+
+    function addOptionField(questionId) {
+        const optionsContainer = document.getElementById(`options-for-${questionId}`);
+        const optionCount = optionsContainer.children.length + 1;
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option-item';
+        optionDiv.innerHTML = `
+        <input type="text" placeholder="ตัวเลือกที่ ${optionCount}" class="option-input">
+        <button type="button" class="remove-option-btn">&times;</button>
+    `;
+        optionsContainer.appendChild(optionDiv);
+    }
+
+    // --- Event Listeners for Form Creation ---
+
+    if(addQuestionBtn) addQuestionBtn.addEventListener('click', () => {
+        // Validate: ไม่ให้เพิ่มคำถามว่างซ้ำ
+        const lastQuestion = questionsContainer.lastElementChild;
+        if (lastQuestion) {
+            const lastTitle = lastQuestion.querySelector('.question-title-input').value.trim();
+            if (!lastTitle) {
+                addFormErrorMessage.textContent = 'กรุณากรอกคำถามก่อนเพิ่มคำถามใหม่';
+                lastQuestion.querySelector('.question-title-input').focus();
+                return;
+            }
+        }
+        addFormErrorMessage.textContent = '';
+        addQuestionField();
+    });
+
+    // เพิ่มปุ่ม '+ เพิ่มคำถาม' ด้านล่างเสมอ
+    function renderAddQuestionBtn() {
+        let btn = document.getElementById('add-question-bottom-btn');
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.id = 'add-question-bottom-btn';
+            btn.className = 'add-question-btn';
+            btn.textContent = '+ เพิ่มคำถาม';
+            btn.style = 'margin-top:12px;background:#1976d2;color:#fff;border:none;border-radius:4px;padding:6px 16px;display:block;width:100%';
+            btn.onclick = () => {
+                const lastQuestion = questionsContainer.lastElementChild;
+                if (lastQuestion) {
+                    const lastTitle = lastQuestion.querySelector('.question-title-input').value.trim();
+                    if (!lastTitle) {
+                        addFormErrorMessage.textContent = 'กรุณากรอกคำถามก่อนเพิ่มคำถามใหม่';
+                        lastQuestion.querySelector('.question-title-input').focus();
+                        return;
+                    }
+                }
+                addFormErrorMessage.textContent = '';
+                addQuestionField();
+            };
+            questionsContainer.after(btn);
+        }
+    }
+
+    // เรียก renderAddQuestionBtn ทุกครั้งที่มีการเปลี่ยนแปลงคำถาม
+    const observer = new MutationObserver(renderAddQuestionBtn);
+    observer.observe(questionsContainer, { childList: true });
+
+    if(questionsContainer) {
+        questionsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-question-btn')) {
+                const questionId = e.target.dataset.target;
+                document.getElementById(`question-item-${questionId}`).remove();
+                renumberQuestions();
+            }
+            if (e.target.classList.contains('add-option-btn')) {
+                addOptionField(e.target.dataset.target);
+            }
+            if (e.target.classList.contains('remove-option-btn')) {
+                const optionDiv = e.target.parentElement;
+                const optionsContainer = optionDiv.parentElement;
+                optionDiv.remove();
+                // Renumber remaining option placeholders
+                const optionInputs = optionsContainer.querySelectorAll('.option-input');
+                optionInputs.forEach((input, idx) => {
+                    input.placeholder = `ตัวเลือกที่ ${idx + 1}`;
+                });
+            }
+        });
+
+        // ฟังก์ชันรีนัมเบอร์ label คำถามที่ X
+        function renumberQuestions() {
+            const questionItems = questionsContainer.querySelectorAll('.question-item');
+            questionItems.forEach((item, idx) => {
+                const label = item.querySelector('.question-item-header label');
+                if (label) {
+                    label.textContent = `คำถามที่ ${idx + 1}:`;
+                }
+            });
+        }
+
+        questionsContainer.addEventListener('change', (e) => {
+            if (e.target.classList.contains('question-type-select')) {
+                const questionId = e.target.dataset.target;
+                const optionsContainer = document.getElementById(`options-container-${questionId}`);
+                if (e.target.value === 'multiple-choice') {
+                    optionsContainer.innerHTML = `
+                    <div class="option-input-container" id="options-for-${questionId}">
+                        <div class="option-item">
+                            <input type="text" placeholder="ตัวเลือกที่ 1" class="option-input">
+                            <button type="button" class="remove-option-btn">&times;</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-option-btn" data-target="${questionId}">+ เพิ่มตัวเลือก</button>
+                `;
+                } else {
+                    optionsContainer.innerHTML = '';
+                }
+            }
+        });
+    }
+
+    // --- Open/Close Modals ---
+    if(addFormsBtn) addFormsBtn.addEventListener('click', () => {
+        formTitleInput.value = '';
+        formDescriptionInput.value = '';
+        questionsContainer.innerHTML = '';
+        addQuestionField(); // Start with one question
+        addFormsModal.style.display = 'flex';
+    });
+    if(closeAddFormsModalBtn) closeAddFormsModalBtn.addEventListener('click', () => addFormsModal.style.display = 'none');
+    if(cancelAddFormBtn) cancelAddFormBtn.addEventListener('click', () => addFormsModal.style.display = 'none');
+
+    // --- Save Form Logic ---
+    if(saveFormBtn) saveFormBtn.addEventListener('click', async () => {
+        const title = formTitleInput.value.trim();
+        const description = formDescriptionInput.value.trim();
+
+        if (!title) {
+            addFormErrorMessage.textContent = 'กรุณากรอกหัวข้อแบบประเมิน';
+            return;
+        }
+
+        const questions = [];
+        const questionItems = questionsContainer.querySelectorAll('.question-item');
+        for (const item of questionItems) {
+            const questionTitle = item.querySelector('.question-title-input').value.trim();
+            const questionType = item.querySelector('.question-type-select').value;
+
+            if (!questionTitle) continue;
+
+            let options = [];
+            if (questionType === 'multiple-choice') {
+                const optionInputs = item.querySelectorAll('.option-input');
+                optionInputs.forEach(opt => {
+                    if (opt.value.trim()) options.push(opt.value.trim());
+                });
+            }
+            questions.push({ title: questionTitle, type: questionType, options: options });
+        }
+
+        if (questions.length === 0) {
+            addFormErrorMessage.textContent = 'กรุณาเพิ่มคำถามอย่างน้อย 1 ข้อ';
+            return;
+        }
+
+        try {
+            const formDocRef = await formsCollection.add({
+                title: title,
+                description: description,
+                questions: questions,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            // เผยแพร่ไปที่ข่าวสารทันที
+            await newsCollection.add({
+                title: `${title}`,
+                content: description || 'กรุณาตอบแบบประเมิน',
+                formId: formDocRef.id,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                pinned: false
+            });
+            addFormsModal.style.display = 'none';
+            renderNews(); // Refresh news list
+        } catch (error) {
+            console.error("Error saving form: ", error);
+            addFormErrorMessage.textContent = 'เกิดข้อผิดพลาดในการบันทึก';
+        }
+    });
+
+    // --- Open/Close Manage Forms Modal ---
+    if(deleteFormsBtn) deleteFormsBtn.addEventListener('click', async () => {
+        deleteFormsList.innerHTML = '<li>กำลังโหลด...</li>';
+        deleteFormsModal.style.display = 'flex';
+
+        try {
+            const snapshot = await formsCollection.orderBy('timestamp', 'desc').get();
+            deleteFormsList.innerHTML = '';
+            if(snapshot.empty) {
+                deleteFormsList.innerHTML = '<li>ยังไม่มีแบบประเมิน</li>';
+                return;
+            }
+            snapshot.forEach(doc => {
+                const form = doc.data();
+                const li = document.createElement('li');
+                li.innerHTML = `
+                <span>${form.title}</span>
+                <div class="form-actions">
+                    <button class="summary-form-btn" data-id="${doc.id}">ดูสรุป</button>
+                    <button class="delete-form-btn" data-id="${doc.id}">ลบ</button>
+                    <button class="edit-form-btn" data-id="${doc.id}">แก้ไขคำตอบ</button>
+                </div>
+            `;
+                deleteFormsList.appendChild(li);
+            });
+        } catch(error) {
+            console.error("Error loading forms: ", error);
+            deleteFormsList.innerHTML = '<li>เกิดข้อผิดพลาด</li>';
+        }
+    });
+    if(closeDeleteFormsModalBtn) closeDeleteFormsModalBtn.addEventListener('click', () => deleteFormsModal.style.display = 'none');
+    if(cancelDeleteFormsSelectionBtn) cancelDeleteFormsSelectionBtn.addEventListener('click', () => deleteFormsModal.style.display = 'none');
+
+    // --- Logic for Manage Forms Buttons (Delete, Summary) ---
+    if(deleteFormsList) deleteFormsList.addEventListener('click', async (e) => {
+        const formId = e.target.dataset.id;
+        if (!formId) return;
+
+        // ...
+        if (e.target.classList.contains('delete-form-btn')) {
+            // Create custom confirmation modal
+            let confirmModal = document.getElementById('confirmDeleteFormModal');
+            if (!confirmModal) {
+                confirmModal = document.createElement('div');
+                confirmModal.id = 'confirmDeleteFormModal';
+                confirmModal.className = 'modal-overlay';
+                confirmModal.innerHTML = `
+                    <div class="modal-content modal-delete-form">
+                        <h3 class="modal-title">ยืนยันการลบแบบประเมิน</h3>
+                        <p class="modal-desc">คุณต้องการลบแบบประเมิน, ข้อมูลการตอบกลับ และข่าวที่เกี่ยวข้องทั้งหมดใช่หรือไม่?<br><span class='text-danger'>การกระทำนี้ไม่สามารถย้อนกลับได้</span></p>
+                        <button id="confirmDeleteFormBtn" class="btn btn-danger btn-modal">ลบ</button>
+                        <button id="cancelDeleteFormBtn" class="btn btn-secondary btn-modal">ยกเลิก</button>
+                    </div>
+                `;
+                document.body.appendChild(confirmModal);
+            } else {
+                confirmModal.style.display = 'flex';
+            }
+            confirmModal.classList.add('modal-overlay-active');
+
+            // Add event listeners for confirm/cancel
+            document.getElementById('confirmDeleteFormBtn').onclick = async () => {
+                confirmModal.style.display = 'none';
+                    try {
+                        // 1. Delete the form document
+                        await formsCollection.doc(formId).delete();
+                        // 2. Delete all submissions for this form
+                        const submissionsSnapshot = await formSubmissionsCollection.where('formId', '==', formId).get();
+                        const batch = db.batch();
+                        submissionsSnapshot.forEach(doc => {
+                            batch.delete(formSubmissionsCollection.doc(doc.id));
+                        });
+                        await batch.commit();
+                        // 3. Delete related news
+                        const newsSnapshot = await newsCollection.where('formId', '==', formId).get();
+                        const newsBatch = db.batch();
+                        newsSnapshot.forEach(doc => {
+                            newsBatch.delete(newsCollection.doc(doc.id));
+                        });
+                        await newsBatch.commit();
+                        // 4. Refresh the forms list UI
+                        deleteFormsModal.style.display = 'none';
+                        await renderNews();
+                    } catch (error) {
+                        alert('เกิดข้อผิดพลาดในการลบแบบประเมิน: ' + error.message);
+                    }
+            };
+            document.getElementById('cancelDeleteFormBtn').onclick = () => {
+                confirmModal.style.display = 'none';
+            };
+        }
+        // ...
+        if (e.target.classList.contains('edit-form-btn')) {
+            openEditFormSubmissionModal(formId);
+        }
+
+        if (e.target.classList.contains('summary-form-btn')) {
+            openFormSummaryModal(formId);
+        }
+
+    });
+
+    // REPLACED FUNCTION
+async function openDoFormModal(formId) {
+    currentSubmittingFormId = formId;
+
+    try {
+        // 1. ดึงข้อมูลของแบบประเมิน
+        const formDoc = await formsCollection.doc(formId).get();
+        if (!formDoc.exists) {
+            formSubmissionError.textContent = 'ไม่พบแบบประเมิน';
+            return;
+        }
+        const formData = formDoc.data();
+
+        // 2. ดึงข้อมูลการส่งทั้งหมดของแบบประเมินนี้ เพื่อเช็คว่าใครทำไปแล้วบ้าง
+        const submissionsSnapshot = await formSubmissionsCollection.where('formId', '==', formId).get();
+        const submittedStudentIds = new Set(); // ใช้ Set เพื่อการค้นหาที่รวดเร็ว
+        submissionsSnapshot.forEach(doc => {
+            // เราจะเก็บ studentId ตอนส่งข้อมูล (จะแก้ไขในข้อ 2.2)
+            if (doc.data().submitterStudentId) {
+                submittedStudentIds.add(doc.data().submitterStudentId);
+            }
+        });
+
+        // 3. แสดงหัวข้อและคำอธิบายของแบบประเมิน
+        doFormTitle.textContent = formData.title;
+        doFormDescription.textContent = formData.description;
+        formSubmissionContainer.innerHTML = ''; // ล้างคำถามเก่า
+        formSubmissionError.textContent = ''; // ล้างข้อความ error เก่า
+
+        // 4. สร้าง Dropdown ของรายชื่อนักเรียน
+        const userNameSelect = document.getElementById('userNameInput');
+        userNameSelect.innerHTML = ''; // ล้างตัวเลือกเก่า
+
+        // เพิ่มตัวเลือกตั้งต้น
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "--- กรุณาเลือกชื่อของคุณ ---";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        userNameSelect.appendChild(defaultOption);
+
+        // วนลูปสร้างตัวเลือกจากข้อมูลนักเรียนทั้งหมด
+        studentsData.forEach(student => {
+            const option = document.createElement('option');
+            option.value = student.id; // value คือ ID ของนักเรียน
+            option.textContent = `เลขที่ ${student.studentNumber} - ${student.prefix}${student.name} ${student.lastName}`;
+
+            // 5. ตรวจสอบว่านักเรียนคนนี้เคยทำแบบประเมินแล้วหรือยัง
+            if (submittedStudentIds.has(student.id)) {
+                option.disabled = true; // ปิดการใช้งานตัวเลือก
+                option.textContent += " (ทำแล้ว)"; // เพิ่มข้อความบอก
+            }
+            userNameSelect.appendChild(option);
+        });
+
+        // 6. สร้างคำถามของแบบประเมิน
+        formData.questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'form-question';
+            let inputHtml = '';
+            if (q.type === 'text') {
+                inputHtml = `<input type="text" name="q_${index}" required>`;
+            } else if (q.type === 'multiple-choice') {
+                inputHtml = '<div class="form-options">';
+                q.options.forEach((opt, optIndex) => {
+                    inputHtml += `
+                    <label>
+                        <input type="radio" name="q_${index}" value="${opt}" required>
+                        ${opt}
+                    </label>
+                `;
+                });
+                inputHtml += '</div>';
+            }
+            questionDiv.innerHTML = `<p>${q.title}</p>${inputHtml}`;
+            formSubmissionContainer.appendChild(questionDiv);
+        });
+
+        // 7. แสดง Modal
+        doFormModal.style.display = 'flex';
+
+    } catch (error) {
+    console.error("Error opening form modal:", error);
+    formSubmissionError.textContent = 'เกิดข้อผิดพลาดในการโหลดแบบประเมิน';
+    }
+}
+
+async function loadAdminPasswordFromFirebase() {
+    try {
+        const adminDoc = await appSettingsCollection.doc('admin').get();
+        if (adminDoc.exists && adminDoc.data().password) {
+            ADMIN_PASSWORD = adminDoc.data().password;
+            console.log('Loaded ADMIN_PASSWORD from Firebase');
+        } else {
+            ADMIN_PASSWORD = '301';
+            console.warn('Admin password not found in Firestore! Using fallback password.');
+        }
+    } catch (e) {
+        ADMIN_PASSWORD = '301';
+        console.error('Error loading admin password from Firestore, using fallback password:', e);
+    }
+}
+
+loadAdminPasswordFromFirebase();
+
+    // --- Logic to handle form submission ---
+    if(submitFormBtn) submitFormBtn.addEventListener('click', async () => {
+        const userName = userNameInput.value.trim();
+        if (!userName) {
+            formSubmissionError.textContent = 'กรุณากรอกชื่อ-นามสกุล';
+            return;
+        }
+
+        const answers = {};
+        const formElements = formSubmissionContainer.elements;
+        let allAnswered = true;
+
+        // Loop through questions to collect answers
+        const questionsSnapshot = await formsCollection.doc(currentSubmittingFormId).get();
+        const questions = questionsSnapshot.data().questions;
+
+        for (let i = 0; i < questions.length; i++) {
+            const input = formElements[`q_${i}`];
+            if (!input) continue;
+
+            if (input.type === 'text') {
+                if (!input.value.trim()) {
+                    allAnswered = false;
+                    break;
+                }
+                answers[`q_${i}`] = input.value.trim();
+            } else if (input.length) { // Radio buttons
+                const checked = Array.from(input).find(radio => radio.checked);
+                if (!checked) {
+                    allAnswered = false;
+                    break;
+                }
+                answers[`q_${i}`] = checked.value;
+            }
+        }
+
+        if (!allAnswered) {
+            formSubmissionError.textContent = 'กรุณาตอบคำถามให้ครบทุกข้อ';
+            return;
+        }
+
+        try {
+            await formSubmissionsCollection.add({
+                formId: currentSubmittingFormId,
+                submitterName: userName,
+                submitterStudentId: userNameInput.value, // เพิ่มบรรทัดนี้
+                answers: answers,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+                formSubmissionError.innerHTML = '<span style="color: green;">ส่งคำตอบเรียบร้อยแล้ว</span>';
+            setTimeout(() => { doFormModal.style.display = 'none'; formSubmissionError.textContent = ''; }, 1200);
+        } catch (error) {
+            console.error("Error submitting form: ", error);
+            formSubmissionError.textContent = 'เกิดข้อผิดพลาดในการส่งคำตอบ';
+        }
+    });
+
+    // --- Logic to show Form Summary ---
+    async function openFormSummaryModal(formId) {
+    formSummaryContainer.innerHTML = '<p>กำลังโหลดสรุปผล...</p>';
+    formSummaryModal.style.display = 'flex';
+
+    try {
+        // 1. ดึงข้อมูลจำเป็นทั้งหมด: แบบประเมิน, การส่ง, และรายชื่อนักเรียน
+        const formDoc = await formsCollection.doc(formId).get();
+        if (!formDoc.exists) {
+            formSummaryContainer.innerHTML = '<p>ไม่พบแบบประเมินนี้</p>';
+            return;
+        }
+        const formData = formDoc.data();
+        summaryFormTitle.textContent = `สรุปผล: ${formData.title}`;
+
+        const submissionsSnapshot = await formSubmissionsCollection.where('formId', '==', formId).get();
+
+        // 2. สร้าง Map ของข้อมูลการส่ง และ Set ของ ID คนที่ส่งแล้ว
+        const submissionsMap = new Map();
+        submissionsSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.submitterStudentId) {
+                submissionsMap.set(data.submitterStudentId, data);
+            }
+        });
+        const submittedStudentIds = new Set(submissionsMap.keys());
+
+        // 3. แยกนักเรียนเป็น 2 กลุ่ม: ทำแล้ว และ ยังไม่ทำ
+        const notSubmittedStudents = studentsData.filter(student => !submittedStudentIds.has(student.id));
+
+        // 4. เริ่มสร้าง HTML สำหรับแสดงผล
+        let summaryHtml = `<p><strong>จำนวนผู้ตอบกลับ: ${submittedStudentIds.size} / ${studentsData.length} คน</strong></p>`;
+        
+        // ---- ส่วนแสดงรายชื่อผู้ที่ "ยังไม่ทำ" ----
+        summaryHtml += `
+            <div class="summary-list not-submitted-list">
+                <h4>รายชื่อผู้ที่ยังไม่ทำ (${notSubmittedStudents.length} คน)</h4>
+                <ul>
+                    ${notSubmittedStudents.length > 0 ? notSubmittedStudents.map(s => `<li>เลขที่ ${s.studentNumber} - ${s.prefix}${s.name} ${s.lastName}</li>`).join('') : '<li>ไม่มีนักเรียนที่ค้าง</li>'}
+                </ul>
+            </div>
+            <hr>
+        `;
+
+        // ---- ส่วนแสดงรายละเอียดคำตอบรายบุคคลของผู้ที่ "ทำแล้ว" ----
+        summaryHtml += '<h3>รายละเอียดคำตอบรายบุคคล</h3>';
+        if (submittedStudentIds.size > 0) {
+            studentsData.forEach(student => {
+                if (submittedStudentIds.has(student.id)) {
+                    const submission = submissionsMap.get(student.id);
+                    summaryHtml += `
+                        <div class="summary-student-card">
+                            <h4>เลขที่ ${student.studentNumber} - ${student.prefix}${student.name} ${student.lastName}</h4>
+                            <ul>
+                    `;
+                    formData.questions.forEach((question, index) => {
+                        const answer = submission.answers[`q_${index}`] || '<em>(ไม่ได้ตอบ)</em>';
+                        summaryHtml += `<li><strong>${question.title}:</strong> ${answer}</li>`;
+                    });
+                    summaryHtml += `
+                            </ul>
+                        </div>
+                    `;
+                }
+            });
+        } else {
+            summaryHtml += '<p>ยังไม่มีผู้ส่งคำตอบ</p>';
+        }
+        
+        // 5. นำ HTML ไปแสดงผล
+        formSummaryContainer.innerHTML = summaryHtml;
+
+    } catch (error) {
+        console.error("Error generating detailed form summary:", error);
+        formSummaryContainer.innerHTML = '<p>เกิดข้อผิดพลาดในการโหลดข้อมูลสรุป</p>';
+    }
+}
+
+    // --- Add event listeners for new modals ---
+    if(closeDoFormModalBtn) closeDoFormModalBtn.addEventListener('click', () => doFormModal.style.display = 'none');
+    if(closeFormSummaryModalBtn) closeFormSummaryModalBtn.addEventListener('click', () => formSummaryModal.style.display = 'none');
+    
+    // ===========================================
+    // ===== END: FORMS SYSTEM LOGIC            =====
+    // ===========================================
+    
     // New: Punishment Summary Navigation elements
     punishmentNav = document.getElementById('punishmentNav');
     prevMonthPunishmentBtn = document.getElementById('prevMonthPunishmentBtn');
@@ -3355,82 +4255,92 @@ document.addEventListener('DOMContentLoaded', async () => {
     cancelUserReplyBtn = document.getElementById('cancelUserReplyBtn');
     cancelAdminReplyBtn = document.getElementById('cancelAdminReplyBtn');
 
-    cancelUserReplyBtn.addEventListener('click', hideReplyPreview);
-    cancelAdminReplyBtn.addEventListener('click', hideReplyPreview);
+    if(cancelUserReplyBtn) cancelUserReplyBtn.addEventListener('click', hideReplyPreview);
+    if(cancelAdminReplyBtn) cancelAdminReplyBtn.addEventListener('click', hideReplyPreview);
     // END BUG FIX
-
     // Initial data population from Firebase
     await loadStudentsFromFirebase();
     await loadPaymentRequirements();
     checkForUpdates(); // New: Set up real-time update listener
 
     // --- Hide Loader and Show Initial Page ---
-    setTimeout(() => {
-        loader.style.opacity = '0';
-        loader.addEventListener('transitionend', () => {
-            loader.style.display = 'none';
-            document.body.classList.remove('is-loading');
-            switchPage('home');
-        });
-    }, 1000);
+    if(loader) {
+        setTimeout(() => {
+            loader.style.opacity = '0';
+            loader.addEventListener('transitionend', () => {
+                loader.style.display = 'none';
+                document.body.classList.remove('is-loading');
+                switchPage('home');
+            });
+        }, 1000);
+    } else {
+        switchPage('home');
+    }
 
     // --- Event Listeners for Main Navigation Buttons ---
-    navHomeBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('home'); });
-    navClassBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('class'); });
-    navContactBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('contact'); });
-    navChatBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('chat'); });
-    navSettingBtn.addEventListener('click', (e) => { e.preventDefault(); openSettingsAdminPasswordModal(); });
+    if(navHomeBtn) navHomeBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('home'); });
+    if(navClassBtn) navClassBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('class'); });
+    if(navContactBtn) navContactBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('contact'); });
+    if(navChatBtn) navChatBtn.addEventListener('click', (e) => { e.preventDefault(); switchPage('chat'); });
+    if(navSettingBtn) navSettingBtn.addEventListener('click', (e) => { e.preventDefault(); openSettingsAdminPasswordModal(); });
 
     // --- Event Listeners for Class Page Toggle Buttons ---
-    showStudentListBtn.addEventListener('click', () => switchContentSection('studentList'));
-    showStudentScoresBtn.addEventListener('click', () => switchContentSection('studentScores'));
-    showStudentScoresBtnAll.addEventListener('click', () => switchContentSection('studentScoresAll'));
-    showStudentFeeSummaryBtn.addEventListener('click', () => switchContentSection('studentFeeSummary'));
-    showPunishmentSummaryBtn.addEventListener('click', () => switchContentSection('punishmentSummary'));
-    ScoresHistoryBtn.addEventListener('click', () => switchContentSection('saveHistory'));
+    if(showStudentListBtn) showStudentListBtn.addEventListener('click', () => switchContentSection('studentList'));
+    if(showStudentScoresBtn) showStudentScoresBtn.addEventListener('click', () => switchContentSection('studentScores'));
+    if(showStudentScoresBtnAll) showStudentScoresBtnAll.addEventListener('click', () => switchContentSection('studentScoresAll'));
+    if(showStudentFeeSummaryBtn) showStudentFeeSummaryBtn.addEventListener('click', () => switchContentSection('studentFeeSummary'));
+    if(showPunishmentSummaryBtn) showPunishmentSummaryBtn.addEventListener('click', () => switchContentSection('punishmentSummary'));
+    if(ScoresHistoryBtn) ScoresHistoryBtn.addEventListener('click', () => switchContentSection('saveHistory'));
 
     // --- Event Listeners for Modals and other actions ---
-    closeButton.addEventListener('click', closeStudentDetailModal);
-    modalOverlay.addEventListener('click', (event) => { if (event.target === modalOverlay) closeStudentDetailModal(); });
-    editStudentInfoBtn.addEventListener('click', () => toggleEditMode(true));
-    saveStudentInfoBtn.addEventListener('click', saveStudentInfo);
-    cancelStudentInfoBtn.addEventListener('click', () => { toggleEditMode(false); adminPasswordInput.value = ''; passwordErrorMessage.textContent = ''; });
+    if(closeButton) closeButton.addEventListener('click', closeStudentDetailModal);
     
-    closeMonthlySelectionModalBtn.addEventListener('click', closeMonthlySelectionModal);
-    monthlySelectionModal.addEventListener('click', (event) => { if (event.target === monthlySelectionModal) closeMonthlySelectionModal(); });
-    cancelMonthlySelectionBtn.addEventListener('click', closeMonthlySelectionModal);
+    if(editStudentInfoBtn) editStudentInfoBtn.addEventListener('click', () => toggleEditMode(true));
+    if(saveStudentInfoBtn) saveStudentInfoBtn.addEventListener('click', saveStudentInfo);
+    if(cancelStudentInfoBtn) cancelStudentInfoBtn.addEventListener('click', () => { toggleEditMode(false); if(adminPasswordInput) adminPasswordInput.value = ''; if(passwordErrorMessage) passwordErrorMessage.textContent = ''; });
     
-    closeWeeklyScoresModalBtn.addEventListener('click', () => { weeklyScoresModal.style.display = 'none'; });
-    weeklyScoresModal.addEventListener('click', (event) => { if (event.target === weeklyScoresModal) weeklyScoresModal.style.display = 'none'; });
-    saveWeeklyScoresBtn.addEventListener('click', saveWeeklyScores);
-    cancelWeeklyScoresBtn.addEventListener('click', () => { weeklyScoresModal.style.display = 'none'; });
+    if(closeMonthlySelectionModalBtn) closeMonthlySelectionModalBtn.addEventListener('click', closeMonthlySelectionModal);
+    if(cancelMonthlySelectionBtn) cancelMonthlySelectionBtn.addEventListener('click', closeMonthlySelectionModal);
     
-    closeAllStudentsMonthSelectionModalBtn.addEventListener('click', () => { closeAllStudentsMonthSelectionModal(); switchContentSection('studentList'); });
-    allStudentsMonthSelectionModal.addEventListener('click', (event) => { if (event.target === allStudentsMonthSelectionModal) { closeAllStudentsMonthSelectionModal(); switchContentSection('studentList'); } });
-    cancelAllStudentsMonthSelectionBtn.addEventListener('click', () => { closeAllStudentsMonthSelectionModal(); switchContentSection('studentList'); });
+    if(closeWeeklyScoresModalBtn) closeWeeklyScoresModalBtn.addEventListener('click', () => { weeklyScoresModal.style.display = 'none'; });
+    if(saveWeeklyScoresBtn) saveWeeklyScoresBtn.addEventListener('click', saveWeeklyScores);
+    if(cancelWeeklyScoresBtn) cancelWeeklyScoresBtn.addEventListener('click', () => { weeklyScoresModal.style.display = 'none'; });
     
-    saveAllStudentsWeeklyScoresBtn.addEventListener('click', saveAllStudentsWeeklyScores);
-    cancelAllStudentsWeeklyScoresBtn.addEventListener('click', () => switchContentSection('studentList'));
+    if(closeAllStudentsMonthSelectionModalBtn) closeAllStudentsMonthSelectionModalBtn.addEventListener('click', () => { closeAllStudentsMonthSelectionModal(); switchContentSection('studentList'); });
+    if(cancelAllStudentsMonthSelectionBtn) cancelAllStudentsMonthSelectionBtn.addEventListener('click', () => { closeAllStudentsMonthSelectionModal(); switchContentSection('studentList'); });
     
-    addMultipleWeeklyFeesBtn.addEventListener('click', openAddMultipleWeeklyFeesModal);
-    closeAddMultipleWeeklyFeesModalBtn.addEventListener('click', closeAddMultipleWeeklyFeesModal);
-    cancelMultipleWeeklyFeesBtn.addEventListener('click', closeAddMultipleWeeklyFeesModal);
-    saveMultipleWeeklyFeesBtn.addEventListener('click', () => {
+    if(saveAllStudentsWeeklyScoresBtn) saveAllStudentsWeeklyScoresBtn.addEventListener('click', saveAllStudentsWeeklyScores);
+    if(cancelAllStudentsWeeklyScoresBtn) cancelAllStudentsWeeklyScoresBtn.addEventListener('click', () => switchContentSection('studentList'));
+    
+    if(addMultipleWeeklyFeesBtn) addMultipleWeeklyFeesBtn.addEventListener('click', openAddMultipleWeeklyFeesModal);
+    if(closeAddMultipleWeeklyFeesModalBtn) closeAddMultipleWeeklyFeesModalBtn.addEventListener('click', closeAddMultipleWeeklyFeesModal);
+    if(cancelMultipleWeeklyFeesBtn) cancelMultipleWeeklyFeesBtn.addEventListener('click', closeAddMultipleWeeklyFeesModal);
+    if(saveMultipleWeeklyFeesBtn) saveMultipleWeeklyFeesBtn.addEventListener('click', () => {
         const anyStudentSelected = Array.from(multipleWeeklyFeesTableBody.querySelectorAll('.student-select-checkbox')).some(cb => cb.checked);
-        if (!anyStudentSelected) { alert("กรุณาเลือกนักเรียนอย่างน้อยหนึ่งคน"); return; }
+        if (!anyStudentSelected) {
+            addMultipleWeeklyFeesErrorMessage.textContent = 'กรุณาเลือกนักเรียนอย่างน้อยหนึ่งคน';
+            addMultipleWeeklyFeesErrorMessage.style.color = 'red';
+            addMultipleWeeklyFeesErrorMessage.style.display = 'block';
+            return;
+        }
         const anyWeekSelected = Array.from(multipleWeeklyFeesTableBody.querySelectorAll('.week-select-checkbox')).some(cb => cb.checked);
-        if (!anyWeekSelected) { alert("กรุณาเลือกสัปดาห์อย่างน้อยหนึ่งสัปดาห์"); return; }
-        initialMultipleFeesActions.style.display = 'none';
-        addMultipleFeesPasswordSection.style.display = 'block';
-        addMultipleWeeklyFeesAdminPasswordInput.focus();
+        if (!anyWeekSelected) {
+            addMultipleWeeklyFeesErrorMessage.textContent = 'กรุณาเลือกสัปดาห์อย่างน้อยหนึ่งสัปดาห์';
+            addMultipleWeeklyFeesErrorMessage.style.color = 'red';
+            addMultipleWeeklyFeesErrorMessage.style.display = 'block';
+            return;
+        }
+        if(initialMultipleFeesActions) initialMultipleFeesActions.style.display = 'none';
+        if(addMultipleFeesPasswordSection) addMultipleFeesPasswordSection.style.display = 'block';
+        if(addMultipleWeeklyFeesAdminPasswordInput) addMultipleWeeklyFeesAdminPasswordInput.focus();
     });
-    cancelSaveMultipleFeesBtn.addEventListener('click', () => {
-        initialMultipleFeesActions.style.display = 'block';
-        addMultipleFeesPasswordSection.style.display = 'none';
-        addMultipleWeeklyFeesErrorMessage.textContent = '';
+    if(cancelSaveMultipleFeesBtn) cancelSaveMultipleFeesBtn.addEventListener('click', () => {
+        if(initialMultipleFeesActions) initialMultipleFeesActions.style.display = 'block';
+        if(addMultipleFeesPasswordSection) addMultipleFeesPasswordSection.style.display = 'none';
+        if(addMultipleWeeklyFeesErrorMessage) addMultipleWeeklyFeesErrorMessage.textContent = '';
     });
-    confirmSaveMultipleFeesBtn.addEventListener('click', confirmAndSaveMultipleFees);
-    selectAllStudentsCheckbox.addEventListener('change', (event) => {
+    if(confirmSaveMultipleFeesBtn) confirmSaveMultipleFeesBtn.addEventListener('click', confirmAndSaveMultipleFees);
+    if(selectAllStudentsCheckbox) selectAllStudentsCheckbox.addEventListener('change', (event) => {
         multipleWeeklyFeesTableBody.querySelectorAll('.student-select-checkbox').forEach(cb => { cb.checked = event.target.checked; });
     });
     document.querySelectorAll('.select-all-week-checkbox').forEach(headerCheckbox => {
@@ -3440,115 +4350,113 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    prevMonthPunishmentBtn.addEventListener('click', () => { if (currentPunishmentMonthIndex > 0) renderPunishmentSummary(currentPunishmentMonthIndex - 1); });
-    nextMonthPunishmentBtn.addEventListener('click', () => {
+    if(prevMonthPunishmentBtn) prevMonthPunishmentBtn.addEventListener('click', () => { if (currentPunishmentMonthIndex > 0) renderPunishmentSummary(currentPunishmentMonthIndex - 1); });
+    if(nextMonthPunishmentBtn) nextMonthPunishmentBtn.addEventListener('click', () => {
         const currentAcademicMonthIndex = getAcademicMonthIndex(new Date().getMonth());
         if (currentPunishmentMonthIndex < currentAcademicMonthIndex) renderPunishmentSummary(currentPunishmentMonthIndex + 1);
     });
 
     // --- Settings Event Listeners ---
-    clearHistoryBtn.addEventListener('click', openAdminClearHistoryModal);
-    closeAdminClearHistoryModalBtn.addEventListener('click', closeAdminClearHistoryModal);
-    adminClearHistoryModal.addEventListener('click', (event) => { if (event.target === adminClearHistoryModal) closeAdminClearHistoryModal(); });
-    confirmClearHistoryBtn.addEventListener('click', clearSaveHistoryFromFirebase);
-    cancelClearHistoryBtn.addEventListener('click', closeAdminClearHistoryModal);
+    if(clearHistoryBtn) clearHistoryBtn.addEventListener('click', openAdminClearHistoryModal);
+    if(closeAdminClearHistoryModalBtn) closeAdminClearHistoryModalBtn.addEventListener('click', closeAdminClearHistoryModal);
+    if(confirmClearHistoryBtn) confirmClearHistoryBtn.addEventListener('click', clearSaveHistoryFromFirebase);
+    if(cancelClearHistoryBtn) cancelClearHistoryBtn.addEventListener('click', closeAdminClearHistoryModal);
 
-    autoDeleteToggle.addEventListener('change', async () => {
+    if(autoDeleteToggle) autoDeleteToggle.addEventListener('change', async () => {
         const currentSettings = (await appSettingsDocRef.get()).data() || {};
         await saveAppSettings({ ...currentSettings, autoDeleteEnabled: autoDeleteToggle.checked });
         await checkAndTrimHistory();
     });
-    editHistoryLimitBtn.addEventListener('click', () => toggleHistoryLimitEditMode(true));
-    saveHistoryLimitBtn.addEventListener('click', handleSaveHistoryLimit);
-    cancelHistoryLimitBtn.addEventListener('click', () => toggleHistoryLimitEditMode(false));
+    if(editHistoryLimitBtn) editHistoryLimitBtn.addEventListener('click', () => toggleHistoryLimitEditMode(true));
+    if(saveHistoryLimitBtn) saveHistoryLimitBtn.addEventListener('click', handleSaveHistoryLimit);
+    if(cancelHistoryLimitBtn) cancelHistoryLimitBtn.addEventListener('click', () => toggleHistoryLimitEditMode(false));
 
-    autoDeleteNewsToggle.addEventListener('change', async () => {
+    if(autoDeleteNewsToggle) autoDeleteNewsToggle.addEventListener('change', async () => {
         const currentSettings = (await appSettingsDocRef.get()).data() || {};
         await saveAppSettings({ ...currentSettings, autoDeleteNewsEnabled: autoDeleteNewsToggle.checked });
         await checkAndTrimNews();
     });
-    editNewsLimitBtn.addEventListener('click', () => toggleNewsLimitEditMode(true));
-    saveNewsLimitBtn.addEventListener('click', handleSaveNewsLimit);
-    cancelNewsLimitBtn.addEventListener('click', () => toggleNewsLimitEditMode(false));
+    if(editNewsLimitBtn) editNewsLimitBtn.addEventListener('click', () => toggleNewsLimitEditMode(true));
+    if(saveNewsLimitBtn) saveNewsLimitBtn.addEventListener('click', handleSaveNewsLimit);
+    if(cancelNewsLimitBtn) cancelNewsLimitBtn.addEventListener('click', () => toggleNewsLimitEditMode(false));
 
     // New: Chat Settings Listeners
-    autoDeleteChatToggle.addEventListener('change', async () => {
+    if(autoDeleteChatToggle) autoDeleteChatToggle.addEventListener('change', async () => {
         const currentSettings = (await appSettingsDocRef.get()).data() || {};
         await saveAppSettings({ ...currentSettings, autoDeleteChatEnabled: autoDeleteChatToggle.checked });
         await checkAndTrimChat();
     });
-    editChatLimitBtn.addEventListener('click', () => toggleChatLimitEditMode(true));
-    saveChatLimitBtn.addEventListener('click', handleSaveChatLimit);
-    cancelChatLimitBtn.addEventListener('click', () => toggleChatLimitEditMode(false));
+    if(editChatLimitBtn) editChatLimitBtn.addEventListener('click', () => toggleChatLimitEditMode(true));
+    if(saveChatLimitBtn) saveChatLimitBtn.addEventListener('click', handleSaveChatLimit);
+    if(cancelChatLimitBtn) cancelChatLimitBtn.addEventListener('click', () => toggleChatLimitEditMode(false));
 
 
-    closeSettingsAdminPasswordModalBtn.addEventListener('click', () => { closeSettingsAdminPasswordModal(); switchPage('home'); });
-    settingsAdminPasswordModal.addEventListener('click', (event) => { if (event.target === settingsAdminPasswordModal) { closeSettingsAdminPasswordModal(); switchPage('home'); } });
-    confirmSettingsAdminPasswordBtn.addEventListener('click', handleSettingsAdminPasswordConfirm);
-    cancelSettingsAdminPasswordBtn.addEventListener('click', () => { closeSettingsAdminPasswordModal(); switchPage('home'); });
+    if(closeSettingsAdminPasswordModalBtn) closeSettingsAdminPasswordModalBtn.addEventListener('click', () => { closeSettingsAdminPasswordModal(); switchPage('home'); });
+    if(confirmSettingsAdminPasswordBtn) confirmSettingsAdminPasswordBtn.addEventListener('click', handleSettingsAdminPasswordConfirm);
+    if(cancelSettingsAdminPasswordBtn) cancelSettingsAdminPasswordBtn.addEventListener('click', () => { closeSettingsAdminPasswordModal(); switchPage('home'); });
 
-    addStudentBtn.addEventListener('click', openAddStudentModal);
-    deleteStudentBtn.addEventListener('click', openDeleteStudentSelectionModal);
-    closeAddStudentModalBtn.addEventListener('click', closeAddStudentModal);
-    addStudentModal.addEventListener('click', (event) => { if (event.target === addStudentModal) closeAddStudentModal(); });
-    saveNewStudentBtn.addEventListener('click', addNewStudent);
-    cancelAddStudentBtn.addEventListener('click', closeAddStudentModal);
+    if(addStudentBtn) addStudentBtn.addEventListener('click', openAddStudentModal);
+    if(deleteStudentBtn) deleteStudentBtn.addEventListener('click', openDeleteStudentSelectionModal);
+    if(closeAddStudentModalBtn) closeAddStudentModalBtn.addEventListener('click', closeAddStudentModal);
+    if(saveNewStudentBtn) saveNewStudentBtn.addEventListener('click', addNewStudent);
+    if(cancelAddStudentBtn) cancelAddStudentBtn.addEventListener('click', closeAddStudentModal);
 
-    closeDeleteStudentSelectionModalBtn.addEventListener('click', closeDeleteStudentSelectionModal);
-    deleteStudentSelectionModal.addEventListener('click', (event) => { if (event.target === deleteStudentSelectionModal) closeDeleteStudentSelectionModal(); });
-    cancelDeleteSelectionBtn.addEventListener('click', closeDeleteStudentSelectionModal);
+    if(closeDeleteStudentSelectionModalBtn) closeDeleteStudentSelectionModalBtn.addEventListener('click', closeDeleteStudentSelectionModal);
+    if(cancelDeleteSelectionBtn) cancelDeleteSelectionBtn.addEventListener('click', closeDeleteStudentSelectionModal);
 
-    closeConfirmDeleteStudentModalBtn.addEventListener('click', closeConfirmDeleteStudentModal);
-    confirmDeleteStudentModal.addEventListener('click', (event) => { if (event.target === confirmDeleteStudentModal) closeConfirmDeleteStudentModal(); });
-    confirmDeleteStudentFinalBtn.addEventListener('click', deleteStudentConfirmed);
-    cancelDeleteStudentFinalBtn.addEventListener('click', closeConfirmDeleteStudentModal);
+    if(closeConfirmDeleteStudentModalBtn) closeConfirmDeleteStudentModalBtn.addEventListener('click', closeConfirmDeleteStudentModal);
+    if(confirmDeleteStudentFinalBtn) confirmDeleteStudentFinalBtn.addEventListener('click', deleteStudentConfirmed);
+    if(cancelDeleteStudentFinalBtn) cancelDeleteStudentFinalBtn.addEventListener('click', closeConfirmDeleteStudentModal);
 
-    setMonthlyFeesBtn.addEventListener('click', openSetMonthlyFeesModal);
-    closeSetMonthlyFeesModalBtn.addEventListener('click', closeSetMonthlyFeesModal);
-    setMonthlyFeesModal.addEventListener('click', (event) => { if (event.target === setMonthlyFeesModal) closeSetMonthlyFeesModal(); });
-    saveMonthlyFeesBtn.addEventListener('click', saveMonthlyFees);
-    cancelSetMonthlyFeesBtn.addEventListener('click', closeSetMonthlyFeesModal);
+    if(setMonthlyFeesBtn) setMonthlyFeesBtn.addEventListener('click', openSetMonthlyFeesModal);
+    if(closeSetMonthlyFeesModalBtn) closeSetMonthlyFeesModalBtn.addEventListener('click', closeSetMonthlyFeesModal);
+    if(saveMonthlyFeesBtn) saveMonthlyFeesBtn.addEventListener('click', saveMonthlyFees);
+    if(cancelSetMonthlyFeesBtn) cancelSetMonthlyFeesBtn.addEventListener('click', closeSetMonthlyFeesModal);
 
     // --- News System Event Listeners ---
-    addNewsBtn.addEventListener('click', openAddNewsModal);
-    deleteNewsBtn.addEventListener('click', openDeleteNewsModal);
-    closeAddNewsModalBtn.addEventListener('click', closeAddNewsModal);
-    addNewsModal.addEventListener('click', (event) => { if (event.target === addNewsModal) closeAddNewsModal(); });
-    saveNewsBtn.addEventListener('click', saveNews);
-    cancelAddNewsBtn.addEventListener('click', closeAddNewsModal);
-    closeDeleteNewsModalBtn.addEventListener('click', closeDeleteNewsModal);
-    deleteNewsModal.addEventListener('click', (event) => { if (event.target === deleteNewsModal) closeDeleteNewsModal(); });
-    cancelDeleteNewsSelectionBtn.addEventListener('click', closeDeleteNewsModal);
+    if(addNewsBtn) addNewsBtn.addEventListener('click', openAddNewsModal);
+    if(deleteNewsBtn) deleteNewsBtn.addEventListener('click', openDeleteNewsModal);
+    if(closeAddNewsModalBtn) closeAddNewsModalBtn.addEventListener('click', closeAddNewsModal);
+    if(saveNewsBtn) saveNewsBtn.addEventListener('click', saveNews);
+    if(cancelAddNewsBtn) cancelAddNewsBtn.addEventListener('click', closeAddNewsModal);
+    if(closeDeleteNewsModalBtn) closeDeleteNewsModalBtn.addEventListener('click', closeDeleteNewsModal);
+    if(cancelDeleteNewsSelectionBtn) cancelDeleteNewsSelectionBtn.addEventListener('click', closeDeleteNewsModal);
     
+    // CHANGE: Added Event Delegation for news cards
+    if (newsContainer) {
+        newsContainer.addEventListener('click', (event) => {
+            const card = event.target.closest('.news-card');
+            if (!card) return;
+
+            const isFormButton = event.target.classList.contains('start-form-btn');
+            const formId = card.dataset.formId;
+
+            if (isFormButton && formId) {
+                openDoFormModal(formId);
+            } else if (card.dataset.newsData) {
+                const newsData = JSON.parse(card.dataset.newsData);
+                openNewsDetailModal(newsData);
+            }
+        });
+    }
+
     // Confirm Delete News Modal Listeners
-    closeConfirmDeleteNewsModalBtn.addEventListener('click', closeConfirmDeleteNewsModal);
-    confirmDeleteNewsModal.addEventListener('click', (event) => { if (event.target === confirmDeleteNewsModal) closeConfirmDeleteNewsModal(); });
-    confirmDeleteNewsFinalBtn.addEventListener('click', deleteNewsItemConfirmed);
-    cancelDeleteNewsFinalBtn.addEventListener('click', closeConfirmDeleteNewsModal);
+    if(closeConfirmDeleteNewsModalBtn) closeConfirmDeleteNewsModalBtn.addEventListener('click', closeConfirmDeleteNewsModal);
+    if(confirmDeleteNewsFinalBtn) confirmDeleteNewsFinalBtn.addEventListener('click', deleteNewsItemConfirmed);
+    if(cancelDeleteNewsFinalBtn) cancelDeleteNewsFinalBtn.addEventListener('click', closeConfirmDeleteNewsModal);
 
     // Confirm Clear Chat Modal Listeners
-    closeConfirmClearChatModalBtn.addEventListener('click', closeConfirmClearChatModal);
-    confirmClearChatModal.addEventListener('click', (event) => { if (event.target === confirmClearChatModal) closeConfirmClearChatModal(); });
-    confirmClearChatFinalBtn.addEventListener('click', clearAllChatMessages);
-    cancelClearChatFinalBtn.addEventListener('click', closeConfirmClearChatModal);
+    if(closeConfirmClearChatModalBtn) closeConfirmClearChatModalBtn.addEventListener('click', closeConfirmClearChatModal);
+    if(confirmClearChatFinalBtn) confirmClearChatFinalBtn.addEventListener('click', clearAllChatMessages);
+    if(cancelClearChatFinalBtn) cancelClearChatFinalBtn.addEventListener('click', closeConfirmClearChatModal);
 
     // Image Modal Listeners
-    closeImageModalBtn.addEventListener('click', closeImageModal);
-    imageModal.addEventListener('click', (event) => {
-        if (event.target === imageModal) {
-            closeImageModal();
-        }
-    });
-
+    if(closeImageModalBtn) closeImageModalBtn.addEventListener('click', closeImageModal);
+    
     // News Detail Modal Listeners
-    closeNewsDetailModalBtn.addEventListener('click', closeNewsDetailModal);
-    newsDetailModal.addEventListener('click', (event) => {
-        if (event.target === newsDetailModal) {
-            closeNewsDetailModal();
-        }
-    });
-
-    newsImageUrlInput.addEventListener('input', () => {
+    if(closeNewsDetailModalBtn) closeNewsDetailModalBtn.addEventListener('click', closeNewsDetailModal);
+    
+    if(newsImageUrlInput) newsImageUrlInput.addEventListener('input', () => {
         const url = newsImageUrlInput.value.trim();
         if (url) {
             newsImagePreview.src = url;
@@ -3562,21 +4470,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // --- Chat System Event Listeners ---
-    clearChatBtn.addEventListener('click', openConfirmClearChatModal);
-    saveChatNameBtn.addEventListener('click', handleSaveChatName);
+    if(clearChatBtn) clearChatBtn.addEventListener('click', openConfirmClearChatModal);
+    if(saveChatNameBtn) saveChatNameBtn.addEventListener('click', handleSaveChatName);
 
     // NEW: Event listener for the change name button
-    changeChatNameBtn.addEventListener('click', () => {
+    if(changeChatNameBtn) changeChatNameBtn.addEventListener('click', () => {
         // Pre-fill the input with the current name
-        chatNameInput.value = chatDisplayName || '';
+        if(chatNameInput) chatNameInput.value = chatDisplayName || '';
         // Show the name prompt modal
-        namePromptModal.style.display = 'flex';
-        chatNameInput.focus();
+        if(namePromptModal) namePromptModal.style.display = 'flex';
+        if(chatNameInput) chatNameInput.focus();
     });
 
 
     // --- Update Notification Listener ---
-    refreshPageBtn.addEventListener('click', () => {
+    if(refreshPageBtn) refreshPageBtn.addEventListener('click', () => {
         location.reload();
     });
 
@@ -3585,6 +4493,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =============================================
 
     function autoGrowTextarea(textarea) {
+        if (!textarea) return;
         textarea.style.height = 'auto'; // รีเซ็ตความสูง
         textarea.style.height = (textarea.scrollHeight) + 'px'; // ตั้งค่าความสูงตามเนื้อหา
     }
@@ -3601,16 +4510,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (form && typeof form.requestSubmit === 'function') {
                 form.requestSubmit();
             }
-            
-            // หลังจากส่งแล้ว ให้รีเซ็ตความสูงกลับไปเท่าเดิม
-            setTimeout(() => {
-                textarea.style.height = 'auto';
-            }, 0);
         }
-        // ถ้ากด Shift + Enter จะเป็นการขึ้นบรรทัดใหม่ตามปกติ
     }
     
-    // ทำให้ textarea ขยาย/หด อัตโนมัติเมื่อพิมพ์
     if(userChatMessageInput) {
         userChatMessageInput.addEventListener('input', () => autoGrowTextarea(userChatMessageInput));
         userChatMessageInput.addEventListener('keydown', handleTextareaKeydown);
@@ -3620,25 +4522,169 @@ document.addEventListener('DOMContentLoaded', async () => {
         adminChatMessageInput.addEventListener('keydown', handleTextareaKeydown);
     }
 
-    // แก้ไขฟังก์ชัน submit เดิมให้รองรับการรีเซ็ตความสูงของ textarea
-    const originalHandleUserChatSubmit = handleUserChatSubmit;
-    handleUserChatSubmit = function(e) {
-        originalHandleUserChatSubmit(e).then(() => {
+    if(userChatForm) userChatForm.addEventListener('submit', (e) => {
+        handleUserChatSubmit(e).then(() => {
             if(userChatMessageInput) autoGrowTextarea(userChatMessageInput);
         });
-    }
-
-    const originalHandleAdminChatSubmit = handleAdminChatSubmit;
-    handleAdminChatSubmit = function(e) {
-        originalHandleAdminChatSubmit(e).then(() => {
+    });
+    if(adminChatForm) adminChatForm.addEventListener('submit', (e) => {
+        handleAdminChatSubmit(e).then(() => {
             if(adminChatMessageInput) autoGrowTextarea(adminChatMessageInput);
         });
+    });
+    
+    // --- QR Code Generator Tool ---
+if (document.getElementById('other-tool')) {
+  if (!window.qrcode) {
+    var qrScript = document.createElement('script');
+    qrScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+    qrScript.onload = function() {
+      setupQrTool();
+    };
+    document.head.appendChild(qrScript);
+  } else {
+    setupQrTool();
+  }
+}
+
+function setupQrTool() {
+  const qrText = document.getElementById('qrText');
+  const qrColor = document.getElementById('qrColor');
+  const qrBgColor = document.getElementById('qrBgColor');
+  const qrSize = document.getElementById('qrSize');
+  const generateBtn = document.getElementById('generateQrBtn');
+  const qrResult = document.getElementById('qrResult');
+  const qrCanvas = document.getElementById('qrCanvas');
+  const downloadBtn = document.getElementById('downloadQrBtn');
+  const qrAlert = document.getElementById('qrAlert');
+
+  const qrBorderInput = document.getElementById('qrBorderWidth');
+  const qrBorderColorInput = document.getElementById('qrBorderColor');
+  const qrRadiusInput = document.getElementById('qrRadius');
+  const qrColorPreview = document.getElementById('qrColorPreview');
+  const qrBgColorPreview = document.getElementById('qrBgColorPreview');
+
+  // เพิ่ม: ดึง Element ของช่องใส่ชื่อไฟล์
+  const qrFilenameInput = document.getElementById('qrFilename');
+
+  function updateColorPreview() {
+    qrColorPreview.style.background = qrColor.value;
+    qrBgColorPreview.style.background = qrBgColor.value;
+  }
+  qrColor.addEventListener('input', updateColorPreview);
+  qrBgColor.addEventListener('input', updateColorPreview);
+  updateColorPreview();
+
+  let lastQrData = null;
+  
+  function generate() {
+    const text = qrText.value.trim();
+    const color = qrColor.value;
+    const bgColor = qrBgColor.value;
+    let size = parseInt(qrSize.value, 10);
+    let borderWidth = parseInt(qrBorderInput.value, 10) || 0;
+    let borderColor = qrBorderColorInput.value || '#2563eb';
+    let radius = parseInt(qrRadiusInput.value, 10) || 0;
+    if (!text) {
+      qrAlert.textContent = 'กรุณากรอกข้อความหรือ URL ที่ต้องการสร้าง QR Code';
+      qrAlert.classList.remove('hidden');
+      qrResult.classList.add('hidden');
+      return;
     }
+    if (isNaN(size) || size < 100 || size > 600) {
+      qrAlert.textContent = 'ขนาดต้องอยู่ระหว่าง 100 ถึง 600 พิกเซล';
+      qrAlert.classList.remove('hidden');
+      qrResult.classList.add('hidden');
+      return;
+    }
+    qrAlert.classList.add('hidden');
+    let qr = window.qrcode(0, 'L');
+    qr.addData(text);
+    qr.make();
+    let cellSize = Math.floor(size / qr.getModuleCount());
+    let qrSizePx = cellSize * qr.getModuleCount();
+    let totalSize = qrSizePx + borderWidth * 2;
+    qrCanvas.width = totalSize;
+    qrCanvas.height = totalSize;
+    let ctx = qrCanvas.getContext('2d');
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(radius, 0);
+    ctx.lineTo(totalSize - radius, 0);
+    ctx.quadraticCurveTo(totalSize, 0, totalSize, radius);
+    ctx.lineTo(totalSize, totalSize - radius);
+    ctx.quadraticCurveTo(totalSize, totalSize, totalSize - radius, totalSize);
+    ctx.lineTo(radius, totalSize);
+    ctx.quadraticCurveTo(0, totalSize, 0, totalSize - radius);
+    ctx.lineTo(0, radius);
+    ctx.quadraticCurveTo(0, 0, radius, 0);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = borderColor;
+    ctx.fillRect(0, 0, totalSize, totalSize);
+    ctx.restore();
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(radius + borderWidth, borderWidth);
+    ctx.lineTo(totalSize - radius - borderWidth, borderWidth);
+    ctx.quadraticCurveTo(totalSize - borderWidth, borderWidth, totalSize - borderWidth, radius + borderWidth);
+    ctx.lineTo(totalSize - borderWidth, totalSize - radius - borderWidth);
+    ctx.quadraticCurveTo(totalSize - borderWidth, totalSize - borderWidth, totalSize - radius - borderWidth, totalSize - borderWidth);
+    ctx.lineTo(radius + borderWidth, totalSize - borderWidth);
+    ctx.quadraticCurveTo(borderWidth, totalSize - borderWidth, borderWidth, totalSize - radius - borderWidth);
+    ctx.lineTo(borderWidth, radius + borderWidth);
+    ctx.quadraticCurveTo(borderWidth, borderWidth, radius + borderWidth, borderWidth);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(borderWidth, borderWidth, qrSizePx, qrSizePx);
+    ctx.restore();
+    for (let r = 0; r < qr.getModuleCount(); r++) {
+      for (let c = 0; c < qr.getModuleCount(); c++) {
+        ctx.fillStyle = qr.isDark(r, c) ? color : bgColor;
+        ctx.fillRect(borderWidth + c * cellSize, borderWidth + r * cellSize, cellSize, cellSize);
+      }
+    }
+    qrResult.classList.remove('hidden');
+    lastQrData = text;
+  }
+
+  generateBtn.addEventListener('click', generate);
+
+  // เพิ่ม: qrFilenameInput เข้าไปในกลุ่ม control เพื่อให้ auto-update ทำงาน (ถ้ามี)
+  const allControls = [qrText, qrColor, qrBgColor, qrSize, qrBorderInput, qrBorderColorInput, qrRadiusInput, qrFilenameInput];
+  allControls.forEach(control => {
+      control.addEventListener('input', () => {
+        if (qrText.value.trim()){
+            generate();
+        }
+      });
+  });
+
+  downloadBtn.addEventListener('click', function() {
+    if (!lastQrData) {
+      qrAlert.textContent = 'กรุณาสร้าง QR Code ก่อนดาวน์โหลด';
+      qrAlert.classList.remove('hidden');
+      return;
+    }
+    const link = document.createElement('a');
     
-    // --- ผูก event submit ใหม่หลังจากการแก้ไขฟังก์ชัน ---
-    if(userChatForm) userChatForm.addEventListener('submit', handleUserChatSubmit);
-    if(adminChatForm) adminChatForm.addEventListener('submit', handleAdminChatSubmit);
+    // แก้ไข: ตรรกะสำหรับตั้งชื่อไฟล์
+    let filename = qrFilenameInput.value.trim();
+    if (!filename) {
+        filename = 'qrcode'; // ถ้าไม่ได้กรอกชื่อ ให้ใช้ชื่อเริ่มต้น
+    }
+    // ตรวจสอบและเพิ่ม .png ถ้ายังไม่มี
+    if (!filename.toLowerCase().endsWith('.png')) {
+        filename += '.png';
+    }
+    link.download = filename;
     
+    link.href = qrCanvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
     // ===========================================
     // ===== END: Auto-growing Textarea Logic =====
     // ===========================================
@@ -3652,4 +4698,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (contactAdminForm) {
         contactAdminForm.addEventListener('submit', handleContactFormSubmit);
     }
+    // Close modals when clicking overlay
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (event) => {
+            // ไม่ต้องปิด modal เมื่อคลิก overlay ทุกกรณี
+            // (ปิดได้เฉพาะกดปุ่ม close/cancel เท่านั้น)
+            return;
+        });
+    });
 });
