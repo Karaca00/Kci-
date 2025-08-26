@@ -556,21 +556,21 @@ function closeStudentDetailModal() {
 function toggleEditMode(isEditMode) {
     const modalContent = studentDetailModal.querySelector('.modal-content');
     if (isEditMode) {
-        studentDetailsView.classList.add('hidden');
-        studentDetailsEdit.classList.add('grid');
-        editStudentInfoBtn.classList.add('hidden');
-        saveStudentInfoBtn.classList.remove('hidden');
-        cancelStudentInfoBtn.classList.remove('hidden');
-        modalContent.classList.add('expanded-edit-mode');
-        adminPasswordSection.classList.remove('hidden');
+        studentDetailsView.style.display = 'none';
+        studentDetailsEdit.style.display = 'grid'; // Use grid for edit form
+        editStudentInfoBtn.style.display = 'none';
+        saveStudentInfoBtn.style.display = 'inline-block';
+        cancelStudentInfoBtn.style.display = 'inline-block';
+        modalContent.classList.add('expanded-edit-mode'); // Expand modal for editing
+        adminPasswordSection.style.display = 'flex'; // Show password section
     } else {
-        studentDetailsView.classList.remove('hidden');
-        studentDetailsEdit.classList.remove('grid');
-        editStudentInfoBtn.classList.remove('hidden');
-        saveStudentInfoBtn.classList.add('hidden');
-        cancelStudentInfoBtn.classList.add('hidden');
-        modalContent.classList.remove('expanded-edit-mode');
-        adminPasswordSection.classList.add('hidden');
+        studentDetailsView.style.display = 'block';
+        studentDetailsEdit.style.display = 'none';
+        editStudentInfoBtn.style.display = 'inline-block';
+        saveStudentInfoBtn.style.display = 'none';
+        cancelStudentInfoBtn.style.display = 'none';
+        modalContent.classList.remove('expanded-edit-mode'); // Shrink modal back
+        adminPasswordSection.style.display = 'none'; // Hide password section
     }
 }
 
