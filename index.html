@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ห้องเรียน 3/1 - รายละเอียดและค่าห้องนักเรียน</title>
+    <link rel="icon" href="Image/Icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="loader" class="loader-overlay">
+        <div class="loader-spinner"></div>
+        <p>กำลังโหลดข้อมูล...</p>
+    </div>
+
+    <header>
+        <h1>คำชะอีวิทยาคาร</h1>
+        <h2>M.3/1</h2>
+        <nav>
+            <ul>
+                <li><a href="#" id="navHomeBtn">หน้าหลัก</a></li>
+                <li><a href="#" id="navClassBtn">เกี่ยวกับห้องเรียน</a></li>
+                <li><a href="#" id="navContactBtn">ติดต่อแอดมิน</a></li>
+                <li><a href="#" id="navChatBtn">แชท</a></li>
+                <li><a href="#" id="navSettingBtn">Menu Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="app-container">
+        <div id="homePlaceholderContainer" class="page-content">
+            <div id="homeTableContainer" class="table-container content-section">
+                <h2>ยินดีต้อนรับสู่ระบบจัดการข้อมูลนักเรียน</h2>
+                <p>คุณสามารถใช้เมนูด้านบนเพื่อเข้าถึงส่วนต่างๆ ของระบบ</p>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header" style="justify-content: center; border-bottom: none; margin-bottom: 0;">
+                    <h2>ข่าวสารและประกาศ</h2>
+                </div>
+                <div id="newsContainer" style="border-top: 1px solid #ecf0f1; padding-top: 20px;">
+                    <!-- เนื้อหาข่าวสารจะถูกเพิ่มที่นี่โดย JavaScript -->
+                </div>
+            </div>
+        </div>
+
+
+        <div id="classPageContainer" class="page-content">
+            <div class="toggle-buttons">
+                <button id="showStudentListBtn" class="toggle-btn">รายชื่อของนักเรียน</button>
+                <button id="showStudentScoresBtn" class="toggle-btn">ค่าห้องของนักเรียน</button>
+                <button id="showStudentScoresBtnAll" class="toggle-btn">ค่าห้องของนักเรียนทั้งหมด</button>
+                <button id="showStudentFeeSummaryBtn" class="toggle-btn">สรุปค่าห้องของนักเรียน</button>
+                <button id="showStudentborrowBtn" class="toggle-btn">ยืมเงินห้อง</button>
+                <button id="showPunishmentSummaryBtn" class="toggle-btn">สรุปบทลงโทษ</button>
+                <button id="ScoresHistoryBtn" class="toggle-btn">ประวัติการบันทึก</button>
+            </div>
+
+            <div id="studentListTableContainer" class="table-container content-section">
+                <div class="table-header">
+                    <h2>รายชื่อนักเรียน ห้อง 3/1</h2>
+                </div>
+                <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>คำนำหน้า</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>สถานะ</th>
+                                <th>รายละเอียด</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentListTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="scoreTableContainer" class="table-container content-section">
+                 <div class="table-header">
+                    <h2>ค่าห้องของนักเรียน ห้อง 3/1</h2>
+                 </div>
+                <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>ดูค่าห้องรายเดือน</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="studentFeeSummaryTableContainer" class="table-container content-section">
+                 <div class="table-header">
+                    <h2 id="feeSummaryTitle">สรุปค่าห้องของนักเรียน ห้อง 3/1 (ต่อเดือน)</h2>
+                 </div>
+                 <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr id="feeSummaryTableHeader">
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>ชื่อ - นามสกุล</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentFeeSummaryTableBody"></tbody>
+                        <tfoot id="feeSummaryTableFooter"></tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div id="saveHistoryTableContainer" class="table-container content-section">
+                 <div class="table-header">
+                    <h2>ประวัติการบันทึก</h2>
+                 </div>
+                <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>รายละเอียด</th>
+                                <th>จำนวนค่าห้องที่เปลี่ยนแปลง</th>
+                                <th>เวลาที่บันทึก</th>
+                            </tr>
+                        </thead>
+                        <tbody id="saveHistoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="punishmentSummarySection" class="content-section">
+                <div id="punishmentNav" class="punishment-nav">
+                    <button id="prevMonthPunishmentBtn">เดือนที่แล้ว</button>
+                    <span id="currentPunishmentMonthDisplay"></span>
+                    <button id="nextMonthPunishmentBtn">เดือนถัดไป</button>
+                </div>
+                <div id="punishmentSummaryTableContainer" class="table-container">
+                    <div class="table-header">
+                        <h2 id="punishmentSummaryTitle">สรุปบทลงโทษนักเรียน</h2>
+                    </div>
+                    <div class="table-scroll-wrapper">
+                        <table id="punishmentSummaryTable">
+                            <thead id="punishmentSummaryTableHeader"></thead>
+                            <tbody id="punishmentSummaryTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="allStudentsWeeklyScoresMainContainer" class="table-container content-section">
+                 <div class="table-header">
+                    <h4>ค่าห้องประจำสัปดาห์ของนักเรียนทุกคนประจำเดือน <span id="allStudentsWeeklyModalMonthName"></span></h4>
+                    <button id="addMultipleWeeklyFeesBtn" class="add-multiple-fees-btn">ตั้งค่าหลายคน</button>
+                 </div>
+                <div class="table-scroll-wrapper">
+                    <table id="allStudentsWeeklyScoresTable">
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสนักเรียน</th>
+                                <th>ชื่อ - นามสกุล</th>
+                                <th>สัปดาห์ที่ 1</th>
+                                <th>สัปดาห์ที่ 2</th>
+                                <th>สัปดาห์ที่ 3</th>
+                                <th>สัปดาห์ที่ 4</th>
+                                <th>สัปดาห์ที่ 5</th>
+                                <th>รวม</th>
+                            </tr>
+                            <tr id="allStudentsWeeklyFeesHeader">
+                                <th colspan="3">ค่าห้องที่ต้องจ่ายต่อสัปดาห์:</th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week1"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week2"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week3"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week4"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-week5"></th>
+                                <th class="weekly-fee-header" id="weeklyFeeHeader-weekall"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="allStudentsWeeklyScoresTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="password-verification" id="allStudentsWeeklyAdminPasswordSectionAll">
+                    <label for="allStudentsWeeklyAdminPasswordInput">รหัสผ่านแอดมิน:</label>
+                    <input type="password" id="allStudentsWeeklyAdminPasswordInputAll" placeholder="กรอกรหัสผ่านเพื่อบันทึก">
+                    <p id="allStudentsWeeklyPasswordErrorMessageAll" class="error-message"></p>
+                </div>
+                <div class="score-modal-actions">
+                    <button class="save-btn" id="saveAllStudentsWeeklyScoresBtn">บันทึกค่าห้อง</button>
+                    <button class="cancel-btn" id="cancelAllStudentsWeeklyScoresBtn">ยกเลิก</button>
+                </div>
+            </div>
+
+            <div id="borrowTableContainer" class="table-container content-section">
+    <div class="table-header">
+        <h2>ยืมเงินห้อง</h2>
+    </div>
+    <div class="table-scroll-wrapper">
+        <table id="borrowTable">
+            <thead>
+                <tr>
+                    <th>วันที่ยืม</th>
+                    <th>กำหนดคืน</th>
+                    <th>วันที่คืน</th>
+                    <th>ผู้ยืม</th>
+                    <th>จำนวน (บาท)</th>
+                    <th>สถานะ</th>
+                </tr>
+            </thead>
+            <tbody id="borrowTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+        </div>
+
+        <div id="settingsContainer" class="page-content">
+            <div class="settings-layout-grid">
+                <div class="settings-sidebar">
+                    <h3>เมนูผู้ดูแล</h3>
+                    <ul class="settings-menu">
+                        <li><a href="#" class="settings-menu-item active" data-target="manage-students">จัดการนักเรียน</a></li>
+                        <li><a href="#" class="settings-menu-item" data-target="general-settings">ทั่วไป</a></li>
+                        <li><a href="#" class="settings-menu-item" data-target="history-settings">ประวัติการบันทึก</a></li>
+                        <li><a href="#" class="settings-menu-item" data-target="news-settings">ข่าวสารและประกาศ</a></li>
+                        <li><a href="#" class="settings-menu-item" data-target="chat-settings">จัดการแชท</a></li>
+                        <li><a href="#" class="settings-menu-item" data-target="other-tool">เครื่องมือเพิ่มเติม</a></li>
+                        <button id="logoutAdminBtn" class="settings-button danger">ออกจากระบบ</button>
+                    </ul>
+                </div>
+
+                <div class="settings-content">
+                    <div id="manage-students" class="settings-panel active">
+                        <h2>จัดการนักเรียน</h2>
+                        <div class="settings-button-group">
+                            <button id="addStudentBtn" class="settings-button">เพิ่มนักเรียน</button>
+                            <button id="deleteStudentBtn" class="settings-button danger">ลบนักเรียน</button>
+                        </div>
+                    </div>
+<div id="other-tool" class="settings-panel">
+    <h2>เครื่องมือสร้าง QR Code</h2>
+    <div class="qr-tool-container">
+        <div class="qr-form-group">
+            <label for="qrText">ข้อความหรือ URL ที่ต้องการ:</label>
+            <input type="text" id="qrText" placeholder="กรอกข้อความหรือ URL" />
+        </div>
+        <div class="qr-form-group">
+            <label for="qrColor">สี QR Code:</label>
+            <input type="color" id="qrColor" value="#2563eb" />
+            <span id="qrColorPreview" style="display: inline-block; width: 24px; height: 24px; border: 1px solid #ccc; margin-left: 8px; vertical-align: middle;"></span>
+            
+            <label for="qrBgColor" style="margin-left:10px;">สีพื้นหลัง:</label>
+            <input type="color" id="qrBgColor" value="#ffffff" />
+            <span id="qrBgColorPreview" style="display: inline-block; width: 24px; height: 24px; border: 1px solid #ccc; margin-left: 8px; vertical-align: middle;"></span>
+        </div>
+        <div class="qr-form-group">
+            <label for="qrSize">ขนาด (px):</label>
+            <input type="number" id="qrSize" min="100" max="600" value="220" style="width:80px;" />
+        </div>
+        <div class="qr-form-group">
+            <label for="qrBorderWidth">ขนาดขอบ:</label>
+            <input type="number" id="qrBorderWidth" value="2" min="0" max="20" style="width:60px;">
+            <label for="qrBorderColor" style="margin-left:10px;">สีขอบ:</label>
+            <input type="color" id="qrBorderColor" value="#2563eb">
+            <label for="qrRadius" style="margin-left:10px;">ความโค้งขอบ:</label>
+            <input type="number" id="qrRadius" value="12" min="0" max="60" style="width:60px;">
+        </div>
+        <div class="qr-form-group">
+            <label for="qrFilename">ชื่อไฟล์ (ไม่ต้องใส่ .png):</label>
+            <input type="text" id="qrFilename" placeholder="Qrcode" />
+        </div>
+        <button id="generateQrBtn" class="save-btn">สร้าง QR Code</button>
+        <div id="qrAlert" class="error-message hidden"></div>
+        <div id="qrResult" class="qr-result-container hidden">
+            <canvas id="qrCanvas"></canvas>
+            <button id="downloadQrBtn" class="add-student-btn" style="margin-top:12px;">ดาวน์โหลด QR Code</button>
+        </div>
+    </div>
+</div>
+                    <div id="general-settings" class="settings-panel">
+                        <h2>ค่าห้อง</h2>
+                        <button id="setMonthlyFeesBtn" class="settings-button">ตั้งค่าค่าห้องรายเดือน</button>
+                        <h2></h2>
+                        <h2>ประวัติการเข้าชมเว็บไซต์</h2>
+                        <button id="history-webside" class="settings-button">ประวัติการเข้าชมเว็บไซต์</button>
+                        <h2></h2>
+                        <h2>การยืมเงินห้อง</h2>
+                        <button id="manageBorrowsBtn" class="settings-button">จัดการการยืม</button>
+                    </div>
+
+                    <div id="history-settings" class="settings-panel">
+                        <h2>ประวัติการบันทึก</h2>
+                        <div id="historyCountDisplay" class="setting-item"></div>
+                        <div class="setting-item toggle-container">
+                            <label for="autoDeleteToggle">ลบประวัติอัตโนมัติ:</label>
+                            <input type="checkbox" id="autoDeleteToggle" class="toggle-switch">
+                        </div>
+                        <div class="setting-item">
+                            <label for="historyLimitInput">ขีดจำกัดประวัติ:</label>
+                            <div class="input-group">
+                                <input type="number" id="historyLimitInput" min="1" value="100" readonly>
+                                <button id="editHistoryLimitBtn" class="edit-btn">แก้ไข</button>
+                                <div id="historyLimitEditActions" style="display: none;">
+                                    <button id="saveHistoryLimitBtn" class="save-btn">บันทึก</button>
+                                    <button class="cancel-btn" id="cancelHistoryLimitBtn">ยกเลิก</button>
+                                </div>
+                            </div>
+                            <p id="historyLimitErrorMessage" class="error-message"></p>
+                        </div>
+                        <button id="clearHistoryBtn" class="settings-button danger">ล้างประวัติการบันทึกทั้งหมด</button>
+                    </div>
+
+                    <div id="news-settings" class="settings-panel">
+                        <h2>ข่าวสารและประกาศ</h2>
+                        <div class="settings-button-group">
+                            <button id="addNewsBtn" class="settings-button">เพิ่มข่าวสาร</button>
+                            <button id="deleteNewsBtn" class="settings-button">จัดการข่าวสาร</button>
+                        </div>
+                        <div class="settings-button-group">
+                            <button id="addFormsBtn" class="settings-button">เพิ่มแบบประเมิน</button>
+                            <button id="deleteFormsBtn" class="settings-button">จัดการแบบประเมิน</button>
+                        </div>
+                        <div id="newsCountDisplay" class="setting-item"></div>
+                        <div class="setting-item toggle-container">
+                            <label for="autoDeleteNewsToggle">ลบข่าวสารอัตโนมัติ:</label>
+                            <input type="checkbox" id="autoDeleteNewsToggle" class="toggle-switch">
+                        </div>
+                        <div class="setting-item">
+                            <label for="newsLimitInput">ขีดจำกัดข่าวสาร:</label>
+                            <div class="input-group">
+                                <input type="number" id="newsLimitInput" min="1" value="10" readonly>
+                                <button id="editNewsLimitBtn" class="edit-btn">แก้ไข</button>
+                                <div id="newsLimitEditActions" style="display: none;">
+                                    <button id="saveNewsLimitBtn" class="save-btn">บันทึก</button>
+                                    <button class="cancel-btn" id="cancelNewsLimitBtn">ยกเลิก</button>
+                                </div>
+                            </div>
+                            <p id="newsLimitErrorMessage" class="error-message"></p>
+                        </div>
+                    </div>
+
+                    <div id="chat-settings" class="settings-panel">
+                        <h2>แชท (Admin)</h2>
+                        <div id="adminChatContainer" class="chat-container">
+                            <div id="adminChatMessages" class="chat-messages">
+                                <!-- Messages will be loaded here -->
+                            </div>
+                            <div class="chat-input-area">
+                                <div id="adminReplyPreview" class="reply-preview" style="display: none;">
+                                    <div class="reply-preview-content">
+                                        <strong>ตอบกลับ:</strong>
+                                        <p id="adminReplyPreviewText"></p>
+                                    </div>
+                                    <button type="button" id="cancelAdminReplyBtn" class="cancel-reply-btn">&times;</button>
+                                </div>
+                                <form id="adminChatForm" class="chat-input-form">
+                                    <textarea id="adminChatMessageInput" placeholder="พิมพ์ข้อความในฐานะแอดมิน..." rows="1"></textarea>
+                                    <button type="submit">ส่ง</button>
+                              </form>
+                           </div>
+                        </div>
+                        <div id="chatCountDisplay" class="setting-item" style="margin-top: 15px;"></div>
+                        <div class="setting-item toggle-container">
+                            <label for="autoDeleteChatToggle">ลบข้อความแชทอัตโนมัติ:</label>
+                            <input type="checkbox" id="autoDeleteChatToggle" class="toggle-switch">
+                        </div>
+                        <div class="setting-item">
+                            <label for="chatLimitInput">ขีดจำกัดข้อความ:</label>
+                            <div class="input-group">
+                                <input type="number" id="chatLimitInput" min="1" value="200" readonly>
+                                <button id="editChatLimitBtn" class="edit-btn">แก้ไข</button>
+                                <div id="chatLimitEditActions" style="display: none;">
+                                    <button id="saveChatLimitBtn" class="save-btn">บันทึก</button>
+                                    <button class="cancel-btn" id="cancelChatLimitBtn">ยกเลิก</button>
+                                </div>
+                            </div>
+                            <p id="chatLimitErrorMessage" class="error-message"></p>
+                        </div>
+                        <button id="clearChatBtn" class="settings-button danger" style="margin-top: 15px;">ลบข้อความแชททั้งหมด</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="contactAdminContainer" class="page-content">
+            <h2>ติดต่อแอดมิน</h2>
+            <form id="contactAdminForm">
+                <div class="form-field-item">
+                    <label for="contactSubject">หัวข้อ:</label>
+                    <input type="text" id="contactSubject" name="subject" required>
+                </div>
+                <div class="form-field-item">
+                    <label for="contactMessage">ข้อความ:</label>
+                    <textarea id="contactMessage" name="message" rows="5" required></textarea>
+                </div>
+                <div class="captcha-section">
+                    <label for="captchaInput" class="captcha-question" id="captchaQuestion"></label>
+                    <input type="number" id="captchaInput" class="captcha-input" placeholder="คำตอบ" required>
+                    <p id="captchaError" class="error-message"></p>
+                </div>
+                <button type="submit" id="contactSubmitBtn" disabled>ส่งข้อความ</button>
+                <div id="contactStatus"></div>
+            </form>
+        </div>
+
+        <div id="chatPageContainer" class="page-content">
+            <div class="table-container">
+                <h2>แชทกลุ่ม</h2>
+                <div id="chatNameDisplayContainer" class="chat-name-controls">
+                    <h3 id="currentUserChatName"></h3>
+                    <button id="changeChatNameBtn" class="settings-button">เปลี่ยนชื่อ</button>
+                </div>
+                <div id="userChatContainer" class="chat-container">
+                    <div id="userChatMessages" class="chat-messages">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    <div class="chat-input-area">
+                        <div id="userReplyPreview" class="reply-preview" style="display: none;">
+                            <div class="reply-preview-content">
+                                <strong>ตอบกลับ:</strong>
+                                <p id="userReplyPreviewText"></p>
+                            </div>
+                            <button type="button" id="cancelUserReplyBtn" class="cancel-reply-btn">&times;</button>
+                        </div>
+                        <form id="userChatForm" class="chat-input-form">
+                            <textarea id="userChatMessageInput" placeholder="พิมพ์ข้อความ..." rows="1"></textarea>
+                            <button type="submit">ส่ง</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="studentDetailModal" class="modal-overlay">
+  <div class="modal-content idcard-layout">
+    <span class="close-button">&times;</span>
+    <h3 id="modalStudentName"></h3>
+
+    <!-- 🪪 ส่วนโครงสร้างแบบบัตรประชาชน -->
+    <div class="idcard-body">
+      <!-- รูปนักเรียนด้านซ้าย -->
+      <div class="student-photo-container">
+        <img id="studentPhoto" src="Image/default-profile.png" alt="Student Photo" class="student-photo">
+      </div>
+
+      <!-- ข้อมูลนักเรียนด้านขวา -->
+      <div class="student-info-container">
+        <div id="studentDetailsView" class="student-detail-display view-mode">
+          <p><strong>เลขที่:</strong> <span id="modalStudentNumber"></span></p>
+          <p><strong>รหัสนักเรียน:</strong> <span id="modalStudentId"></span></p>
+          <p><strong>คำนำหน้า:</strong> <span id="modalStudentPrefix"></span></p>
+          <p><strong>ชื่อ:</strong> <span id="modalStudentFirstName"></span></p>
+          <p><strong>นามสกุล:</strong> <span id="modalStudentLastName"></span></p>
+          <p><strong>ชั้นปี:</strong> <span id="modalStudentGrade"></span></p>
+          <p><strong>ห้องเรียน:</strong> <span id="modalStudentClass"></span></p>
+          <p><strong>สถานะ:</strong> <span id="modalStudentStatus"></span></p>
+          <p><strong>วันเกิด:</strong> <span id="modalStudentDob"></span></p>
+          <p><strong>เบอร์โทรศัพท์:</strong> <span id="modalStudentPhone"></span></p>
+        </div>
+
+        <div id="studentDetailsEdit" class="student-detail-edit edit-mode" style="display: none;">
+          <div class="edit-field-item"><label for="editStudentNumber">เลขที่:</label><input type="number" id="editStudentNumber" placeholder="เลขที่นักเรียน" min="1"></div>
+          <div class="edit-field-item"><label for="editStudentId">รหัสนักเรียน:</label><input type="text" id="editStudentId" placeholder="รหัสนักเรียน"></div>
+          <div class="edit-field-item"><label for="editPrefix">คำนำหน้า:</label><select id="editPrefix"><option value="เด็กชาย">เด็กชาย</option><option value="นาย">นาย</option><option value="เด็กหญิง">เด็กหญิง</option><option value="นางสาว">นางสาว</option></select></div>
+          <div class="edit-field-item"><label for="editName">ชื่อ:</label><input type="text" id="editName" placeholder="ชื่อ"></div>
+          <div class="edit-field-item"><label for="editLastName">นามสกุล:</label><input type="text" id="editLastName" placeholder="นามสกุล"></div>
+          <div class="edit-field-item"><label for="editGrade">ชั้นปี:</label><input type="text" id="editGrade" placeholder="ชั้นปี"></div>
+          <div class="edit-field-item"><label for="editClass">ห้องเรียน:</label><input type="text" id="editClass" placeholder="ห้องเรียน"></div>
+          <div class="edit-field-item"><label for="editStatus">สถานะ:</label><input type="text" id="editStatus" placeholder="สถานะ"></div>
+          <div class="edit-field-item"><label for="editDob">วันเกิด:</label><input type="text" id="editDob" placeholder="วันเกิด (เช่น 01 มกราคม 2545)"></div>
+          <div class="edit-field-item"><label for="editPhone">เบอร์โทรศัพท์:</label><input type="tel" id="editPhone" placeholder="เบอร์โทรศัพท์"></div>
+        </div>
+
+        <div class="password-verification" id="adminPasswordSection">
+          <label for="adminPasswordInput">รหัสผ่านแอดมิน:</label>
+          <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก">
+          <p id="passwordErrorMessage" class="error-message"></p>
+        </div>
+
+        <div class="edit-student-buttons">
+          <button class="edit-btn" id="editStudentInfoBtn">แก้ไขข้อมูล</button>
+          <button class="save-edit-btn" id="saveStudentInfoBtn" style="display: none;">บันทึกข้อมูล</button>
+          <button class="cancel-edit-btn" id="cancelStudentInfoBtn" style="display: none;">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <div id="monthlySelectionModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeMonthlySelectionModalBtn">&times;</span><h3 id="monthlySelectionModalStudentName"></h3><h4>เลือกเดือนเพื่อดูค่าห้องรายสัปดาห์</h4><div id="monthButtonsGrid" class="score-input-grid"></div><div class="score-modal-actions"></div></div></div>
+    <div id="weeklyScoresModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeWeeklyScoresModalBtn">&times;</span><h3 id="weeklyModalStudentName"></h3><h4>ค่าห้องประจำสัปดาห์ของ <span id="weeklyModalMonthName"></span></h4><div id="weeklyScoresGrid" class="score-input-grid" style="margin-top: 20px;"></div><div class="password-verification" id="weeklyAdminPasswordSection"><label for="weeklyAdminPasswordInput">รหัสผ่านแอดมิน:</label><input type="password" id="weeklyAdminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก"><p id="weeklyPasswordErrorMessage" class="error-message"></p></div><div class="score-modal-actions"><button class="save-btn" id="saveWeeklyScoresBtn">บันทึกค่าห้องรายสัปดาห์</button><button class="cancel-btn" id="cancelWeeklyScoresBtn">ยกเลิก</button></div></div></div>
+    <div id="allStudentsMonthSelectionModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAllStudentsMonthSelectionModalBtn">&times;</span><h3 id="allStudentsMonthSelectionModalTitle">เลือกเดือนเพื่อดูค่าห้องของนักเรียนทั้งหมด</h3><div class="table-scroll-wrapper"><table style="width: 100%; border-collapse: collapse; margin-top: 15px;"><thead><tr><th>เดือน</th><th>การจัดการ</th></tr></thead><tbody id="allStudentsMonthTableBody"></tbody></table></div><div class="score-modal-actions"></div></div></div>
+    <div id="adminClearHistoryModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAdminClearHistoryModalBtn">&times;</span><h3>ยืนยันการล้างประวัติ</h3><p>คุณแน่ใจใช่มั้ยที่จะลบประวัติทั้งหมด?</p><p style="color: #e74c3c; font-weight: bold; margin-top: 10px;">เมื่อกดล้างประวัติแล้วจะไม่สามารถกู้คืนได้</p><div class="modal-actions"><button class="confirm-btn danger" id="confirmClearHistoryBtn">ยืนยัน</button></div></div></div>
+    <div id="settingsAdminPasswordModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeSettingsAdminPasswordModalBtn">&times;</span><h3>กรุณาใส่รหัสผ่านแอดมิน</h3><label for="settingsAdminPasswordInput">รหัสผ่าน:</label><input type="password" id="settingsAdminPasswordInput" placeholder="กรอกรหัสผ่านแอดมิน"><p id="settingsAdminPasswordErrorMessage" class="error-message"></p><div class="modal-actions"><button class="confirm-btn" id="confirmSettingsAdminPasswordBtn">ยืนยัน</button><button class="cancel-btn" id="cancelSettingsAdminPasswordBtn">ยกเลิก</button></div></div></div>
+    <div id="addStudentModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAddStudentModalBtn">&times;</span><h3>เพิ่มนักเรียนใหม่</h3><div id="addStudentFormGrid"><div class="form-field-item"><label for="addStudentNumber">เลขที่:</label><input type="number" id="addStudentNumber" placeholder="เลขที่นักเรียน" min="1"></div><div class="form-field-item"><label for="addStudentId">รหัสนักเรียน:</label><input type="text" id="addStudentId" placeholder="รหัสนักเรียน"></div><div class="form-field-item"><label for="addPrefix">คำนำหน้า:</label><select id="addPrefix"><option value="เด็กชาย">เด็กชาย</option><option value="นาย">นาย</option><option value="เด็กหญิง">เด็กหญิง</option><option value="นางสาว">นางสาว</option></select></div><div class="form-field-item"><label for="addName">ชื่อ:</label><input type="text" id="addName" placeholder="ชื่อ"></div><div class="form-field-item"><label for="addLastName">นามสกุล:</label><input type="text" id="addLastName" placeholder="นามสกุล"></div><div class="form-field-item"><label for="addGrade">ชั้นปี:</label><input type="text" id="addGrade" placeholder="ชั้นปี" value="มัธยมศึกษาปีที่ 3"></div><div class="form-field-item"><label for="addClass">ห้องเรียน:</label><input type="text" id="addClass" placeholder="ห้องเรียน" value="3/1"></div><div class="form-field-item"><label for="addStatus">สถานะ:</label><input type="text" id="addStatus" placeholder="สถานะ" value="นักเรียน"></div><div class="form-field-item"><label for="addDob">วันเกิด:</label><input type="text" id="addDob" placeholder="วันเกิด (เช่น 01 มกราคม 2545)" value="-"></div><div class="form-field-item"><label for="addPhone">เบอร์โทรศัพท์:</label><input type="tel" id="addPhone" placeholder="เบอร์โทรศัพท์" value="-"></div></div><p id="addStudentErrorMessage" class="error-message"></p><div class="modal-actions"><button class="save-btn" id="saveNewStudentBtn">บันทึก</button></div></div></div>
+    <div id="deleteStudentSelectionModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeDeleteStudentSelectionModalBtn">&times;</span><h3>เลือกรหัสนักเรียนที่ต้องการลบ</h3><ul id="deleteStudentList"></ul><div class="modal-actions"></div></div></div>
+    <div id="confirmDeleteStudentModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeConfirmDeleteStudentModalBtn">&times;</span><h3>ยืนยันการลบนักเรียน</h3><p>คุณแน่ใจหรือไม่ที่จะลบข้อมูลนักเรียน <strong><span id="studentToDeleteName"></span> (<span id="studentToDeleteId"></span>)</strong>?</p><p style="color: #e74c3c; font-weight: bold;">การดำเนินการนี้ไม่สามารถยกเลิกได้ และจะลบข้อมูลทั้งหมดที่เกี่ยวข้องกับนักเรียนคนนี้!</p><p id="deleteConfirmationErrorMessage" class="error-message"></p><div class="modal-actions"><button class="confirm-btn danger" id="confirmDeleteStudentFinalBtn">ยืนยัน</button></div></div></div>
+    <div id="setMonthlyFeesModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeSetMonthlyFeesModalBtn">&times;</span><h3>ตั้งค่าค่าห้องรายเดือนและรายสัปดาห์</h3><div class="monthly-fees-grid" id="monthlyFeesGrid"></div><div class="score-modal-actions"><button class="save-btn" id="saveMonthlyFeesBtn">บันทึก</button></div></div></div>
+    <div id="addMultipleWeeklyFeesModal" class="modal-overlay"><div class="modal-content"><span class="close-button" id="closeAddMultipleWeeklyFeesModalBtn">&times;</span><h3 id="addMultipleWeeklyFeesModalTitle">ตั้งค่าห้องรายสัปดาห์หลายคน</h3><div style="margin-bottom: 20px; text-align: center;"><label for="multipleFeeAmountInput">ตั้งค่าเงิน (ต่อคน):</label><input type="number" id="multipleFeeAmountInput" value="20"></div><div class="table-scroll-wrapper"><table id="multipleWeeklyFeesTable"><thead><tr><th>เลือกทั้งหมด <input type="checkbox" id="selectAllStudentsCheckbox"></th><th>เลขที่</th><th>ชื่อ - นามสกุล</th><th>สัปดาห์ 1 <input type="checkbox" data-week="week1" class="select-all-week-checkbox"></th><th>สัปดาห์ 2 <input type="checkbox" data-week="week2" class="select-all-week-checkbox"></th><th>สัปดาห์ 3 <input type="checkbox" data-week="week3" class="select-all-week-checkbox"></th><th>สัปดาห์ 4 <input type="checkbox" data-week="week4" class="select-all-week-checkbox"></th><th>สัปดาห์ 5 <input type="checkbox" data-week="week5" class="select-all-week-checkbox"></th></tr></thead><tbody id="multipleWeeklyFeesTableBody"></tbody></table></div><div class="password-verification" id="addMultipleFeesPasswordSection" style="display: none;"><label for="addMultipleWeeklyFeesAdminPasswordInput">รหัสผ่านแอดมิน:</label>
+<input type="password" id="addMultipleWeeklyFeesAdminPasswordInput" placeholder="กรอกรหัสผ่านเพื่อบันทึก"><p id="addMultipleWeeklyFeesErrorMessage" class="error-message"></p><div class="score-modal-actions"><button class="save-btn" id="confirmSaveMultipleFeesBtn">ยืนยันการบันทึก</button><button class="cancel-btn" id="cancelSaveMultipleFeesBtn">ยกเลิก</button></div></div><div class="score-modal-actions" id="initialMultipleFeesActions"><button class="save-btn" id="saveMultipleWeeklyFeesBtn">บันทึก</button><button class="cancel-btn" id="cancelMultipleWeeklyFeesBtn">ยกเลิก</button></div></div></div>
+    
+    <div id="addNewsModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeAddNewsModalBtn">&times;</span>
+            <h3>เพิ่มข่าวสารใหม่</h3>
+            <div class="form-field-item">
+                <label for="newsTitleInput">หัวข้อข่าว:</label>
+                <input type="text" id="newsTitleInput" placeholder="ใส่หัวข้อข่าวสาร">
+            </div>
+            <div class="form-field-item">
+                <label for="newsContentInput">เนื้อหาข่าว:</label>
+                <textarea id="newsContentInput" rows="5" placeholder="ใส่เนื้อหาข่าวสาร"></textarea>
+            </div>
+            <div class="form-field-item">
+                <div id="newsImagePreviewContainer">
+                    <img id="newsImagePreview" src="" alt="Image Preview" style="display: none;">
+                </div>
+                <label for="newsImageUrlInput">ลิงก์รูปภาพ (URL):</label>
+                <input type="text" id="newsImageUrlInput" placeholder="เช่น https://Karaca.com/image.png">
+            </div>
+             <div class="form-field-item toggle-container">
+                <label for="pinNewsToggle">ปักหมุดข่าวสารนี้:</label>
+                <input type="checkbox" id="pinNewsToggle" class="toggle-switch">
+            </div>
+            <p id="addNewsErrorMessage" class="error-message"></p>
+            <div class="modal-actions">
+                <button class="save-btn" id="saveNewsBtn">บันทึกข่าวสาร</button>
+                <button class="cancel-btn" id="cancelAddNewsBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteNewsModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeDeleteNewsModalBtn">&times;</span>
+            <h3>จัดการข่าวสาร</h3>
+            <ul id="deleteNewsList">
+                <!-- News items for deletion will be loaded here -->
+            </ul>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelDeleteNewsSelectionBtn">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmDeleteNewsModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeConfirmDeleteNewsModalBtn">&times;</span>
+            <h3>ยืนยันการลบข่าวสาร</h3>
+            <p>คุณแน่ใจหรือไม่ที่จะลบข่าวสาร: <strong><span id="newsToDeleteTitle"></span></strong>?</p>
+            <p id="deleteNewsErrorMessage" class="error-message"></p>
+            <div class="modal-actions">
+                <button class="confirm-btn danger" id="confirmDeleteNewsFinalBtn">ยืนยันการลบ</button>
+                <button class="cancel-btn" id="cancelDeleteNewsFinalBtn">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmClearChatModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeConfirmClearChatModalBtn">&times;</span>
+            <h3>ยืนยันการลบข้อความแชททั้งหมด</h3>
+            <p>คุณแน่ใจหรือไม่ที่จะลบข้อความแชททั้งหมด?</p>
+            <p style="color: #e74c3c; font-weight: bold; margin-top: 10px;">การดำเนินการนี้ไม่สามารถย้อนกลับได้!</p>
+            <div class="modal-actions">
+                <button class="confirm-btn danger" id="confirmClearChatFinalBtn">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="updateNotificationModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>มีเวอร์ชันใหม่พร้อมใช้งาน!</h3>
+            <p>มีการอัปเดตใหม่สำหรับเว็บไซต์นี้ เพื่อให้ได้ประสบการณ์การใช้งานที่ดีที่สุด กรุณารีเฟรชหน้าเว็บ</p>
+            <p>เวอร์ชันปัจจุบัน: <span id="localVersionDisplay"></span></p>
+            <p>เวอร์ชันใหม่: <span id="remoteVersionDisplay"></span></p>
+            <div class="modal-actions">
+                <button class="confirm-btn" id="refreshPageBtn">รีเฟรชเลย</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="namePromptModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>ตั้งชื่อที่แสดงในแชท</h3>
+            <p>กรุณาตั้งชื่อที่จะใช้แสดงในแชทกลุ่ม</p>
+            <div class="form-field-item" style="margin-top: 20px;">
+                <label for="chatNameInput">ชื่อของคุณ:</label>
+                <input type="text" id="chatNameInput" placeholder="ใส่ชื่อ..." maxlength="25">
+            </div>
+            <p id="chatNameErrorMessage" class="error-message"></p>
+            <div class="modal-actions">
+                <button class="save-btn" id="saveChatNameBtn">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage borrows modal -->
+<div id="manageBorrowModal" class="modal-overlay">
+  <div class="modal-content">
+    <span class="close-button" id="closeManageBorrowModalBtn">&times;</span>
+    <h3>จัดการการยืมเงินห้อง</h3>
+    <div class="table-scroll-wrapper" style="max-height: 50vh; overflow:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>วันที่ยืม</th>
+                    <th>กำหนดคืน</th>
+                    <th>วันที่คืน</th>
+                    <th>ผู้ยืม</th>
+                    <th>จำนวน (บาท)</th>
+                    <th>การดำเนินการ</th>
+                </tr>
+            </thead>
+            <tbody id="manageBorrowTableBody"></tbody>
+        </table>
+    </div>
+    <div class="modal-actions" style="margin-top:12px;">
+        <button id="openAddBorrowBtn" class="save-btn">เพิ่มการยืม</button>
+        <button class="edit-btn-new" id="editManageBorrowModalBtn">จัดการการยืม</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add borrow modal -->
+<div id="addBorrowModal" class="modal-overlay">
+  <div class="modal-content">
+    <span class="close-button" id="closeAddBorrowModalBtn">&times;</span>
+    <h3>เพิ่มผู้ยืมเงินห้อง</h3>
+    <div class="form-field-item">
+      <label for="borrowerStudentSelect">เลือกนักเรียน:</label>
+      <select id="borrowerStudentSelect"></select>
+    </div>
+    <div class="form-field-item">
+      <label for="borrowDatetimeInput">วันที่และเวลายืม:</label>
+      <input type="datetime-local" id="borrowDatetimeInput">
+    </div>
+    <div class="form-field-item">
+      <label for="daysUntilReturnInput">คืนภายใน (วัน) — หรือระบุวันที่คืน</label>
+      <input type="number" id="daysUntilReturnInput" min="0" value="7">
+    </div>
+    <div class="form-field-item">
+      <label for="dueDateInput">วันที่กำหนดคืน:</label>
+      <input type="date" id="dueDateInput">
+    </div>
+    <div class="form-field-item">
+      <label for="borrowAmountInput">จำนวนเงิน (บาท):</label>
+      <input type="number" id="borrowAmountInput" min="0" value="0">
+    </div>
+    <div class="modal-actions">
+      <button class="save-btn" id="saveBorrowBtn">บันทึก</button>
+      <button class="cancel-btn" id="cancelAddBorrowBtn">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+    <div id="imageModal" class="modal-overlay">
+        <span class="close-button" id="closeImageModalBtn">&times;</span>
+        <img class="modal-image" id="modalImageContent">
+    </div>
+
+    <div id="newsDetailModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" id="closeNewsDetailModalBtn">&times;</span>
+            <h3 id="modalNewsTitle"></h3>
+            <img id="modalNewsImage" src="" alt="News Image" style="display: none;">
+            <p id="modalNewsContent"></p>
+            <div class="news-card-timestamp" id="modalNewsTimestamp"></div>
+        </div>
+    </div>
+    <div id="historyModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-button" id="closeHistoryModalBtn">&times;</span>
+        <h3>ประวัติการเข้าชมเว็บไซต์</h3>
+        <p>คุณสามารถดูประวัติการเข้าชมเว็บไซต์ล่าสุดที่นี่ได้</p>
+        <div class="table-container">
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>เวลาที่เข้าชม</th>
+                        <th>อุปกรณ์</th>
+                        <th>ชื่ออุปกรณ์</th>
+                        <th>IP Address</th>
+                        <th>ชื่อผู้ใช้</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <!-- History entries will be rendered here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="refreshHistoryBtn">รีเฟรช</button>
+            <button id="clearHistoryVisitBtn" class="setting-button danger">ลบประวัติทั้งหมด</button>
+        </div>
+    </div>
+</div>
+
+<div id="addFormsModal" class="modal-overlay">
+    <div class="modal-content expanded-edit-mode">
+        <span class="close-button" id="closeAddFormsModalBtn">&times;</span>
+        <h3>สร้างแบบประเมินใหม่</h3>
+        <div class="form-field-item">
+            <label for="formTitleInput">หัวข้อแบบประเมิน:</label>
+            <input type="text" id="formTitleInput" placeholder="เช่น แบบประเมินความพึงพอใจ">
+        </div>
+        <div class="form-field-item">
+            <label for="formDescriptionInput">คำอธิบาย:</label>
+            <textarea id="formDescriptionInput" rows="3" placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับแบบประเมินนี้"></textarea>
+        </div>
+        <hr style="margin: 20px 0;">
+        <h4>คำถาม:</h4>
+        <div id="questionsContainer">
+            <!-- Questions will be added here by JS -->
+        </div>
+    <!-- toggle เผยแพร่เป็นประกาศทันที ถูกลบออก -->
+        <p id="addFormErrorMessage" class="error-message"></p>
+        <div class="modal-actions">
+            <button class="save-btn" id="saveFormBtn">บันทึกและเผยแพร่</button>
+            <button class="cancel-btn" id="cancelAddFormBtn">ยกเลิก</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteFormsModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-button" id="closeDeleteFormsModalBtn">&times;</span>
+        <h3>จัดการแบบประเมิน</h3>
+        <ul id="deleteFormsList">
+            <!-- Forms for deletion will be loaded here -->
+        </ul>
+        <div class="modal-actions">
+            <button class="cancel-btn" id="cancelDeleteFormsSelectionBtn">ปิด</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="doFormModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-button" id="closeDoFormModalBtn">&times;</span>
+        <h3 id="doFormTitle"></h3>
+        <p id="doFormDescription"></p>
+        <div class="form-field-item">
+            <label for="userNameInput">เลือกชื่อของคุณ:</label>
+            <select id="userNameInput" required>
+                </select>
+        </div>
+        <hr>
+        <form id="formSubmissionContainer">
+            <!-- Form questions will be loaded here -->
+        </form>
+        <p id="formSubmissionError" class="error-message"></p>
+        <div class="modal-actions">
+            <button class="save-btn" id="submitFormBtn">ส่งคำตอบ</button>
+        </div>
+    </div>
+</div>
+
+<!-- NEW: Modal for editing form answers -->
+<div id="editFormModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-button" id="closeEditFormModalBtn">&times;</span>
+        <h3 id="editFormModalTitle">แก้ไขคำตอบแบบประเมิน</h3>
+        <p id="editFormModalDescription"></p>
+        <form id="editFormModalContainer">
+            <!-- Form questions for editing will be loaded here -->
+        </form>
+        <p id="editFormModalError" class="error-message"></p>
+        <div class="modal-actions">
+            <button class="save-btn" id="editFormModalSaveBtn">บันทึกการแก้ไข</button>
+            <button class="cancel-btn" id="editFormModalCancelBtn">ยกเลิก</button>
+        </div>
+    </div>
+</div>
+
+<div id="formSummaryModal" class="modal-overlay">
+    <div class="modal-content expanded-edit-mode">
+        <span class="close-button" id="closeFormSummaryModalBtn">&times;</span>
+        <h3 id="summaryFormTitle"></h3>
+        <div id="formSummaryContainer">
+            <!-- Form summary will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<div id="editFormSubmissionModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content">
+    <span class="close-button" id="closeEditFormSubmissionModalBtn">&times;</span>
+    <h3>เลือกนักเรียนที่ต้องการแก้ไขคำตอบ</h3>
+    <ul id="editFormSubmissionStudentList"></ul>
+    <div class="modal-actions">
+      <button class="cancel-btn" id="cancelEditFormSubmissionBtn">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit returned borrows modal (bulk delete) -->
+<div id="editReturnedBorrowsModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content">
+    <span class="close-button" id="closeEditReturnedBorrowsModalBtn">&times;</span>
+    <h3>รายการการยืมที่คืนแล้ว (เลือกลบ)</h3>
+    <div class="table-scroll-wrapper" style="max-height:50vh; overflow:auto; margin-top:12px;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="width:40px;"><input type="checkbox" id="selectAllReturnedCheckbox" title="เลือกทั้งหมด"></th>
+            <th>วันที่ยืม</th>
+            <th>กำหนดคืน</th>
+            <th>วันที่คืน</th>
+            <th>ผู้ยืม</th>
+            <th style="text-align:right;">จำนวน (บาท)</th>
+          </tr>
+        </thead>
+        <tbody id="editReturnedBorrowsTbody">
+          <!-- rows added by JS -->
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-actions" style="margin-top:14px; justify-content:flex-end;">
+      <button id="deleteSelectedReturnedBtn" class="cancel-btn">ลบที่เลือก</button>
+    </div>
+  </div>
+</div>
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- Local Script -->
+    <script src="script.js"></script>
+</body>
+</html>
