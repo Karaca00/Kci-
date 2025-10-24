@@ -7,7 +7,7 @@ function getStudentNumberFromId(id) {
 }
 
 let ADMIN_PASSWORD = null;
-const LOCAL_VERSION = "1.3.0"; // New: Define local version of the web app
+const LOCAL_VERSION = "2.0.0"; // New: Define local version of the web app
 
 // Student data for Class 3/1 (initial - will be overwritten by Firebase data)
 // Removed hardcoded initialStudents array as per user request.
